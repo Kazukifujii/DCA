@@ -1,0 +1,17 @@
+test1.py
+	testprogram:python3 test1.py --codpath ciflist
+	各引数に
+	--codpath:cifファイルをまとめているディレクトリ、デフォルトはCOD/O
+	--output1:出力結果をまとめたディレクトリ、デフォルトはresult
+	--output2:output1のひとつ下の出力ディレクトリ、デフォルトはcod
+
+test2.py
+	
+test3.py
+	testprogram:python3 test3.py -e EXPLANATION
+test4_4.py:
+	#事前に準備するデータ例
+		result/cod/1000007/
+	・指定したディレクトリ内に存在するディレクトリをfindを用いてリストアップしソート(デフォルトはresult/cod
+	・リストアップした各ディレクトリ内に存在する.pickleファイルのデータを整理し取り出す
+	・取り出したデータを元にpngを出力
