@@ -57,7 +57,6 @@ def cre_plotdata(isite,nn_data,neighbor_data,cifnum):
 	print(len(set(neighbor_data[1][0])-set(first_neighbor)))
 	print(second_neighbor)
 	"""
-	
 	# from one side bond
 	if len(set(neighbor_data[1][0])-set(first_neighbor)) != 0:
 		for i in set(neighbor_data[1][0])-set(first_neighbor):
@@ -99,7 +98,7 @@ def cre_plotdata(isite,nn_data,neighbor_data,cifnum):
 							line = art3d.Line3D([firstx,secondx],[firsty,secondy],[firstz,secondz], color='y')
 							ax.add_line(line)
 
-		
+	
 	if len(neighbor_data[2]) == len(second_neighbor):
 		for index,i in enumerate(neighbor_data[2]):
 			for j in nn_data[isite][1::]:
@@ -129,7 +128,6 @@ def cre_plotdata(isite,nn_data,neighbor_data,cifnum):
 								# first neighbor - second neighbor
 								line = art3d.Line3D([firstox,secondx],[firstoy,secondy],[firstoz,secondz], color='y')
 								ax.add_line(line)
-	
 	ax.scatter(ox,oy,oz,color='b')
 	ax.text(ox,oy,oz,otag)
 			

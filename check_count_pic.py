@@ -20,7 +20,8 @@ def main():
 
 	count = 0
 	for i in cifdir:
-		cifnum = re.findall('\/(\d+)',i)[0]
+		#cifnum = re.findall('\/(\d+)',i)[0]
+		cifnum=os.path.basename(i)
 		
 		cifdir_nn_i_data = subprocess.getoutput("find {0} -name nb_*.pickle".format(i))
 		with open(cifdir_nn_i_data,"rb") as frb:

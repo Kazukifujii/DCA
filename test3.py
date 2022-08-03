@@ -1,3 +1,4 @@
+from operator import ne
 import os
 import re
 import sys
@@ -117,7 +118,6 @@ def main():
 			
 		combination_data = create_combination(nn_data)
 		neighbor_data = create_neighbor(args.adjacent_number,nn_data,combination_data)
-		
 		print(cifnum)
 		with open(("{0}" + "/" + "neighbor_data_{1}.pickle").format(i,cifnum),"wb") as fwb:
 	   		pickle.dump(neighbor_data,fwb)

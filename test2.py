@@ -104,5 +104,4 @@ def main():
 	   		pickle.dump(cifdir_o_file,fwb)
 	
 if __name__ == '__main__':
-	main()	
-
+	main()
