@@ -14,11 +14,7 @@ import pickle
 import subprocess
 import numpy as np
 
-def read_info(isiet,nn_data):
-	first_info=[isite,nn_data[isiet][0][0]]
-	for i in nn_data[isiet][0][-3::]:
-		first_info.append(i)
-	return [first_info]
+
 
 def create_combination(nn_data):
 	combination_data_ = []
@@ -61,7 +57,7 @@ def recluclate_coords(isite,front_isite,cycle_data,nn_data):
         k=nn_data[isite][idx].copy()
         rkjn=np.array(k[-3::])
         rnijk=rkjn-rdij
-        k[-3],k[-2],k[-1]=rnijk[0],rnijk[1],rnijk[2]
+        k[-3::]=list(rkjn)
         coords.append(k)
     return coords
 
@@ -76,7 +72,14 @@ def n_cycle_func(isite,nn_data,front_isite,combination_data):
     cycle_coords=recluclate_coords(isite,front_isite,cycle_data,nn_data)
     return cycle_coords
 
-def create_neighbor_coords(isite,adjacent_number,nn_data):
+def read_info(isite,nn_data):
+	first_info=[isite,nn_data[isite][0][0]]
+	for i in nn_data[isite][0][-3::]:
+		first_info.append(i)
+	return first_info
+
+
+def create_neighbor_coords(isite,nn_data,adjacent_number=2):
     combination_data = create_combination(nn_data)
     neighbor = {0:read_info(isite,nn_data)}
     i=isite
@@ -105,7 +108,7 @@ def create_neighbor_coords(isite,adjacent_number,nn_data):
                 neighbor[j].append(n_cycle_func(k,nn_data,front_isite[num],combination_data))
     return neighbor
 
-
+"""
 result_dir='/home/fujikazuki/crystal_emd/result/zeorite_4'
 atom='Si'
 cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(result_dir))
@@ -132,3 +135,4 @@ for isite in nn_data.keys():
 		print(cluster_2)
 		sys.exit()
 
+"""

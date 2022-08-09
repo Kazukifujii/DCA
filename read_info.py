@@ -1,8 +1,9 @@
+
 import os,pickle,re,sys
 import subprocess
 import collections
 import numpy as np
-
+from reconstruction_cluster import create_neighbor_coords as cnc
 def flatten(l):
 	#https://note.nkmk.me/python-list-flatten/
     for el in l:
@@ -27,21 +28,37 @@ def find_xz_shaft(isite,nn_data):
 		ilenge=np.linalg.norm(np.array(ic)-np.array(center_c))
 		lenge.append((ilenge,i_site))
 	lenge.sort(key=lambda x:x[0])
-	print(lenge)
-	print(nn_data[isite])
-	print(center_c,nn_data[lenge[0][1]][0][-3::],nn_data[lenge[0][1]][1][-3::])
-	return center_c,nn_data[lenge[0][1]][0][-3::],nn_data[lenge[0][1]][1][-3::]
+	from reconstruction_cluster import search_index
+	main_idx=search_index(lenge[0][1],isite,nn_data)
+	sub_idx=search_index(lenge[1][1],isite,nn_data)
+	return nn_data[isite][main_idx],nn_data[isite][sub_idx]
 
 class Set_Cluster_Info:
-	def __init__(self,isite,nn_data,neighbor_data):
+	def __init__(self,isite,nn_data,adjacent_number=2):
 		#_c:_cordinate
+		self.cluster_coords=cnc(isite,nn_data,adjacent_number)
 		self.isite=isite
 		self.nn_data=nn_data
-		self.neighbor_data=neighbor_data
-		self.all_adjacent_c=all_cordinate_info(isite,nn_data,neighbor_data)
-		self.center_c,self.main_shaft_c,self.sub_shaft_c=find_xz_shaft(isite,nn_data)
-		
+		#self.neighbor_data=neighbor_data
+		#self.all_adjacent_c=all_cordinate_info(isite,nn_data,neighbor_data)
+		self.main_shaft_c,self.sub_shaft_c=find_xz_shaft(isite,nn_data)
 
+	def parallel_shift_of_center(self,coords=[0,0,0]):
+		dif_coords=np.array(coords)-np.array(self.cluster_coords[0][-3::])
+		self.cluster_coords[0][-3::]=np.array(self.cluster_coords[0][-3::])+dif_coords
+		self.main_shaft_c[-3::]=list(np.array(self.main_shaft_c[-3::])+dif_coords)
+		self.sub_shaft_c[-3::]=list(np.array(self.sub_shaft_c[-3::])+dif_coords)
+		for item,val in self.cluster_coords.items():
+			if item!=0:
+				for I,i in enumerate(val):
+					for J,j in enumerate(i):
+						j[-3::]=list(np.array(j[-3::])+dif_coords)
+						self.cluster_coords[item][I][J]=j
+	
+
+
+
+"""
 result_dir='/home/fujikazuki/crystal_emd/result/cod'
 atom='Si'
 cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(result_dir))
@@ -64,5 +81,7 @@ with open(cifdir_neighbor_i_data,"rb") as frb:
 for isite in nn_data.keys():
 	isite_atom = re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
 	if isite_atom == atom:
-		cluster_1=Set_Cluster_Info(isite,nn_data,neighbor_data[isite])
+		cluster_1=Set_Cluster_Info(isite,nn_data,3)
+		cluster_1.parallel_shift_of_center()
 		sys.exit()
+"""
