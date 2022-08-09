@@ -19,7 +19,6 @@ def cre_plotdata(isite,nn_data,neighbor_data,cifnum):
 	otag,ox,oy,oz = nn_data[isite][0][0]+'_'+str(isite),nn_data[isite][0][2],nn_data[isite][0][3],nn_data[isite][0][4]
 	#print(otag)
 	#if otag == 'Ca0.015_174':
-	
 	first_neighbor = []
 	second_neighbor = []
 	for i in nn_data[isite][1::]:
