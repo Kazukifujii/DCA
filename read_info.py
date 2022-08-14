@@ -35,7 +35,7 @@ def find_xz_shaft(isite,nn_data):
 
 class Set_Cluster_Info:
 	def __init__(self,isite,nn_data,adjacent_number=2):
-		#_c:_cordinate
+		#_c:_coordinate
 		self.cluster_coords=cnc(isite,nn_data,adjacent_number)
 		self.isite=isite
 		self.nn_data=nn_data
@@ -55,6 +55,18 @@ class Set_Cluster_Info:
 						j[-3::]=list(np.array(j[-3::])+dif_coords)
 						self.cluster_coords[item][I][J]=j
 	
+	def make_rot_matrix(self):
+		ra=self.main_shaft_c[-3::]
+		rb=self.sub_shaft_c[-3::]
+		#must run parallel_shift_of_center
+		z1=np.linalg.norm(ra,ord=2)
+		rot3=ra/z1
+		z2=np.dot(rb,rot3)
+		x2=np.linalg.norm(rb-z2*rot3)
+		rot1=(rb-z2*rot3)/x2
+		rot2=np.cross(rot3,rot1)
+		rot_=np.array([rot1,rot2,rot3])
+		self.rot=np.linalg.inv(rot_)
 
 
 

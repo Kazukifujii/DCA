@@ -1,20 +1,6 @@
-import itertools
-from operator import ne
-import os
-import re
-import sys
-import pickle
-import subprocess
 import numpy as np
-import os
-import re
-import sys
 import copy
-import pickle
-import subprocess
 import numpy as np
-
-
 
 def create_combination(nn_data):
 	combination_data_ = []
