@@ -1,9 +1,17 @@
 
+from cmath import nan
 import os,pickle,re,sys
 import subprocess
 import collections
 import numpy as np
 from reconstruction_cluster import create_neighbor_coords as cnc
+from reconstruction_cluster import create_neighbor_coords_df as cncdf
+import pandas as pd
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d.art3d as art3d
+
+cul_name=['neighbor_num','isite','atom','x','y','z','front_index']
 def flatten(l):
 	#https://note.nkmk.me/python-list-flatten/
     for el in l:
@@ -36,7 +44,7 @@ def find_xz_shaft(isite,nn_data):
 class Set_Cluster_Info:
 	def __init__(self,isite,nn_data,adjacent_number=2):
 		#_c:_coordinate
-		self.cluster_coords=cnc(isite,nn_data,adjacent_number)
+		self.cluster_coords=cncdf(isite,nn_data,adjacent_number)
 		self.isite=isite
 		self.nn_data=nn_data
 		#self.neighbor_data=neighbor_data
@@ -44,17 +52,17 @@ class Set_Cluster_Info:
 		self.main_shaft_c,self.sub_shaft_c=find_xz_shaft(isite,nn_data)
 
 	def parallel_shift_of_center(self,coords=[0,0,0]):
-		dif_coords=np.array(coords)-np.array(self.cluster_coords[0][-3::])
-		self.cluster_coords[0][-3::]=np.array(self.cluster_coords[0][-3::])+dif_coords
+		dif_coords=np.array(coords)-self.cluster_coords.loc[0].loc['x':'z'].to_list()
+		difdf=pd.DataFrame(columns=['x','y','z'],index=self.cluster_coords.index.to_list())
+		difdf.x=dif_coords[0]
+		difdf.y=dif_coords[1]
+		difdf.z=dif_coords[2]
 		self.main_shaft_c[-3::]=list(np.array(self.main_shaft_c[-3::])+dif_coords)
 		self.sub_shaft_c[-3::]=list(np.array(self.sub_shaft_c[-3::])+dif_coords)
-		for item,val in self.cluster_coords.items():
-			if item!=0:
-				for I,i in enumerate(val):
-					for J,j in enumerate(i):
-						j[-3::]=list(np.array(j[-3::])+dif_coords)
-						self.cluster_coords[item][I][J]=j
-	
+		self.cluster_coords.x=self.cluster_coords.x+difdf.x
+		self.cluster_coords.y=self.cluster_coords.y+difdf.y
+		self.cluster_coords.z=self.cluster_coords.z+difdf.z
+
 	def make_rot_matrix(self):
 		ra=self.main_shaft_c[-3::]
 		rb=self.sub_shaft_c[-3::]
@@ -68,7 +76,42 @@ class Set_Cluster_Info:
 		rot_=np.array([rot1,rot2,rot3])
 		self.rot=np.linalg.inv(rot_)
 
+	def make_csv(self):
+		import pandas as pd
+		re_coords=list()
+		neighbor_num=int()
+		for key,val in self.cluster_coords.items():
+			if key==0:
+				re_coords.append([key]+val+[nan])
+				continue
+			re_coords_=[]
+			for i,datas in enumerate(val):
+				neighbor_num+=1
+				for data in datas:
+					re_coords_.append([key]+data+[neighbor_num])
+			re_coords+=re_coords_
+		self.cluster_df=pd.DataFrame(data=re_coords,columns=cul_name)
+		self.cluster_df.to_csv('cluster_coords_%d.csv'%self.isite)
 
+
+def clusterplot(clusterdf):
+    noods=list()
+    for index,i in clusterdf.iterrows():
+        if index==0:
+            continue
+        front_idx=i.loc['front_index']-1
+        a=clusterdf.loc[front_idx].loc['x':'z']
+        b=i.loc['x':'z']
+        noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
+    fig = plt.figure(figsize = (12, 12))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
+    for index,i in clusterdf.iterrows():
+        ax.text(i.x,i.y,i.z,i.atom)
+    for nood in noods:
+        line = art3d.Line3D(*nood)
+        ax.add_line(line)
+    plt.show()
 
 """
 result_dir='/home/fujikazuki/crystal_emd/result/cod'

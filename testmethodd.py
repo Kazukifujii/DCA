@@ -1,6 +1,8 @@
+from cmath import nan
 import os,pickle
 import subprocess
 from read_info import Set_Cluster_Info
+from read_info import clusterplot
 result_dir='/home/fujikazuki/crystal_emd/result/cod'
 atom='Si'
 cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(result_dir))
@@ -16,7 +18,9 @@ cifdir_neighbor_i_data = subprocess.getoutput("find {0} -name neighbor_data_*.pi
 with open(cifdir_neighbor_i_data,"rb") as frb:
 	neighbor_data = pickle.load(frb)
 
-#filterling by atom
-cluster_1=Set_Cluster_Info(0,nn_data,2)
+
+cluster_1=Set_Cluster_Info(1,nn_data,2)
 cluster_1.parallel_shift_of_center()
-cluster_1.make_rot_matrix()
+
+
+clusterplot(cluster_1.cluster_coords)

@@ -1,7 +1,8 @@
+from cmath import nan
 import numpy as np
 import copy
 import numpy as np
-
+from constant import cluster_name
 def create_combination(nn_data):
 	combination_data_ = []
 	for i in nn_data.keys():
@@ -19,12 +20,6 @@ def create_combination(nn_data):
 
 def first_cycle_func(isite,nn_data,combination_data):
     #print(isite,nnlist)
-    combination_data_ = copy.deepcopy(combination_data)
-    cycle_data = []
-    for i in combination_data_:
-        if isite in i:
-            i.remove(isite)
-            cycle_data.append(i[0])
     cycle_data = [coords for coords in nn_data[isite][1::]]
     return cycle_data
 
@@ -43,7 +38,7 @@ def recluclate_coords(isite,front_isite,cycle_data,nn_data):
         k=nn_data[isite][idx].copy()
         rkjn=np.array(k[-3::])
         rnijk=rkjn-rdij
-        k[-3::]=list(rkjn)
+        k[-3::]=list(rnijk)
         coords.append(k)
     return coords
 
@@ -93,6 +88,62 @@ def create_neighbor_coords(isite,nn_data,adjacent_number=2):
             for num,k in enumerate(save):
                 neighbor[j].append(n_cycle_func(k,nn_data,front_isite[num],combination_data))
     return neighbor
+
+def create_neighbor_coords_df(isite,nn_data,adjacent_number=2):
+    combination_data = create_combination(nn_data)
+    neighbor = {0:read_info(isite,nn_data)}
+    i=isite
+    for j in range(1,int(adjacent_number)+1):
+        save = []
+        if j == 1:
+            first_NN = first_cycle_func(i,nn_data,combination_data)
+            neighbor[j] = [first_NN]
+        else:
+            if j == 2:
+                front_isite = [i]*len(neighbor[j-1][0])
+            else:
+                front_isite = []
+                front_front_save = []
+                for k in neighbor[j-2]:
+                    for l in k:
+                        front_front_save.append(l[0])
+                for num,k in enumerate(neighbor[j-1]):
+                    for l in k:
+                        front_isite.append(front_front_save[num])
+            neighbor[j] = []
+            for k in neighbor[j-1]:
+                for l in k:
+                    save.append(l[0])
+            for num,k in enumerate(save):
+                neighbor[j].append(n_cycle_func(k,nn_data,front_isite[num],combination_data))
+    import pandas as pd
+    re_coords=list()
+    neighbor_num=int()
+    for key,val in neighbor.items():
+        if key==0:
+            re_coords.append([key]+val+[nan])
+            continue
+        re_coords_=[]
+        for i,datas in enumerate(val):
+            neighbor_num+=1
+            for data in datas:
+                re_coords_.append([key]+data+[neighbor_num])
+        re_coords+=re_coords_
+    cluster_df=pd.DataFrame(data=re_coords,columns=cluster_name)
+    cluster_df.to_csv('cluster_coords_%d.csv'%isite)
+    return cluster_df
+
+
+
+
+
+
+
+
+
+
+
+
 
 """
 result_dir='/home/fujikazuki/crystal_emd/result/zeorite_4'

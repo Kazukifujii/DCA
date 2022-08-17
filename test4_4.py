@@ -129,7 +129,8 @@ def cre_plotdata(isite,nn_data,neighbor_data,cifnum):
 								ax.add_line(line)
 	ax.scatter(ox,oy,oz,color='b')
 	ax.text(ox,oy,oz,otag)
-			
+	plt.show()
+	sys.exit()
 	fig.savefig( cifnum + '_' + otag + ".png")
 	plt.close()
 		
