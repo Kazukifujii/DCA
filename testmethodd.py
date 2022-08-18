@@ -19,8 +19,8 @@ with open(cifdir_neighbor_i_data,"rb") as frb:
 	neighbor_data = pickle.load(frb)
 
 
-cluster_1=Set_Cluster_Info(1,nn_data,2)
+from read_info import clusterplot as clp
+cluster_1=Set_Cluster_Info(10,nn_data,2)
 cluster_1.parallel_shift_of_center()
-
-
-clusterplot(cluster_1.cluster_coords)
+cluster_1.rotation()
+clp(cluster_1.cluster_coords,title='rot.png')
