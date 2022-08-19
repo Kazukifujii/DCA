@@ -3,22 +3,8 @@ import numpy as np
 import copy
 import numpy as np
 from constant import cluster_name
-def create_combination(nn_data):
-	combination_data_ = []
-	for i in nn_data.keys():
-		for num,j in enumerate(nn_data[i]):
-			if not num == 0:
-				nnbond = [i,j[0]]
-				nnbond.sort()
-				combination_data_.append(nnbond)
-	combination_data__ = []
-	combination_data = [x for x in combination_data_ if x not in combination_data__ and not combination_data__.append(x)]
-	#print(combination_data)
-	
-	return combination_data
-
-
-def first_cycle_func(isite,nn_data,combination_data):
+import pandas as pd
+def first_cycle_func(isite,nn_data):
     #print(isite,nnlist)
     cycle_data = [coords for coords in nn_data[isite][1::]]
     return cycle_data
@@ -27,32 +13,6 @@ def search_index(isite,front_isite,nn_data):
     isite_list=[i[0] for i in nn_data[front_isite]]
     return isite_list.index(isite)
 
-def recluclate_coords(isite,front_isite,cycle_data,nn_data):
-    ric = np.array(nn_data[isite][0][-3::])
-    idx=search_index(isite,front_isite,nn_data)
-    rnij = np.array(nn_data[front_isite][idx][-3::])
-    coords=[]
-    for i in cycle_data:
-        rdij = ric-rnij
-        idx=search_index(i,isite,nn_data)
-        k=nn_data[isite][idx].copy()
-        rkjn=np.array(k[-3::])
-        rnijk=rkjn-rdij
-        k[-3::]=list(rnijk)
-        coords.append(k)
-    return coords
-
-def n_cycle_func(isite,nn_data,front_isite,combination_data):
-    combination_data_ = copy.deepcopy(combination_data)
-    cycle_data = []
-    for i in combination_data_:
-        if isite in i:
-            i.remove(isite)
-            cycle_data.append(i[0])
-    cycle_data.remove(front_isite)
-    cycle_coords=recluclate_coords(isite,front_isite,cycle_data,nn_data)
-    return cycle_coords
-
 def read_info(isite,nn_data):
 	first_info=[isite,nn_data[isite][0][0]]
 	for i in nn_data[isite][0][-3::]:
@@ -60,86 +20,31 @@ def read_info(isite,nn_data):
 	return first_info
 
 
-def create_neighbor_coords(isite,nn_data,adjacent_number=2):
-    combination_data = create_combination(nn_data)
-    neighbor = {0:read_info(isite,nn_data)}
-    i=isite
-    for j in range(1,int(adjacent_number)+1):
-        save = []
-        if j == 1:
-            first_NN = first_cycle_func(i,nn_data,combination_data)
-            neighbor[j] = [first_NN]
-        else:
-            if j == 2:
-                front_isite = [i]*len(neighbor[j-1][0])
-            else:
-                front_isite = []
-                front_front_save = []
-                for k in neighbor[j-2]:
-                    for l in k:
-                        front_front_save.append(l[0])
-                for num,k in enumerate(neighbor[j-1]):
-                    for l in k:
-                        front_isite.append(front_front_save[num])
-            neighbor[j] = []
-            for k in neighbor[j-1]:
-                for l in k:
-                    save.append(l[0])
-            for num,k in enumerate(save):
-                neighbor[j].append(n_cycle_func(k,nn_data,front_isite[num],combination_data))
-    return neighbor
-
-def create_neighbor_coords_df(isite,nn_data,adjacent_number=2):
-    combination_data = create_combination(nn_data)
-    neighbor = {0:read_info(isite,nn_data)}
-    i=isite
-    for j in range(1,int(adjacent_number)+1):
-        save = []
-        if j == 1:
-            first_NN = first_cycle_func(i,nn_data,combination_data)
-            neighbor[j] = [first_NN]
-        else:
-            if j == 2:
-                front_isite = [i]*len(neighbor[j-1][0])
-            else:
-                front_isite = []
-                front_front_save = []
-                for k in neighbor[j-2]:
-                    for l in k:
-                        front_front_save.append(l[0])
-                for num,k in enumerate(neighbor[j-1]):
-                    for l in k:
-                        front_isite.append(front_front_save[num])
-            neighbor[j] = []
-            for k in neighbor[j-1]:
-                for l in k:
-                    save.append(l[0])
-            for num,k in enumerate(save):
-                neighbor[j].append(n_cycle_func(k,nn_data,front_isite[num],combination_data))
-    import pandas as pd
-    re_coords=list()
-    neighbor_num=int()
-    for key,val in neighbor.items():
-        if key==0:
-            re_coords.append([key]+val+[nan])
-            continue
-        re_coords_=[]
-        for i,datas in enumerate(val):
-            neighbor_num+=1
-            for data in datas:
-                re_coords_.append([key]+data+[neighbor_num])
-        re_coords+=re_coords_
-    cluster_df=pd.DataFrame(data=re_coords,columns=cluster_name)
-    cluster_df.to_csv('cluster_coords_%d.csv'%isite)
-    return cluster_df
-
-
-
-
-
-
-
-
+def recoords(isite,nn_data,adjacent_number=2,adj_j=1,clusterdf=nan):
+	if adj_j==adjacent_number:
+		return clusterdf
+	if adj_j==1:
+		firstdata=[[0]+read_info(isite,nn_data)+[nan]]
+		for i in first_cycle_func(isite,nn_data):
+			firstdata.append([1]+i+[0])
+		clusterdf=pd.DataFrame(firstdata,columns=cluster_name)
+	neigbordata=[]
+	for num,idata in clusterdf.loc[clusterdf['neighbor_num']==adj_j].iterrows():
+		front_index=clusterdf.loc[idata.front_index].isite
+		rjc=nn_data[idata.isite][0][-3::]
+		rijn=idata.loc['x':'z']
+		difrij=rjc-rijn
+		for jdata in nn_data[idata.isite][1::]:
+			if jdata[0]==front_index:
+				continue
+			jdata_=copy.copy(jdata)
+			rjkn=jdata_[-3::]
+			rkc=rjkn-difrij
+			jdata_[-3::]=rkc
+			neigbordata.append([adj_j+1]+jdata_+[num])
+	clusterdf_=pd.DataFrame(neigbordata,columns=cluster_name)
+	clusterdf=pd.concat([clusterdf,clusterdf_],ignore_index=True)
+	return recoords(isite,nn_data,adjacent_number,adj_j+1,clusterdf)
 
 
 

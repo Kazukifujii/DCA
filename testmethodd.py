@@ -19,8 +19,13 @@ with open(cifdir_neighbor_i_data,"rb") as frb:
 	neighbor_data = pickle.load(frb)
 
 
-cluster_1=Set_Cluster_Info(1,nn_data,2)
-cluster_1.parallel_shift_of_center()
-
-
-clusterplot(cluster_1.cluster_coords)
+from read_info import clusterplot as clp
+import re
+for isite in nn_data.keys():
+	isite_atom=re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
+	if isite_atom == 'Si':
+		cluster_1=Set_Cluster_Info(isite,nn_data,4)
+		cluster_1.cluster_coords.to_csv('cluster_%d.csv'.format(isite))
+		cluster_1.parallel_shift_of_center()
+		cluster_1.rotation()
+		clp(cluster_1.cluster_coords,title='cluster%d.png'%isite)

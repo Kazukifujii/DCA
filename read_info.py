@@ -4,8 +4,7 @@ import os,pickle,re,sys
 import subprocess
 import collections
 import numpy as np
-from reconstruction_cluster import create_neighbor_coords as cnc
-from reconstruction_cluster import create_neighbor_coords_df as cncdf
+from reconstruction_cluster import recoords
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -44,7 +43,7 @@ def find_xz_shaft(isite,nn_data):
 class Set_Cluster_Info:
 	def __init__(self,isite,nn_data,adjacent_number=2):
 		#_c:_coordinate
-		self.cluster_coords=cncdf(isite,nn_data,adjacent_number)
+		self.cluster_coords=recoords(isite,nn_data,adjacent_number)
 		self.isite=isite
 		self.nn_data=nn_data
 		#self.neighbor_data=neighbor_data
@@ -63,7 +62,7 @@ class Set_Cluster_Info:
 		self.cluster_coords.y=self.cluster_coords.y+difdf.y
 		self.cluster_coords.z=self.cluster_coords.z+difdf.z
 
-	def make_rot_matrix(self):
+	def rotation(self):
 		ra=self.main_shaft_c[-3::]
 		rb=self.sub_shaft_c[-3::]
 		#must run parallel_shift_of_center
@@ -75,9 +74,11 @@ class Set_Cluster_Info:
 		rot2=np.cross(rot3,rot1)
 		rot_=np.array([rot1,rot2,rot3])
 		self.rot=np.linalg.inv(rot_)
+		for i,data in self.cluster_coords.loc[:,'x':'z'].iterrows():
+			self.cluster_coords.loc[i,'x':'z']=data.dot(self.rot)
 
+	
 	def make_csv(self):
-		import pandas as pd
 		re_coords=list()
 		neighbor_num=int()
 		for key,val in self.cluster_coords.items():
@@ -92,26 +93,41 @@ class Set_Cluster_Info:
 			re_coords+=re_coords_
 		self.cluster_df=pd.DataFrame(data=re_coords,columns=cul_name)
 		self.cluster_df.to_csv('cluster_coords_%d.csv'%self.isite)
+	
 
 
-def clusterplot(clusterdf):
-    noods=list()
-    for index,i in clusterdf.iterrows():
-        if index==0:
-            continue
-        front_idx=i.loc['front_index']-1
-        a=clusterdf.loc[front_idx].loc['x':'z']
-        b=i.loc['x':'z']
-        noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
-    fig = plt.figure(figsize = (12, 12))
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
-    for index,i in clusterdf.iterrows():
-        ax.text(i.x,i.y,i.z,i.atom)
-    for nood in noods:
-        line = art3d.Line3D(*nood)
-        ax.add_line(line)
-    plt.show()
+def clusterplot(clusterdf,title='cluster.png',txt=True):
+	noods=list()
+	for index,i in clusterdf.iterrows():
+		if index==0:
+			continue
+		front_idx=i.loc['front_index']
+		a=clusterdf.loc[front_idx].loc['x':'z']
+		b=i.loc['x':'z']
+		noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
+	fig = plt.figure(figsize = (12, 12))
+	ax = fig.add_subplot(111, projection='3d')
+	ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
+	for index,i in clusterdf.iterrows():
+		siteinfo=i.atom+'_'+str(i.isite)
+		if txt:
+			ax.text(i.x,i.y,i.z,siteinfo)
+	for nood in noods:
+		line = art3d.Line3D(*nood)
+		ax.add_line(line)
+	y = 0
+	x = np.linspace(-3, 3, 11)
+	z = np.linspace(-3, 3, 11)
+	Y, Z = np.meshgrid(y, z)
+	X = np.array([x] * Y.shape[0])
+	ax.set_xlabel("X")
+	ax.set_ylabel("Y")
+	ax.set_zlabel("Z")
+	ax.plot_surface(X, Y, Z, alpha=0.3)
+	fig.savefig(title)
+	plt.show()
+
+	
 
 """
 result_dir='/home/fujikazuki/crystal_emd/result/cod'
