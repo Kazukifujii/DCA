@@ -95,37 +95,24 @@ class Set_Cluster_Info:
 		self.cluster_df.to_csv('cluster_coords_%d.csv'%self.isite)
 	
 
-
-def clusterplot(clusterdf,title='cluster.png',txt=True):
-	noods=list()
-	for index,i in clusterdf.iterrows():
-		if index==0:
-			continue
-		front_idx=i.loc['front_index']
-		a=clusterdf.loc[front_idx].loc['x':'z']
-		b=i.loc['x':'z']
-		noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
-	fig = plt.figure(figsize = (12, 12))
-	ax = fig.add_subplot(111, projection='3d')
-	ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
-	for index,i in clusterdf.iterrows():
-		siteinfo=i.atom+'_'+str(i.isite)
-		if txt:
-			ax.text(i.x,i.y,i.z,siteinfo)
-	for nood in noods:
-		line = art3d.Line3D(*nood)
-		ax.add_line(line)
-	y = 0
-	x = np.linspace(-3, 3, 11)
-	z = np.linspace(-3, 3, 11)
-	Y, Z = np.meshgrid(y, z)
-	X = np.array([x] * Y.shape[0])
-	ax.set_xlabel("X")
-	ax.set_ylabel("Y")
-	ax.set_zlabel("Z")
-	ax.plot_surface(X, Y, Z, alpha=0.3)
-	fig.savefig(title)
-	plt.show()
+def clusterplot(clusterdf):
+    noods=list()
+    for index,i in clusterdf.iterrows():
+        if index==0:
+            continue
+        front_idx=i.loc['front_index']-1
+        a=clusterdf.loc[front_idx].loc['x':'z']
+        b=i.loc['x':'z']
+        noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
+    fig = plt.figure(figsize = (12, 12))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
+    for index,i in clusterdf.iterrows():
+        ax.text(i.x,i.y,i.z,i.atom)
+    for nood in noods:
+        line = art3d.Line3D(*nood)
+        ax.add_line(line)
+    plt.show()
 
 	
 

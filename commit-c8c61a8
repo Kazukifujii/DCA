@@ -1,0 +1,115 @@
+From c8c61a8242cde4daf280969742309d9ed3c13149 Mon Sep 17 00:00:00 2001
+From: Kazukifujii <fuziikazuki@gmail.com>
+Date: Sun, 14 Aug 2022 18:24:00 +0900
+Subject: add make_rot_matrix function at set_cluster_info
+
+
+diff --git a/__pycache__/read_info.cpython-38.pyc b/__pycache__/read_info.cpython-38.pyc
+index 52f3dfc..b7e3bd1 100644
+Binary files a/__pycache__/read_info.cpython-38.pyc and b/__pycache__/read_info.cpython-38.pyc differ
+diff --git a/__pycache__/reconstruction_cluster.cpython-38.pyc b/__pycache__/reconstruction_cluster.cpython-38.pyc
+index 8e11512..723b6f2 100644
+Binary files a/__pycache__/reconstruction_cluster.cpython-38.pyc and b/__pycache__/reconstruction_cluster.cpython-38.pyc differ
+diff --git a/cod_Si1_0.png b/cod_Si1_0.png
+deleted file mode 100644
+index 29383c5..0000000
+Binary files a/cod_Si1_0.png and /dev/null differ
+diff --git a/read_info.py b/read_info.py
+index 4a5103c..0e7d475 100644
+--- a/read_info.py
++++ b/read_info.py
+@@ -35,7 +35,7 @@ def find_xz_shaft(isite,nn_data):
+ 
+ class Set_Cluster_Info:
+ 	def __init__(self,isite,nn_data,adjacent_number=2):
+-		#_c:_cordinate
++		#_c:_coordinate
+ 		self.cluster_coords=cnc(isite,nn_data,adjacent_number)
+ 		self.isite=isite
+ 		self.nn_data=nn_data
+@@ -55,6 +55,18 @@ class Set_Cluster_Info:
+ 						j[-3::]=list(np.array(j[-3::])+dif_coords)
+ 						self.cluster_coords[item][I][J]=j
+ 	
++	def make_rot_matrix(self):
++		ra=self.main_shaft_c[-3::]
++		rb=self.sub_shaft_c[-3::]
++		#must run parallel_shift_of_center
++		z1=np.linalg.norm(ra,ord=2)
++		rot3=ra/z1
++		z2=np.dot(rb,rot3)
++		x2=np.linalg.norm(rb-z2*rot3)
++		rot1=(rb-z2*rot3)/x2
++		rot2=np.cross(rot3,rot1)
++		rot_=np.array([rot1,rot2,rot3])
++		self.rot=np.linalg.inv(rot_)
+ 
+ 
+ 
+diff --git a/reconstruction_cluster.py b/reconstruction_cluster.py
+index c48f821..13dcfee 100644
+--- a/reconstruction_cluster.py
++++ b/reconstruction_cluster.py
+@@ -1,21 +1,7 @@
+-import itertools
+-from operator import ne
+-import os
+-import re
+-import sys
+-import pickle
+-import subprocess
+ import numpy as np
+-import os
+-import re
+-import sys
+ import copy
+-import pickle
+-import subprocess
+ import numpy as np
+ 
+-
+-
+ def create_combination(nn_data):
+ 	combination_data_ = []
+ 	for i in nn_data.keys():
+diff --git a/testmethodd.py b/testmethodd.py
+index 3fcd211..5616e63 100644
+--- a/testmethodd.py
++++ b/testmethodd.py
+@@ -1,31 +1,22 @@
+-import enum
+-import os,pickle,re,sys
++import os,pickle
+ import subprocess
+ from read_info import Set_Cluster_Info
+-
+-
+-
+ result_dir='/home/fujikazuki/crystal_emd/result/cod'
+ atom='Si'
+ cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(result_dir))
+ cifdir = cifdir_.split('\n')
+ del cifdir[0]
+ cifnum=os.path.basename(result_dir)
+-
+ #read nn_data
+ cifdir_nn_i_data = subprocess.getoutput("find {0} -name nb_*.pickle".format(cifdir[0]))
+ with open(cifdir_nn_i_data,"rb") as frb:
+ 	nn_data = pickle.load(frb)
+-
+-
+ #read neighbor_data
+ cifdir_neighbor_i_data = subprocess.getoutput("find {0} -name neighbor_data_*.pickle".format(cifdir[0]))
+ with open(cifdir_neighbor_i_data,"rb") as frb:
+ 	neighbor_data = pickle.load(frb)
+ 
+ #filterling by atom
+-for isite in nn_data.keys():
+-    isite_atom = re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
+-    if isite_atom == atom:
+-        cluster_1=Set_Cluster_Info(isite,nn_data,3)
+-        cluster_1.parallel_shift_of_center()
+\ No newline at end of file
++cluster_1=Set_Cluster_Info(0,nn_data,2)
++cluster_1.parallel_shift_of_center()
++cluster_1.make_rot_matrix()
