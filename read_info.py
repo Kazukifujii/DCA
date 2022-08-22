@@ -1,8 +1,10 @@
+import copy
 import numpy as np
 from reconstruction_cluster import recoords
 import pandas as pd
 import mpl_toolkits.mplot3d.art3d as art3d
 import matplotlib.pyplot as plt
+
 
 
 cul_name=['neighbor_num','isite','atom','x','y','z','front_index']
@@ -22,13 +24,13 @@ def find_xz_shaft(isite,nn_data):
 	sub_idx=search_index(lenge[1][1],isite,nn_data)
 	return nn_data[isite][main_idx],nn_data[isite][sub_idx]
 
-class Set_Cluster_Info:
+class Set_Cluster_Info():
 	def __init__(self,isite,nn_data,adjacent_number=2):
 		#_c:_coordinate
-		self.cluster_coords=recoords(isite,nn_data,adjacent_number)
+		self.nn_data=copy.deepcopy(nn_data)
+		self.cluster_coords=recoords(isite,self.nn_data,adjacent_number)
 		self.isite=isite
-		self.nn_data=nn_data
-		self.main_shaft_c,self.sub_shaft_c=find_xz_shaft(isite,nn_data)
+		self.main_shaft_c,self.sub_shaft_c=find_xz_shaft(isite,self.nn_data)
 
 	def parallel_shift_of_center(self,coords=[0,0,0]):
 		dif_coords=np.array(coords)-self.cluster_coords.loc[0].loc['x':'z'].to_list()
@@ -36,8 +38,8 @@ class Set_Cluster_Info:
 		difdf.x=dif_coords[0]
 		difdf.y=dif_coords[1]
 		difdf.z=dif_coords[2]
-		self.main_shaft_c[-3::]=list(np.array(self.main_shaft_c[-3::])+dif_coords)
-		self.sub_shaft_c[-3::]=list(np.array(self.sub_shaft_c[-3::])+dif_coords)
+		self.main_shaft_c[-3::]=self.main_shaft_c[-3::]+dif_coords
+		self.sub_shaft_c[-3::]=self.sub_shaft_c[-3::]+dif_coords
 		self.cluster_coords.x=self.cluster_coords.x+difdf.x
 		self.cluster_coords.y=self.cluster_coords.y+difdf.y
 		self.cluster_coords.z=self.cluster_coords.z+difdf.z
@@ -58,7 +60,7 @@ class Set_Cluster_Info:
 			self.cluster_coords.loc[i,'x':'z']=data.dot(self.rot)
 	
 
-def clusterplot(clusterdf,title='cluster.png'):
+def clusterplot(clusterdf,title='cluster.png',show=None):
 	noods=list()
 	for index,i in clusterdf.iterrows():
 		if index==0:
@@ -71,11 +73,14 @@ def clusterplot(clusterdf,title='cluster.png'):
 	ax = fig.add_subplot(111, projection='3d')
 	ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
 	for index,i in clusterdf.iterrows():
-		ax.text(i.x,i.y,i.z,i.atom)
+		text=i.atom+'_'+str(i.isite)
+		ax.text(i.x,i.y,i.z,text)
 	for nood in noods:
 		line = art3d.Line3D(*nood)
 		ax.add_line(line)
 	fig.savefig(title)
+	if show:
+		plt.show()
 	plt.close()
 	
 

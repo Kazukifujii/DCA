@@ -37,7 +37,7 @@ def recoords(isite,nn_data,adjacent_number=2,adj_j=1,clusterdf=nan):
 		for jdata in nn_data[idata.isite][1::]:
 			if jdata[0]==front_index:
 				continue
-			jdata_=copy.copy(jdata)
+			jdata_=copy.deepcopy(jdata)
 			rjkn=jdata_[-3::]
 			rkc=rjkn-difrij
 			jdata_[-3::]=rkc
