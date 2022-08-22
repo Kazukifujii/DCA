@@ -1,3 +1,4 @@
+from cgi import test
 from cmath import nan
 import os,pickle
 import subprocess
@@ -21,11 +22,16 @@ with open(cifdir_neighbor_i_data,"rb") as frb:
 
 from read_info import clusterplot as clp
 import re
+import os
+if not os.path.isdir('testdir'):
+	os.mkdir('testdir')
+os.chdir('testdir')
 for isite in nn_data.keys():
 	isite_atom=re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
 	if isite_atom == 'Si':
 		cluster_1=Set_Cluster_Info(isite,nn_data,4)
-		cluster_1.cluster_coords.to_csv('cluster_%d.csv'.format(isite))
+		cluster_1.cluster_coords.to_csv('cluster_%d.csv'%isite)
 		cluster_1.parallel_shift_of_center()
 		cluster_1.rotation()
 		clp(cluster_1.cluster_coords,title='cluster%d.png'%isite)
+
