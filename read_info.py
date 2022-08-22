@@ -1,30 +1,12 @@
-
-from cmath import nan
-import os,pickle,re,sys
-import subprocess
-import collections
 import numpy as np
 from reconstruction_cluster import recoords
 import pandas as pd
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.art3d as art3d
+import matplotlib.pyplot as plt
+
 
 cul_name=['neighbor_num','isite','atom','x','y','z','front_index']
-def flatten(l):
-	#https://note.nkmk.me/python-list-flatten/
-    for el in l:
-        if isinstance(el, collections.abc.Iterable) and not isinstance(el, (str, bytes)):
-            yield from flatten(el)
-        else:
-            yield el
 
-def all_cordinate_info(isite,nn_data,neighbor_data):
-	all_adjacent_isite=[i for i in flatten(list(neighbor_data.values()))]
-	all_adjacent_coordinate_=list()
-	for i_site in all_adjacent_isite:
-		all_adjacent_coordinate_.append(nn_data[i_site][0][-3::])
-	return np.array(all_adjacent_coordinate_)
 
 def find_xz_shaft(isite,nn_data):
 	lenge=[]
@@ -46,8 +28,6 @@ class Set_Cluster_Info:
 		self.cluster_coords=recoords(isite,nn_data,adjacent_number)
 		self.isite=isite
 		self.nn_data=nn_data
-		#self.neighbor_data=neighbor_data
-		#self.all_adjacent_c=all_cordinate_info(isite,nn_data,neighbor_data)
 		self.main_shaft_c,self.sub_shaft_c=find_xz_shaft(isite,nn_data)
 
 	def parallel_shift_of_center(self,coords=[0,0,0]):
@@ -76,23 +56,6 @@ class Set_Cluster_Info:
 		self.rot=np.linalg.inv(rot_)
 		for i,data in self.cluster_coords.loc[:,'x':'z'].iterrows():
 			self.cluster_coords.loc[i,'x':'z']=data.dot(self.rot)
-
-	
-	def make_csv(self):
-		re_coords=list()
-		neighbor_num=int()
-		for key,val in self.cluster_coords.items():
-			if key==0:
-				re_coords.append([key]+val+[nan])
-				continue
-			re_coords_=[]
-			for i,datas in enumerate(val):
-				neighbor_num+=1
-				for data in datas:
-					re_coords_.append([key]+data+[neighbor_num])
-			re_coords+=re_coords_
-		self.cluster_df=pd.DataFrame(data=re_coords,columns=cul_name)
-		self.cluster_df.to_csv('cluster_coords_%d.csv'%self.isite)
 	
 
 def clusterplot(clusterdf,title='cluster.png'):
@@ -117,6 +80,8 @@ def clusterplot(clusterdf,title='cluster.png'):
 	
 
 """
+import os,pickle,re,sys
+import subprocess
 result_dir='/home/fujikazuki/crystal_emd/result/cod'
 atom='Si'
 cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(result_dir))
