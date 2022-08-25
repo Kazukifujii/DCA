@@ -1,16 +1,16 @@
-import os,pickle
-import subprocess
-from read_info import Set_Cluster_Info
-import copy
+from distance_func import make_distance
 
-
-
-from read_info import clusterplot as clp
+dir1='result/cod/ABW'
+dir2='result/cod/ACO'
+import glob
 import re
-cifdir_ = subprocess.getoutput("find {0} -type d | sort".format('result/cod'))
-cifdir = cifdir_.split('\n')
-del cifdir[0]
-
-cwd = os.getcwd()
-for i in cifdir:
-	
+csvlist1=glob.glob(dir1+'/*csv')
+csvlist2=glob.glob(dir2+'/*csv')
+distance=dict()
+for i in csvlist1:
+    for j in csvlist2:
+        isite_i=re.
+        print(isite_i)
+        import sys
+        sys.exit()
+        #distance[()]=make_distance(csvlist1,csvlist2)

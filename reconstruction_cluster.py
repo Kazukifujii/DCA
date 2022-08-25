@@ -20,7 +20,8 @@ def read_info(isite,nn_data):
 	return first_info
 
 
-def recoords(isite,nn_data,adjacent_number=2,adj_j=1,clusterdf=nan):
+def recoords(isite,nn_data_,adjacent_number=2,adj_j=1,clusterdf=nan):
+	nn_data=copy.deepcopy(nn_data_)
 	if adj_j==adjacent_number:
 		return clusterdf
 	if adj_j==1:
@@ -34,14 +35,14 @@ def recoords(isite,nn_data,adjacent_number=2,adj_j=1,clusterdf=nan):
 		rjc=nn_data[idata.isite][0][-3::]
 		rijn=idata.loc['x':'z']
 		difrij=rjc-rijn
-		for jdata in nn_data[idata.isite][1::]:
+		for jdata_ in nn_data[idata.isite][1::]:
+			jdata=copy.deepcopy(jdata_)
 			if jdata[0]==front_index:
 				continue
-			jdata_=copy.deepcopy(jdata)
-			rjkn=jdata_[-3::]
+			rjkn=jdata[-3::]
 			rkc=rjkn-difrij
-			jdata_[-3::]=rkc
-			neigbordata.append([adj_j+1]+jdata_+[num])
+			jdata[-3::]=rkc
+			neigbordata.append([adj_j+1]+jdata+[num])
 	clusterdf_=pd.DataFrame(neigbordata,columns=cluster_name)
 	clusterdf=pd.concat([clusterdf,clusterdf_],ignore_index=True)
 	return recoords(isite,nn_data,adjacent_number,adj_j+1,clusterdf)

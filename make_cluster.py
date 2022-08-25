@@ -2,8 +2,7 @@ import os,pickle
 import subprocess
 from read_info import Set_Cluster_Info
 
-
-
+#mast run test1.py,test2.py
 from read_info import clusterplot as clp
 import re
 cifdir_ = subprocess.getoutput("find {0} -type d | sort".format('result/cod'))
@@ -12,6 +11,7 @@ del cifdir[0]
 
 cwd = os.getcwd()
 for i in cifdir:
+    cifid=os.path.basename(i)
     cifdir_nn_i_data = subprocess.getoutput("find {0} -name nb_*.pickle".format(i))
     with open(cifdir_nn_i_data,"rb") as frb:
         nn_data = pickle.load(frb)
@@ -27,6 +27,6 @@ for i in cifdir:
             cluster=Set_Cluster_Info(isite,nn_data,4)
             cluster.parallel_shift_of_center()
             cluster.rotation()
-            cluster.cluster_coords.to_csv('cluster_%d.csv'%isite)
-            clp(cluster.cluster_coords,title='cluster%d.png'%isite)
+            cluster.cluster_coords.to_csv('{}_{}.csv'.format(cifid,isite))
+            clp(cluster.cluster_coords,title='{}_{}.png'.format(cifid,isite))
             os.chdir(cwd)

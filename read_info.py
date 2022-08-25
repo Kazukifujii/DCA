@@ -25,9 +25,9 @@ def find_xz_shaft(isite,nn_data):
 	return nn_data[isite][main_idx],nn_data[isite][sub_idx]
 
 class Set_Cluster_Info():
-	def __init__(self,isite,nn_data,adjacent_number=2):
+	def __init__(self,isite,nn_data_,adjacent_number=2):
 		#_c:_coordinate
-		self.nn_data=copy.deepcopy(nn_data)
+		self.nn_data=copy.deepcopy(nn_data_)
 		self.cluster_coords=recoords(isite,self.nn_data,adjacent_number)
 		self.isite=isite
 		self.main_shaft_c,self.sub_shaft_c=find_xz_shaft(isite,self.nn_data)
