@@ -1,5 +1,6 @@
 import os,pickle
 import subprocess
+from tkinter.tix import Tree
 from read_info import Set_Cluster_Info
 
 #mast run test1.py,test2.py
@@ -19,14 +20,18 @@ for i in cifdir:
     cifdir_neighbor_i_data = subprocess.getoutput("find {0} -name neighbor_data_*.pickle".format(i))
     with open(cifdir_neighbor_i_data,"rb") as frb:
         neighbor_data = pickle.load(frb)
-
+    
     for isite in nn_data.keys():
         isite_atom=re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
         if isite_atom == 'Si':
-            os.chdir(i)
             cluster=Set_Cluster_Info(isite,nn_data,4)
-            cluster.parallel_shift_of_center()
-            cluster.rotation()
-            cluster.cluster_coords.to_csv('{}_{}.csv'.format(cifid,isite))
-            clp(cluster.cluster_coords,title='{}_{}.png'.format(cifid,isite))
-            os.chdir(cwd)
+            for pattern in range(len(cluster.shaft_comb)):
+                os.chdir(i)
+                if pattern==0:
+                    clp(cluster.cluster_coords,title='orignal.png')
+                cluster.parallel_shift_of_center()
+                cluster.rotation(pattern=pattern)
+                cluster.cluster_coords.to_csv('{}_{}_{}.csv'.format(cifid,isite,pattern))
+                clp(cluster.cluster_coords,title='{}_{}_{}.png'.format(cifid,isite,pattern))
+                os.chdir(cwd)
+            

@@ -13,7 +13,7 @@ def search_index(isite,front_isite,nn_data):
     isite_list=[i[0] for i in nn_data[front_isite]]
     return isite_list.index(isite)
 
-def read_info(isite,nn_data):
+def center_info(isite,nn_data):
 	first_info=[isite,nn_data[isite][0][0]]
 	for i in nn_data[isite][0][-3::]:
 		first_info.append(i)
@@ -25,7 +25,7 @@ def recoords(isite,nn_data_,adjacent_number=2,adj_j=1,clusterdf=nan):
 	if adj_j==adjacent_number:
 		return clusterdf
 	if adj_j==1:
-		firstdata=[[0]+read_info(isite,nn_data)+[nan]]
+		firstdata=[[0]+center_info(isite,nn_data)+[nan]]
 		for i in first_cycle_func(isite,nn_data):
 			firstdata.append([1]+i+[0])
 		clusterdf=pd.DataFrame(firstdata,columns=cluster_name)

@@ -1,28 +1,39 @@
+from calendar import c
 import copy
+from unicodedata import name
 import numpy as np
 from reconstruction_cluster import recoords
 import pandas as pd
 import mpl_toolkits.mplot3d.art3d as art3d
 import matplotlib.pyplot as plt
-
-
+from reconstruction_cluster import search_index,first_cycle_func
+import itertools
 
 cul_name=['neighbor_num','isite','atom','x','y','z','front_index']
 
+def shaft_comb(coords):
+	#print(coords.head(5))
+	shaftdata=coords[coords.neighbor_num==1].iloc[:,1:-1].values.tolist()
+	combinations=list(itertools.combinations(shaftdata,2))
+	return copy.deepcopy(combinations)
 
-def find_xz_shaft(isite,nn_data):
-	lenge=[]
-	center_c=nn_data[isite][0][-3::]
-	for i in nn_data[isite][1::]:
-		ic=i[-3::]
-		i_site=i[0]
-		ilenge=np.linalg.norm(np.array(ic)-np.array(center_c))
-		lenge.append((ilenge,i_site))
-	lenge.sort(key=lambda x:x[0])
-	from reconstruction_cluster import search_index
-	main_idx=search_index(lenge[0][1],isite,nn_data)
-	sub_idx=search_index(lenge[1][1],isite,nn_data)
-	return nn_data[isite][main_idx],nn_data[isite][sub_idx]
+
+def shaft_info(coords_):
+	coords=copy.deepcopy(coords_)
+	comb=list()
+	center_c=coords.loc[0,'x':'z']
+	for data in shaft_comb(coords):
+		lenge=[]
+		for shaft in data:
+			ic=shaft[-3::]
+			i_site=shaft[0]
+			ilenge=np.linalg.norm(np.array(ic)-np.array(center_c))
+			lenge.append((ilenge,i_site))
+			lenge.sort(key=lambda x:x[0])
+		main_c=coords[(coords.neighbor_num==1) & (coords.isite==lenge[0][1])].iloc[:,1:-1].values.tolist()[0]
+		sub_c=coords[(coords.neighbor_num==1) & (coords.isite==lenge[1][1])].iloc[:,1:-1].values.tolist()[0]
+		comb.append((main_c,sub_c))
+	return comb
 
 class Set_Cluster_Info():
 	def __init__(self,isite,nn_data_,adjacent_number=2):
@@ -30,7 +41,7 @@ class Set_Cluster_Info():
 		self.nn_data=copy.deepcopy(nn_data_)
 		self.cluster_coords=recoords(isite,self.nn_data,adjacent_number)
 		self.isite=isite
-		self.main_shaft_c,self.sub_shaft_c=find_xz_shaft(isite,self.nn_data)
+		self.shaft_comb=shaft_info(self.cluster_coords)
 
 	def parallel_shift_of_center(self,coords=[0,0,0]):
 		dif_coords=np.array(coords)-self.cluster_coords.loc[0].loc['x':'z'].to_list()
@@ -38,13 +49,13 @@ class Set_Cluster_Info():
 		difdf.x=dif_coords[0]
 		difdf.y=dif_coords[1]
 		difdf.z=dif_coords[2]
-		self.main_shaft_c[-3::]=self.main_shaft_c[-3::]+dif_coords
-		self.sub_shaft_c[-3::]=self.sub_shaft_c[-3::]+dif_coords
 		self.cluster_coords.x=self.cluster_coords.x+difdf.x
 		self.cluster_coords.y=self.cluster_coords.y+difdf.y
 		self.cluster_coords.z=self.cluster_coords.z+difdf.z
+		self.shaft_comb=shaft_info(self.cluster_coords)	
 
-	def rotation(self):
+	def rotation(self,pattern=0):
+		self.main_shaft_c,self.sub_shaft_c=self.shaft_comb[pattern]
 		ra=self.main_shaft_c[-3::]
 		rb=self.sub_shaft_c[-3::]
 		#must run parallel_shift_of_center
@@ -56,6 +67,7 @@ class Set_Cluster_Info():
 		rot2=np.cross(rot3,rot1)
 		rot_=np.array([rot1,rot2,rot3])
 		self.rot=np.linalg.inv(rot_)
+		self.rot_cluster_coords=copy.deepcopy(self.cluster_coords)
 		for i,data in self.cluster_coords.loc[:,'x':'z'].iterrows():
 			self.cluster_coords.loc[i,'x':'z']=data.dot(self.rot)
 	
