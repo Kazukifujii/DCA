@@ -1,22 +1,32 @@
-from cmath import nan
 from distance_func import make_distance
-
-dir1='result/cod/ABW'
-dir2='result/cod/ACO'
 import glob
 import re
-csvlist1=glob.glob(dir1+'/*csv')
-csvlist2=glob.glob(dir2+'/*csv')
-distance=dict()
+resultdir='result/cod'
+dir1='result/cod/ABW'
+dir2='result/cod/ACO'
+csvname='distance_{}_{}.csv'.format(re.split('/',dir1)[-1],re.split('/',dir2)[-1])
 
-for i in csvlist1:
+
+csvlist2=glob.glob(dir1+'/*csv')
+distance=dict()
+cont=0
+for i in csvlist2:
     for j in csvlist2:
+        if cont==2:
+            break
         isite_i,pattern_i=tuple(re.findall('(?=_)*\d{1,}',i))
         isite_j,pattern_j=tuple(re.findall('(?=_)*\d{1,}',j))
         distance_=make_distance(i,j)
-        if distance[(isite_i,isite_j)]==nan:
-            distance[(isite_i,isite_j)]=distance_
+        if distance.keys not in(isite_i,isite_j):
+            distance[(isite_i,isite_j)]=(distance_,pattern_i,pattern_j)
         elif distance[(isite_i,isite_j)]>distance_:
-            distance[(isite_i,isite_j)]=distance_
+            distance[(isite_i,isite_j)]=(distance_,pattern_i,pattern_j)
+        cont+=1
+    break
 
-print(distance)
+
+distance=[key+val for key,val in distance.items()]
+import pandas as pd
+disfile_colname=['isite_i','isite_j','distance','pattern_i','pattern_j']
+distancedf=pd.DataFrame(distance,columns=disfile_colname)
+distancedf.to_csv(dir1+'/ABW_selfdistance.csv')

@@ -34,7 +34,7 @@ def make_distance(csv_adress1,csv_adress2):
     for j,data2 in cluster2.iterrows():
         model+= pulp.lpSum([x[(i,j)] for i,_ in cluster1.iterrows()])==colsum2[j]
 
-    result=model.solve()
+    result=model.solve(pulp.PULP_CBC_CMD(msg = False))
     if result==1:
         dis_=float()
         sumf=float()

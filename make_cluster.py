@@ -27,11 +27,8 @@ for i in cifdir:
             cluster=Set_Cluster_Info(isite,nn_data,4)
             for pattern in range(len(cluster.shaft_comb)):
                 os.chdir(i)
-                if pattern==0:
-                    clp(cluster.cluster_coords,title='orignal.png')
                 cluster.parallel_shift_of_center()
                 cluster.rotation(pattern=pattern)
                 cluster.cluster_coords.to_csv('{}_{}_{}.csv'.format(cifid,isite,pattern))
-                clp(cluster.cluster_coords,title='{}_{}_{}.png'.format(cifid,isite,pattern))
+                #clp(cluster.cluster_coords,title='{}_{}_{}.png'.format(cifid,isite,pattern))
                 os.chdir(cwd)
-            
