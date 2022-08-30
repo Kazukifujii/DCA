@@ -1,6 +1,5 @@
 import os,pickle
 import subprocess
-from tkinter.tix import Tree
 from read_info import Set_Cluster_Info
 
 #mast run test1.py,test2.py
@@ -32,3 +31,4 @@ for i in cifdir:
                 cluster.cluster_coords.to_csv('{}_{}_{}.csv'.format(cifid,isite,pattern))
                 #clp(cluster.cluster_coords,title='{}_{}_{}.png'.format(cifid,isite,pattern))
                 os.chdir(cwd)
+

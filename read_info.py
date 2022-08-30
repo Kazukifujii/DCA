@@ -90,6 +90,7 @@ def clusterplot(clusterdf,title='cluster.png',show=None):
 	for nood in noods:
 		line = art3d.Line3D(*nood)
 		ax.add_line(line)
+	fig.suptitle(title)
 	fig.savefig(title)
 	if show:
 		plt.show()
