@@ -23,7 +23,6 @@ def make_self_clusering(dir):
         matrixdf.at[isite_i,isite_j]=copy.deepcopy(distance)
         matrixdf.at[isite_j,isite_i]=copy.deepcopy(distance)
     matrixdf=matrixdf.fillna(0)
-    print(matrixdf)
     matrixdf.to_csv('sort_self_distanc.csv')
     result1 = linkage(matrixdf, method = 'average')
     dendrogram(result1)

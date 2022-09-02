@@ -4,6 +4,11 @@ test1.py
 	--codpath:cifファイルをまとめているディレクトリ、デフォルトはCOD/O
 	--output1:出力結果をまとめたディレクトリ、デフォルトはresult
 	--output2:output1のひとつ下の出力ディレクトリ、デフォルトはcod
+"""""
+/home/fujikazuki/.local/lib/python3.8/site-packages/pymatgen/io/cif.py:1155: UserWarning: Issues encountered while parsing CIF: Some fractional coordinates rounded to ideal values to avoid issues with finite precision.
+  warnings.warn("Issues encountered while parsing CIF: " + "\n".join(self.warnings))
+""""""
+
 
 test2.py:
 	nn_dataを生成しdatファイルとそれと同じ情報を持つpickleファイルの２つを生成

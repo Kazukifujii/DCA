@@ -5,7 +5,9 @@ from read_info import Set_Cluster_Info
 #mast run test1.py,test2.py
 from read_info import clusterplot as clp
 import re
-cifdir_ = subprocess.getoutput("find {0} -type d | sort".format('result/cod'))
+
+resultdir='result/cod'
+cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(resultdir))
 cifdir = cifdir_.split('\n')
 del cifdir[0]
 
