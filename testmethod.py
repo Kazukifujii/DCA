@@ -24,7 +24,6 @@ for i in cifdir:
         if isite_atom == 'Si':
             cluster=Set_Cluster_Info(isite,nn_data,4)
             for pattern in range(len(cluster.shaft_comb)):
-                
                 cluster.parallel_shift_of_center()
                 cluster.rotation(pattern=pattern)
                 cluster.cluster_coords.to_csv('{}_{}_{}.csv'.format(cifid,isite,pattern))

@@ -4,7 +4,7 @@ import pulp
 
 def calcost(data1,data2):
     redata=data1-data2
-    return redata.x**2+redata.y**2+redata.z**2
+    return (redata.x**2+redata.y**2+redata.z**2)**2
 
 def make_distance(csv_adress1,csv_adress2):
     cluster1=pd.read_csv(csv_adress1,index_col=0)

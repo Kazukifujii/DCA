@@ -6,7 +6,6 @@ from reconstruction_cluster import recoords
 import pandas as pd
 import mpl_toolkits.mplot3d.art3d as art3d
 import matplotlib.pyplot as plt
-from reconstruction_cluster import search_index,first_cycle_func
 import itertools
 
 cul_name=['neighbor_num','isite','atom','x','y','z','front_index']
@@ -72,7 +71,7 @@ class Set_Cluster_Info():
 			self.cluster_coords.loc[i,'x':'z']=data.dot(self.rot)
 	
 
-def clusterplot(clusterdf,title='cluster.png',show=None):
+def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
 	noods=list()
 	for index,i in clusterdf.iterrows():
 		if index==0:
@@ -91,7 +90,8 @@ def clusterplot(clusterdf,title='cluster.png',show=None):
 		line = art3d.Line3D(*nood)
 		ax.add_line(line)
 	fig.suptitle(title)
-	fig.savefig(title)
+	if save:
+		fig.savefig(title)
 	if show:
 		plt.show()
 	plt.close()

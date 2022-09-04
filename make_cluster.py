@@ -21,7 +21,7 @@ for i in cifdir:
     cifdir_neighbor_i_data = subprocess.getoutput("find {0} -name neighbor_data_*.pickle".format(i))
     with open(cifdir_neighbor_i_data,"rb") as frb:
         neighbor_data = pickle.load(frb)
-    
+    print(cifid)
     for isite in nn_data.keys():
         isite_atom=re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
         if isite_atom == 'Si':
