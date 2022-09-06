@@ -1,31 +1,21 @@
-import os,pickle
-import subprocess
-from read_info import Set_Cluster_Info
-
-#mast run test1.py,test2.py
-from read_info import clusterplot as clp
+from turtle import fd
+from distance_func import make_distance
 import re
+dir1='result/sorttest/AEI/AEI_15_0.csv'
+dir2='result/sorttest/AEI/AEI_2_1.csv'
+dir='result/sorttest/AEI'
 
-resultdir='result/sorttest'
-cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(resultdir))
-cifdir = cifdir_.split('\n')
-del cifdir[0]
-
-cwd = os.getcwd()
-for i in cifdir:
-    cifid=os.path.basename(i)
-    cifdir_nn_i_data = subprocess.getoutput("find {0} -name nb_*.pickle".format(i))
-    with open(cifdir_nn_i_data,"rb") as frb:
-        nn_data = pickle.load(frb)
-    os.chdir(i)
-    print(cifid)
-    for isite in nn_data.keys():
-        isite_atom=re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
-        if isite_atom == 'Si':
-            cluster=Set_Cluster_Info(isite,nn_data,4)
-            for pattern in range(len(cluster.shaft_comb)):
-                cluster.parallel_shift_of_center()
-                cluster.rotation(pattern=pattern)
-                cluster.cluster_coords.to_csv('{}_{}_{}.csv'.format(cifid,isite,pattern))
-                #clp(cluster.cluster_coords,title='{}_{}_{}.png'.format(cifid,isite,pattern))
-    os.chdir(cwd)
+import glob
+import copy
+dir11=glob.glob(dir+'/AEI_15_*csv')
+dir22=glob.glob(dir+'/AEI_2_*csv')
+fdis=100
+for d1 in dir11:
+    print(re.split('_',d1)[-1].replace('.csv',''),re.split('_',d)[-1].replace('.csv',''))
+    dis=make_distance(d1,d)
+    if fdis>=dis:
+        
+        fdis=copy.deepcopy(dis)
+    print(dis)
+print()
+print(fdis)

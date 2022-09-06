@@ -4,17 +4,18 @@ import pandas as pd
 import os,subprocess,itertools,re
 from distance_func import make_distance
 stime=time.perf_counter()
-cifdirs_ = subprocess.getoutput("find {0} -type d | sort".format('result/cod'))
+cifdirs_ = subprocess.getoutput("find {0} -type d | sort".format('result/sorttest'))
 cifdirs = cifdirs_.split('\n')
 del cifdirs[0]
-
 cwd = os.getcwd()
-for  cifdir in  cifdirs:
-    os.chdir(cifdir)
+for  i,cifdir in  enumerate(cifdirs):
     dirname=re.split('/',cifdir)[-1]
+    if dirname =='ABW':
+        continue
     print(dirname)
+    os.chdir(cifdir)
     csvname='{}_self_distance.csv'.format(dirname)
-    ciflist=glob.glob('*[0-9]*_[0-9].csv')
+    ciflist=glob.glob('*_[0-9]*.csv')
     isitelist=[re.findall('[0-9]{1,}',csvname)[0] for csvname in ciflist]
     plist=[re.findall('[0-9]{1,}',csvname)[1] for csvname in ciflist]
     isitelist=list(set(isitelist))
@@ -29,15 +30,11 @@ for  cifdir in  cifdirs:
         isite_i,isite_j=comb
         csvi=glob.glob('*{}_0.csv'.format(isite_i,0))[0]
         for pi in plist:
-            try:
-                cont+=1
-                print("\r"+str(cont)+'/'+str(alllen),end="")
-                csvj=glob.glob('*{}_{}.csv'.format(isite_j,pi))[0]
-                disij=make_distance(csvi,csvj)
-                distance.append((isite_i,isite_j,plist[0],pi,disij))
-            except:
-                print(isite_i,isite_j,plist[0],pi)
-                continue
+            cont+=1
+            print("\r"+str(cont)+'/'+str(alllen),end="")
+            csvj=glob.glob('*{}_{}.csv'.format(isite_j,pi))[0]
+            disij=make_distance(csvi,csvj)
+            distance.append((isite_i,isite_j,plist[0],pi,disij))
     disfile_colname=['isite_i','isite_j','pattern_i','pattern_j','distance']
     distancedf=pd.DataFrame(distance,columns=disfile_colname)
     distancedf.to_csv(csvname)

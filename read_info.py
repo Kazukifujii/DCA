@@ -1,6 +1,4 @@
-from calendar import c
 import copy
-from unicodedata import name
 import numpy as np
 from reconstruction_cluster import recoords
 import pandas as pd
@@ -32,6 +30,9 @@ def shaft_info(coords_):
 		main_c=coords[(coords.neighbor_num==1) & (coords.isite==lenge[0][1])].iloc[:,1:-1].values.tolist()[0]
 		sub_c=coords[(coords.neighbor_num==1) & (coords.isite==lenge[1][1])].iloc[:,1:-1].values.tolist()[0]
 		comb.append((main_c,sub_c))
+		main_c2=copy.deepcopy(sub_c)
+		sub_c2=copy.deepcopy(main_c)
+		comb.append((main_c2,sub_c2))
 	return comb
 
 class Set_Cluster_Info():
@@ -82,6 +83,9 @@ def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
 		noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
 	fig = plt.figure(figsize = (12, 12))
 	ax = fig.add_subplot(111, projection='3d')
+	ax.set_xlim(-5,5)
+	ax.set_ylim(-5,5)
+	ax.set_zlim(-5,5)
 	ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
 	for index,i in clusterdf.iterrows():
 		text=i.atom+'_'+str(i.isite)
