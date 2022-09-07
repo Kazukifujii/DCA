@@ -1,12 +1,57 @@
 import copy
 import numpy as np
-from reconstruction_cluster import recoords
 import pandas as pd
 import mpl_toolkits.mplot3d.art3d as art3d
 import matplotlib.pyplot as plt
 import itertools
+from cmath import nan
+import copy
+from constant import cluster_name
+import pandas as pd
 
-cul_name=['neighbor_num','isite','atom','x','y','z','front_index']
+
+def first_cycle_func(isite,nn_data):
+    #print(isite,nnlist)
+    cycle_data = [coords for coords in nn_data[isite][1::]]
+    return cycle_data
+
+def search_index(isite,front_isite,nn_data):
+    isite_list=[i[0] for i in nn_data[front_isite]]
+    return isite_list.index(isite)
+
+def center_info(isite,nn_data):
+	first_info=[isite,nn_data[isite][0][0]]
+	for i in nn_data[isite][0][-3::]:
+		first_info.append(i)
+	return first_info
+
+
+def recoords(isite,nn_data_,adjacent_number=2,adj_j=1,clusterdf=nan):
+	nn_data=copy.deepcopy(nn_data_)
+	if adj_j==adjacent_number:
+		return clusterdf
+	if adj_j==1:
+		firstdata=[[0]+center_info(isite,nn_data)+[nan]]
+		for i in first_cycle_func(isite,nn_data):
+			firstdata.append([1]+i+[0])
+		clusterdf=pd.DataFrame(firstdata,columns=cluster_name)
+	neigbordata=[]
+	for num,idata in clusterdf.loc[clusterdf['neighbor_num']==adj_j].iterrows():
+		front_index=clusterdf.loc[idata.front_index].isite
+		rjc=nn_data[idata.isite][0][-3::]
+		rijn=idata.loc['x':'z']
+		difrij=rjc-rijn
+		for jdata_ in nn_data[idata.isite][1::]:
+			jdata=copy.deepcopy(jdata_)
+			if jdata[0]==front_index:
+				continue
+			rjkn=jdata[-3::]
+			rkc=rjkn-difrij
+			jdata[-3::]=rkc
+			neigbordata.append([adj_j+1]+jdata+[num])
+	clusterdf_=pd.DataFrame(neigbordata,columns=cluster_name)
+	clusterdf=pd.concat([clusterdf,clusterdf_],ignore_index=True)
+	return recoords(isite,nn_data,adjacent_number,adj_j+1,clusterdf)
 
 def shaft_comb(coords):
 	#print(coords.head(5))
