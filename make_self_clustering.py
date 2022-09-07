@@ -35,7 +35,6 @@ def make_self_clusering(dir,csvn='sort_self_distanc.csv',pngn='cluster.png',meth
     matrixdf=make_sort_distance(selfcsv,csvn)
     result= linkage(squareform(matrixdf), method = method)
     dendrogram(result,labels=matrixdf.index.to_list())
-    plt.grid()
     plt.title(pngn)
     plt.savefig(pngn)
     plt.close()
@@ -50,11 +49,9 @@ del cifdir[0]
 import re
 for i in cifdir:
     cifid=re.split('/',i)[-1]
-    if cifid!='AEL':
-        continue
     print(cifid)
     sadress=copy.deepcopy(i)
     scifid=copy.deepcopy(cifid)
-result=make_self_clusering(sadress,csvn='{}_sort_self_distanc.csv'.format(scifid),pngn='t_{}_self_cluster.png'.format(scifid))
+result=make_self_clusering(sadress,csvn='{}_sort_self_distanc.csv'.format(scifid),pngn='tt_{}_self_cluster.png'.format(scifid),method='single')
 from scipy.cluster.hierarchy import fcluster
-#print(fcluster(result))
+print(fcluster(result))
