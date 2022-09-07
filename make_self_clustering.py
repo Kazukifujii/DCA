@@ -1,10 +1,9 @@
-import copy,os,glob
+import copy,os,glob,re,subprocess,math
 import matplotlib.pyplot as plt
-from scipy.cluster.hierarchy import linkage, dendrogram
+from scipy.cluster.hierarchy import linkage, dendrogram,fcluster
 import pandas as pd
-import math
-import copy
 from scipy.spatial.distance import squareform
+
 
 def make_sort_distance(selfcsv,csvn='sort_self_distanc.csv'):
     df=pd.read_csv(selfcsv,index_col=['isite_i','isite_j','pattern_i','pattern_j'])
@@ -28,30 +27,26 @@ def make_sort_distance(selfcsv,csvn='sort_self_distanc.csv'):
     standdf.to_csv(csvn)
     return matrixdf
 
-def make_self_clusering(dir,csvn='sort_self_distanc.csv',pngn='cluster.png',method='ward'):
-    cwd=os.getcwd()
-    os.chdir(dir)
+def make_self_clusering(csvn='sort_self_distanc.csv',pngn='cluster.png',method='single',fclusternum=0.0):
     selfcsv=glob.glob('*self_distance.csv')[0]
     matrixdf=make_sort_distance(selfcsv,csvn)
-    result= linkage(squareform(matrixdf), method = method)
-    dendrogram(result,labels=matrixdf.index.to_list())
+    result=linkage(squareform(matrixdf), method = method)
+    idx=matrixdf.index.to_list()
+    dendrogram(result,labels=idx)
     plt.title(pngn)
     plt.savefig(pngn)
     plt.close()
-    os.chdir(cwd)
-    return result
+    result_=[(idx[i],num) for i,num in enumerate(list(fcluster(result,fclusternum)))]
+    return pd.DataFrame(result_,columns=['isite','fclusternum'])
 
-
-import subprocess
 cifdir_ = subprocess.getoutput("find {0} -type d | sort".format('result/sorttest'))
 cifdir = cifdir_.split('\n')
 del cifdir[0]
-import re
+cwd=os.getcwd()
 for i in cifdir:
     cifid=re.split('/',i)[-1]
     print(cifid)
-    sadress=copy.deepcopy(i)
-    scifid=copy.deepcopy(cifid)
-result=make_self_clusering(sadress,csvn='{}_sort_self_distanc.csv'.format(scifid),pngn='tt_{}_self_cluster.png'.format(scifid),method='single')
-from scipy.cluster.hierarchy import fcluster
-print(fcluster(result))
+    os.chdir(i)
+    result=make_self_clusering(csvn='{}_sort_self_distanc.csv'.format(cifid),pngn='{}_self_cluster.png'.format(cifid))
+    result.to_csv('{}_fclusternum=0.0'.format(cifid))
+    os.chdir(cwd)
