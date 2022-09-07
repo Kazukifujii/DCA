@@ -125,11 +125,15 @@ def main():
 	ciffile = subprocess.getoutput("find {0} -name '*.cif'|sort".format(args.codpath))
 	ciffilelist = ciffile.split('\n')
 	#print(ciffilelist)
-
+	cont=0
 	checker = args.restart
 	for i in ciffilelist:
 		#cifnum = re.findall('\/(\w+)\.cif',i)[0]
 		cifnum=os.path.basename(i).replace('.cif','')
+		if cont==0:
+			if cifnum=='LTL':
+				cont+=1
+			continue
 		if cifnum == args.restart or not checker:
 			checker = True
 		

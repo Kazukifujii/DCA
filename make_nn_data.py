@@ -89,7 +89,8 @@ def main():
 		#cifnum = re.findall('\/(\w+)',i)[0]
 		cifnum=os.path.basename(i)
 		print(cifnum)
-		
+		if cifnum=='LTL':
+			return
 		with open(("{0}" + "/" + "nb_{1}.dat").format(i,cifnum),"w") as file2:
 			for j in cifdir_o_file.keys():
 				print('isite = {0}  :  ce_fraction = {1}'.format(j,cifdir_o_file[j][0][1]),file=file2)
