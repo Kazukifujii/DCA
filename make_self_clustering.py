@@ -38,15 +38,23 @@ def make_self_clusering(csvn='sort_self_distanc.csv',pngn='cluster.png',method='
     plt.close()
     result_=[(idx[i],num) for i,num in enumerate(list(fcluster(result,fclusternum)))]
     return pd.DataFrame(result_,columns=['isite','fclusternum'])
-
+"""
 cifdir_ = subprocess.getoutput("find {0} -type d | sort".format('result/sorttest'))
 cifdir = cifdir_.split('\n')
 del cifdir[0]
+"""
+
+dir='/home/fujikazuki/crystal_emd/result/allzeorite'
+cifdir=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
 cwd=os.getcwd()
+fclusternum=0.0
 for i in cifdir:
     cifid=re.split('/',i)[-1]
     print(cifid)
-    os.chdir(i)
-    result=make_self_clusering(csvn='{}_sort_self_distanc.csv'.format(cifid),pngn='{}_self_cluster.png'.format(cifid))
-    result.to_csv('{}_fclusternum=0.0'.format(cifid))
-    os.chdir(cwd)
+    try:
+        os.chdir(i)
+        result=make_self_clusering(csvn='{}_sort_self_distanc.csv'.format(cifid),pngn='{}_self_cluster.png'.format(cifid),fclusternum=fclusternum)
+        result.to_csv('{}_fclusternum={}'.format(cifid,str(fclusternum)))
+        os.chdir(cwd)
+    except:
+        print('non self distance file')
