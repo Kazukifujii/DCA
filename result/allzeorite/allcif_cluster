@@ -1,4 +1,5 @@
 ,cifid,adress,isite
+<<<<<<< HEAD
 0,EDI,/home/fujikazuki/crystal_emd/result/allzeorite/EDI,1
 1,EDI,/home/fujikazuki/crystal_emd/result/allzeorite/EDI,2
 2,JBW,/home/fujikazuki/crystal_emd/result/allzeorite/JBW,1
@@ -365,3 +366,12 @@
 363,SFF,/home/fujikazuki/crystal_emd/result/allzeorite/SFF,6
 364,SFF,/home/fujikazuki/crystal_emd/result/allzeorite/SFF,11
 365,SFF,/home/fujikazuki/crystal_emd/result/allzeorite/SFF,16
+=======
+0,EDI,/home/fujikazuki/crystal_emd/result/allzeorite/EDI,0
+1,EDI,/home/fujikazuki/crystal_emd/result/allzeorite/EDI,4
+2,JBW,/home/fujikazuki/crystal_emd/result/allzeorite/JBW,0
+3,JBW,/home/fujikazuki/crystal_emd/result/allzeorite/JBW,4
+4,NPO,/home/fujikazuki/crystal_emd/result/allzeorite/NPO,0
+5,ABW,/home/fujikazuki/crystal_emd/result/allzeorite/ABW,0
+6,BCT,/home/fujikazuki/crystal_emd/result/allzeorite/BCT,0
+>>>>>>> da46700f05c5f599ff16b211d018e8fc6db9248e
