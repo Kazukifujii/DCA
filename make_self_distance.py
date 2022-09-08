@@ -42,7 +42,7 @@ for  i,cifdir in  enumerate(cifdirs):
         for pi in plist:
             cont+=1
             print("\r"+str(cont)+'/'+str(alllen),end="")
-            distance_=Parallel(n_jobs=16)(delayed(parallel_self_distance)(cifdir,cifid,comb_,pi) for comb_ in comb)
+            distance_=Parallel(n_jobs=5)(delayed(parallel_self_distance)(cifdir,cifid,comb_,pi) for comb_ in comb)
             distance+=distance_
         disfile_colname=['isite_i','isite_j','pattern_i','pattern_j','distance']
         distancedf=pd.DataFrame(distance,columns=disfile_colname)

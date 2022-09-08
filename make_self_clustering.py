@@ -58,3 +58,4 @@ for i in cifdir:
         os.chdir(cwd)
     except:
         print('non self distance file')
+
