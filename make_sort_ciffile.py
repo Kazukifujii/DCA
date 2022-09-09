@@ -1,6 +1,6 @@
 import subprocess
 import re
-dir='/home/fujikazuki/crystal_emd/result/allzeorite'
+dir='result/allzeorite'
 
 cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(dir))
 cifdir = cifdir_.split('\n')
@@ -14,8 +14,9 @@ for i in cifdir:
 isiteinfo.sort(key=lambda x:x[1])
 
 
-h=5*60*60
-estimecont=int((h/1.28/12)*1.5)
+
+estimecont=100
+print(estimecont)
 cont=0
 picupadress=list()
 for i in isiteinfo:

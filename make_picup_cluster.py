@@ -7,7 +7,7 @@ cifdir = cifdir_.split('\n')
 del cifdir[0]
 """
 
-dir='/home/fujikazuki/crystal_emd/result/allzeorite'
+dir='result/allzeorite'
 cifdirs=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
 cwd=os.getcwd()
 picinfo=list()

@@ -17,7 +17,7 @@ def parallel_self_distance(clusterdf,comb,pattern_j):
 
 tstime=time.perf_counter()
 
-dir='/home/fujikazuki/crystal_emd/result/allzeorite'
+dir='result/allzeorite'
 outcsvname='all_distance.csv'
 all_cluser=pd.read_csv('{}/allcif_cluster'.format(dir),index_col=0)
 all_index=all_cluser.index.to_list()

@@ -1,4 +1,5 @@
 ,cifid,adress,isite
+<<<<<<< HEAD
 0,EDI,/home/fujikazuki/crystal_emd/result/allzeorite/EDI,0
 1,EDI,/home/fujikazuki/crystal_emd/result/allzeorite/EDI,4
 2,JBW,/home/fujikazuki/crystal_emd/result/allzeorite/JBW,0
@@ -366,3 +367,29 @@
 364,SFF,/home/fujikazuki/crystal_emd/result/allzeorite/SFF,26
 365,SFF,/home/fujikazuki/crystal_emd/result/allzeorite/SFF,28
 366,SFF,/home/fujikazuki/crystal_emd/result/allzeorite/SFF,30
+=======
+0,EDI,result/allzeorite/EDI,0
+1,EDI,result/allzeorite/EDI,4
+2,JBW,result/allzeorite/JBW,0
+3,JBW,result/allzeorite/JBW,4
+4,NPO,result/allzeorite/NPO,0
+5,ABW,result/allzeorite/ABW,0
+6,BCT,result/allzeorite/BCT,0
+7,DFT,result/allzeorite/DFT,0
+8,NAB,result/allzeorite/NAB,0
+9,NAB,result/allzeorite/NAB,1
+10,SBN,result/allzeorite/SBN,0
+11,SBN,result/allzeorite/SBN,6
+12,THO,result/allzeorite/THO,0
+13,THO,result/allzeorite/THO,4
+14,THO,result/allzeorite/THO,8
+15,ATT,result/allzeorite/ATT,0
+16,ATT,result/allzeorite/ATT,1
+17,ATT,result/allzeorite/ATT,8
+18,BIK,result/allzeorite/BIK,0
+19,BIK,result/allzeorite/BIK,4
+20,CAN,result/allzeorite/CAN,0
+21,MVY,result/allzeorite/MVY,0
+22,MVY,result/allzeorite/MVY,4
+23,MVY,result/allzeorite/MVY,8
+>>>>>>> 27c00a385f913365b5c60a2ecf142817417c891c

@@ -58,7 +58,7 @@ cifdir = cifdir_.split('\n')
 del cifdir[0]
 """
 
-dir='/home/fujikazuki/crystal_emd/result/allzeorite'
+dir='result/allzeorite'
 cwd=os.getcwd()
 os.chdir(dir)
 result=make_all_clusering(csvn='all_sort_self_distanc.csv',pngn='all_self_cluster.png')
