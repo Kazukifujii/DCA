@@ -1,0 +1,14 @@
+,cifadress,Si_len
+0,result/allzeorite/EDI,4
+1,result/allzeorite/JBW,5
+2,result/allzeorite/NPO,5
+3,result/allzeorite/ABW,7
+4,result/allzeorite/BCT,7
+5,result/allzeorite/DFT,7
+6,result/allzeorite/NAB,9
+7,result/allzeorite/SBN,9
+8,result/allzeorite/THO,9
+9,result/allzeorite/ATT,11
+10,result/allzeorite/BIK,11
+11,result/allzeorite/CAN,11
+12,result/allzeorite/MVY,11

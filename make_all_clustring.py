@@ -1,5 +1,6 @@
 import copy,os,glob,re,subprocess,math
 import csv
+import sys
 from turtle import delay
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import linkage, dendrogram,fcluster
@@ -32,10 +33,14 @@ def make_sort_distance(selfcsv,csvn='sort_self_distanc.csv'):
         standdf_.append((isite_i,isite_j,copy.deepcopy(distance)))
     """
     standdf_=Parallel(n_jobs=6)(delayed(make_sort_distamce_)(df,data) for i,data in df.groupby(level=[0,1]))
-    print('end sort distance')
     standdf=pd.DataFrame(standdf_,columns=['isite_i','isite_j','distance'])
     standdf.to_csv(csvn)
-    matrixdf=pd.DataFrame(squareform(standdf.distance),index=list(set(standdf.isite_i.to_list()+standdf.isite_j.to_list())))
+    matrixdf=pd.DataFrame()
+    for i,data in standdf.iterrows():
+        matrixdf.at[data.isite_i,data.isite_j]=copy.deepcopy(data.distance)
+        matrixdf.at[data.isite_j,data.isite_i]=copy.deepcopy(data.distance)
+    for dig in matrixdf.index.to_list():
+        matrixdf.loc[dig,dig]=0
     matrixdf=matrixdf.sort_index()
     matrixdf=matrixdf.sort_index(axis=1)
     matrixdf.to_csv('matrix_{}'.format(csvn))
