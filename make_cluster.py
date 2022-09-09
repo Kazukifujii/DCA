@@ -18,7 +18,7 @@ cifdir=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
 cwd = os.getcwd()
 for i in cifdir:
     cifid=os.path.basename(i)
-    if cifid!='OSO':
+    if cifid!='WEN':
         continue
     print(cifid)
     cifdir_nn_i_data = subprocess.getoutput("find {0} -name nb_*.pickle".format(i))

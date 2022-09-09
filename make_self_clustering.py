@@ -50,12 +50,11 @@ cwd=os.getcwd()
 fclusternum=0.0
 for i in cifdir:
     cifid=re.split('/',i)[-1]
-    print(cifid)
     try:
+        print(cifid)
         os.chdir(i)
         result=make_self_clusering(csvn='{}_sort_self_distanc.csv'.format(cifid),pngn='{}_self_cluster.png'.format(cifid),fclusternum=fclusternum)
         result.to_csv('{}_fclusternum={}'.format(cifid,str(fclusternum)))
         os.chdir(cwd)
     except:
-        print('non self distance file')
-
+        print('{} no such file'.format(cifid))

@@ -31,13 +31,14 @@ distance=list()
 for pi in plist:
     cont+=1
     print("\r"+str(cont)+'/'+str(alllen),end="")
+    fstime=time.perf_counter()
     distance_=Parallel(n_jobs=6)(delayed(parallel_self_distance)(all_cluser,comb_,pi) for comb_ in comb)
     distance+=distance_
+    etiem=time.perf_counter()
+    print('computation time {}'.format(etiem-tstime))
 disfile_colname=['isite_i','isite_j','pattern_i','pattern_j','distance']
 distancedf=pd.DataFrame(distance,columns=disfile_colname)
 distancedf.to_csv('{}/{}'.format(dir,outcsvname))
 print()
 print('output {}'.format(outcsvname))
-etiem=time.perf_counter()
-print('computation time {}'.format(etiem-stime))
 print('total computation time {}'.format(etiem-tstime))

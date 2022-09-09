@@ -1,3 +1,4 @@
+from cmath import nan
 import glob,time
 import pandas as pd
 import os,subprocess,itertools,re
@@ -7,6 +8,8 @@ def parallel_self_distance(dir,cifid,comb,pattern_j):
     isite_i,isite_j=comb
     csvi='{}/{}_{}_0.csv'.format(dir,cifid,isite_i,0)
     csvj='{}/{}_{}_{}.csv'.format(dir,cifid,isite_j,pattern_j)
+    if not (os.path.isfile(csvi) and os.path.isfile(csvj)):
+        return (isite_i,isite_j,0,pattern_j,nan)
     disij=make_distance(csvi,csvj)
     return (isite_i,isite_j,0,pattern_j,disij)
 
@@ -21,7 +24,6 @@ dir='/home/fujikazuki/crystal_emd/result/allzeorite'
 cifdirs=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
 allciflen=str(len(cifdirs))
 for  i,cifdir in  enumerate(cifdirs):
-    try:
         stime=time.perf_counter()
         cifid=re.split('/',cifdir)[-1]
         print('{}   {}/{}'.format(cifid,str(i+1),allciflen))
@@ -51,7 +53,6 @@ for  i,cifdir in  enumerate(cifdirs):
         print('output {}'.format(csvname))
         etiem=time.perf_counter()
         print('computation time {}'.format(etiem-stime))
-    except:
-        print('error')
+
 
 print('total computation time {}'.format(etiem-tstime))
