@@ -17,7 +17,7 @@ def parallel_self_distance(clusterdf,comb,pattern_j):
 
 tstime=time.perf_counter()
 
-dir='/home/fujikazuki/crystal_emd/result/allzeorite'
+dir='result/allzeorite'
 outcsvname='all_distance.csv'
 all_cluser=pd.read_csv('{}/allcif_cluster'.format(dir),index_col=0)
 all_index=all_cluser.index.to_list()
@@ -31,7 +31,7 @@ distance=list()
 for pi in plist:
     cont+=1
     print("\r"+str(cont)+'/'+str(alllen),end="")
-    distance_=Parallel(n_jobs=6)(delayed(parallel_self_distance)(all_cluser,comb_,pi) for comb_ in comb)
+    distance_=Parallel(n_jobs=12)(delayed(parallel_self_distance)(all_cluser,comb_,pi) for comb_ in comb)
     distance+=distance_
 disfile_colname=['isite_i','isite_j','pattern_i','pattern_j','distance']
 distancedf=pd.DataFrame(distance,columns=disfile_colname)
