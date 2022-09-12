@@ -13,6 +13,8 @@ def make_picup_cluster(dir):
     cwd=os.getcwd()
     for _,cifdir in enumerate(cifdirs):
         cifid=re.split('/',cifdir)[-1]
+        if cifid=='GIS':
+            break
         print(cifid)
         os.chdir(cifdir)
         try:
@@ -28,5 +30,3 @@ def make_picup_cluster(dir):
 
     totalinfo=pd.DataFrame(picinfo,columns=['cifid','adress','isite'])
     totalinfo.to_csv('{}/allcif_cluster'.format(dir))
-
-make_picup_cluster('result/testcif')

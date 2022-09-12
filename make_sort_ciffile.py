@@ -9,11 +9,14 @@ isiteinfo=list()
 for i in cifdir:
     cifid=re.split('/',i)[-1]
     lasttxt=subprocess.getoutput("grep ' Si' {}/{}.txt |tail -n 1".format(i,cifid))
-    maxisite=int(re.split('Si',lasttxt)[0].replace(' ',''))
+    try:
+        maxisite=int(re.split('Si',lasttxt)[0].replace(' ',''))
+    except:
+        continue
     isiteinfo.append((i,maxisite))
 isiteinfo.sort(key=lambda x:x[1])
-
-estimecont=100
+h=5*60*60
+estimecont=int((h/1.28/12)*1.5)
 print(estimecont)
 cont=0
 picupadress=list()

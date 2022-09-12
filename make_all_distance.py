@@ -3,6 +3,8 @@ import pandas as pd
 import os,itertools,time
 from distance_func import make_distance
 from joblib import Parallel,delayed
+import subprocess
+
 def parallel_self_distance(clusterdf,comb,pattern_j):
     index_i,index_j=comb
     data_i=clusterdf.loc[index_i]
@@ -15,7 +17,7 @@ def parallel_self_distance(clusterdf,comb,pattern_j):
     return ('{}_{}'.format(data_i.cifid,str(data_i.isite)),'{}_{}'.format(data_j.cifid,str(data_j.isite)),0,pattern_j,disij)
 
 
-import subprocess
+
 def make_all_distance(dir):
     tstime=time.perf_counter()
     if os.path.isfile('{}/picupadress'.format(dir)):
@@ -37,16 +39,13 @@ def make_all_distance(dir):
         cont+=1
         print("\r"+str(cont)+'/'+str(alllen),end="")
         fstime=time.perf_counter()
-        distance_=Parallel(n_jobs=6)(delayed(parallel_self_distance)(all_cluser,comb_,pi) for comb_ in comb)
+        distance_=Parallel(n_jobs=-1)(delayed(parallel_self_distance)(all_cluser,comb_,pi) for comb_ in comb)
         distance+=distance_
         etiem=time.perf_counter()
-        print('\ncomputation time {}'.format(etiem-tstime))
+        print('\ncomputation time {}'.format(etiem-fstime))
     disfile_colname=['isite_i','isite_j','pattern_i','pattern_j','distance']
     distancedf=pd.DataFrame(distance,columns=disfile_colname)
     distancedf.to_csv('{}/{}'.format(dir,outcsvname))
     print()
     print('output {}'.format(outcsvname))
     print('total computation time {}'.format(etiem-tstime))
-
-
-make_all_distance('result/testcif')

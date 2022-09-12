@@ -1,4 +1,4 @@
-import copy,os,glob,re,math
+import copy,os,glob,re,math,subprocess
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import linkage, dendrogram,fcluster
 import pandas as pd
@@ -27,7 +27,7 @@ def make_sort_distance(selfcsv,csvn='sort_self_distanc.csv'):
     standdf.to_csv(csvn)
     return matrixdf
 
-def make_self_clusering(csvn='sort_self_distanc.csv',pngn='cluster.png',method='single',fclusternum=0.0):
+def make_self_clusering_(csvn='sort_self_distanc.csv',pngn='cluster.png',method='single',fclusternum=0.0):
     selfcsv=glob.glob('*self_distance.csv')[0]
     matrixdf=make_sort_distance(selfcsv,csvn)
     result=linkage(squareform(matrixdf), method = method)
@@ -41,24 +41,22 @@ def make_self_clusering(csvn='sort_self_distanc.csv',pngn='cluster.png',method='
 
 
 
-
-import subprocess
-dir='result/testcif'
-if os.path.isfile('{}/picupadress'.format(dir)):
-    cifdirs=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
-else:
-    cifdirs= subprocess.getoutput("find {0} -type d | sort".format(dir))
-    cifdirs= cifdirs.split('\n')
-    del cifdirs[0]
-cwd=os.getcwd()
-fclusternum=0.0
-for i in cifdirs:
-    cifid=re.split('/',i)[-1]
-    try:
-        print(cifid)
-        os.chdir(i)
-        result=make_self_clusering(csvn='{}_sort_self_distanc.csv'.format(cifid),pngn='{}_self_cluster.png'.format(cifid),fclusternum=fclusternum)
-        result.to_csv('{}_fclusternum={}'.format(cifid,str(fclusternum)))
-        os.chdir(cwd)
-    except:
-        print('{} no such file'.format(cifid))
+def make_self_clusering(dir):
+    if os.path.isfile('{}/picupadress'.format(dir)):
+        cifdirs=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
+    else:
+        cifdirs= subprocess.getoutput("find {0} -type d | sort".format(dir))
+        cifdirs= cifdirs.split('\n')
+        del cifdirs[0]
+    cwd=os.getcwd()
+    fclusternum=0.0
+    for i in cifdirs:
+        cifid=re.split('/',i)[-1]
+        try:
+            print(cifid)
+            os.chdir(i)
+            result=make_self_clusering_(csvn='{}_sort_self_distanc.csv'.format(cifid),pngn='{}_self_cluster.png'.format(cifid),fclusternum=fclusternum)
+            result.to_csv('{}_fclusternum={}'.format(cifid,str(fclusternum)))
+            os.chdir(cwd)
+        except:
+            print('{} no such file'.format(cifid))

@@ -1,4 +1,6 @@
 import copy,os,glob,math
+import sys
+from tkinter.tix import Tree
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import linkage, dendrogram,fcluster
 import pandas as pd
@@ -23,14 +25,17 @@ def make_sort_distance(selfcsv,csvn='sort_self_distanc.csv'):
     for i,data in standdf.iterrows():
         matrixdf.at[data.isite_i,data.isite_j]=copy.deepcopy(data.distance)
         matrixdf.at[data.isite_j,data.isite_i]=copy.deepcopy(data.distance)
-    for dig in matrixdf.index.to_list():
-        matrixdf.loc[dig,dig]=0
     matrixdf=matrixdf.sort_index()
     matrixdf=matrixdf.sort_index(axis=1)
+    matrixdf.dropna(inplace=True,how='all')
+    matrixdf.dropna(inplace=True,axis=1,how='all')
+    for dig in matrixdf.index.to_list():
+        matrixdf.loc[dig,dig]=0
+    print(matrixdf)
     matrixdf.to_csv('matrix_{}'.format(csvn))
     return matrixdf
 
-def make_all_clusering(csvn='sort_self_distanc.csv',pngn='cluster.png',method='single',fclusternum=0.0):
+def make_all_clusering_(csvn='sort_self_distanc.csv',pngn='cluster.png',method='single',fclusternum=0.0):
     selfcsv=glob.glob('all_distance.csv')[0]
     matrixdf=make_sort_distance(selfcsv,csvn)
     result=linkage(squareform(matrixdf), method = method)
@@ -42,12 +47,13 @@ def make_all_clusering(csvn='sort_self_distanc.csv',pngn='cluster.png',method='s
     result_=[(idx[i],num) for i,num in enumerate(list(fcluster(result,fclusternum)))]
     return pd.DataFrame(result_,columns=['isite','fclusternum'])
 
-dir='result/testcif'
-cwd=os.getcwd()
-os.chdir(dir)
-result=make_all_clusering(csvn='all_sort_self_distanc.csv',pngn='all_self_cluster.png')
-os.chdir(cwd)
-import pickle
-with open(("all_clustering_data.pickle"),"wb") as fwb:
-    pickle.dump(result,fwb)
+
+def make_all_clusering(dir):
+    cwd=os.getcwd()
+    os.chdir(dir)
+    result=make_all_clusering_(csvn='all_sort_self_distanc.csv',pngn='all_self_cluster.png')
+    os.chdir(cwd)
+    import pickle
+    with open(("all_clustering_data.pickle"),"wb") as fwb:
+        pickle.dump(result,fwb)
 

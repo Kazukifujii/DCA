@@ -1,8 +1,5 @@
-from asyncio import subprocess
 from cmath import nan
-from genericpath import isfile
 import glob,time
-import threading
 import pandas as pd
 import os,itertools,re
 from distance_func import make_distance
@@ -59,5 +56,3 @@ def make_self_distance(dir):
             etiem=time.perf_counter()
             print('computation time {}'.format(etiem-stime))
     print('total computation time {}'.format(etiem-tstime))
-
-make_self_distance('result/testcif')
