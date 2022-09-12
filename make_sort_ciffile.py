@@ -13,8 +13,6 @@ for i in cifdir:
     isiteinfo.append((i,maxisite))
 isiteinfo.sort(key=lambda x:x[1])
 
-
-
 estimecont=100
 print(estimecont)
 cont=0

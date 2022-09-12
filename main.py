@@ -17,9 +17,5 @@ log.append(log3)
 log4= subprocess.getoutput("python3 make_all_distance.py")
 log.append(log4)
 import pickle
-
-
-
 with open(("main_log.pickle"),"wb") as fwb:
     pickle.dump(log,fwb)
-    

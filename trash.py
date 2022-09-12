@@ -1,9 +1,9 @@
 import pickle
+import pandas as pd
+import subprocess
 
 with open('main_log.pickle','rb') as f:
 	log=pickle.load(f)
-
-import copy 
 
 txtlog="".join(log)
 import re
@@ -20,11 +20,9 @@ for id in logindex:
 	#print()
 	break
 
-import pandas as pd
-dir='/home/fujikazuki/crystal_emd/result/allzeorite'
+dir='result/allzeorite'
 outcsvname='all_distance.csv'
 picadress=pd.read_csv('{}/allcif_cluster'.format(dir),index_col=0)
-import subprocess
 
 for i in picadress.adress.to_list():
 	result=subprocess.getoutput('ls {}/*_0_0.csv'.format(i))

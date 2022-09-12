@@ -1,4 +1,4 @@
-import copy,os,glob,re,subprocess,math
+import copy,os,glob,re,math
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import linkage, dendrogram,fcluster
 import pandas as pd
@@ -38,17 +38,21 @@ def make_self_clusering(csvn='sort_self_distanc.csv',pngn='cluster.png',method='
     plt.close()
     result_=[(idx[i],num) for i,num in enumerate(list(fcluster(result,fclusternum)))]
     return pd.DataFrame(result_,columns=['isite','fclusternum'])
-"""
-cifdir_ = subprocess.getoutput("find {0} -type d | sort".format('result/sorttest'))
-cifdir = cifdir_.split('\n')
-del cifdir[0]
-"""
 
-dir='result/allzeorite'
-cifdir=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
+
+
+
+import subprocess
+dir='result/testcif'
+if os.path.isfile('{}/picupadress'.format(dir)):
+    cifdirs=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
+else:
+    cifdirs= subprocess.getoutput("find {0} -type d | sort".format(dir))
+    cifdirs= cifdirs.split('\n')
+    del cifdirs[0]
 cwd=os.getcwd()
 fclusternum=0.0
-for i in cifdir:
+for i in cifdirs:
     cifid=re.split('/',i)[-1]
     try:
         print(cifid)

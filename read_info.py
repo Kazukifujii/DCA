@@ -25,7 +25,6 @@ def center_info(isite,nn_data):
 		first_info.append(i)
 	return first_info
 
-
 def recoords(isite,nn_data_,adjacent_number=2,adj_j=1,clusterdf=nan):
 	nn_data=copy.deepcopy(nn_data_)
 	if adj_j==adjacent_number:
