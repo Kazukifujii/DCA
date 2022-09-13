@@ -10,7 +10,7 @@ def parallel_self_distance(clusterdf,comb,pattern_j):
     data_i=clusterdf.loc[index_i]
     data_j=clusterdf.loc[index_j]
     csvi='{}/{}_{}_0.csv'.format(data_i.adress,data_i.cifid,data_i.isite,0)
-    csvj='{}/{}_{}_{}.csv'.format(data_j.adress,data_j.cifid,data_j.isite,0)
+    csvj='{}/{}_{}_{}.csv'.format(data_j.adress,data_j.cifid,data_j.isite,pattern_j)
     if not (os.path.isfile(csvi) and os.path.isfile(csvj)):
         return ('{}_{}'.format(data_i.cifid,str(data_i.isite)),'{}_{}'.format(data_j.cifid,str(data_j.isite)),0,pattern_j,nan)
     disij=make_distance(csvi,csvj)

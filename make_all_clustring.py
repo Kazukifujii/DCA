@@ -1,6 +1,4 @@
 import copy,os,glob,math
-import sys
-from tkinter.tix import Tree
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import linkage, dendrogram,fcluster
 import pandas as pd
@@ -31,7 +29,6 @@ def make_sort_distance(selfcsv,csvn='sort_self_distanc.csv'):
     matrixdf.dropna(inplace=True,axis=1,how='all')
     for dig in matrixdf.index.to_list():
         matrixdf.loc[dig,dig]=0
-    print(matrixdf)
     matrixdf.to_csv('matrix_{}'.format(csvn))
     return matrixdf
 

@@ -5,8 +5,8 @@ from make_all_clustring import make_all_clusering as mac
 from make_picup_cluster import make_picup_cluster as mpc
 
 dir='result/allzeorite'
-#msd(dir)
-#msc(dir)
-#mpc(dir)
-#mad(dir)
+"""msd(dir)
+msc(dir)
+mpc(dir)"""
+mad(dir)
 mac(dir)

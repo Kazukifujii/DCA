@@ -45,6 +45,6 @@ def make_distance(csv_adress1,csv_adress2):
             sumf+=val.varValue
         for key,val in f.items():
             dis_+=val.varValue*costs[key]
-        return dis_/sumf
+        return dis_/sumf,
     else:
         return nan
