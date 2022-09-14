@@ -44,7 +44,6 @@ def make_all_clusering_(csvn='sort_self_distanc.csv',pngn='cluster.png',method='
     result_=[(idx[i],num) for i,num in enumerate(list(fcluster(result,fclusternum)))]
     return pd.DataFrame(result_,columns=['isite','fclusternum'])
 
-
 def make_all_clusering(dir):
     cwd=os.getcwd()
     os.chdir(dir)
@@ -53,4 +52,3 @@ def make_all_clusering(dir):
     import pickle
     with open(("all_clustering_data.pickle"),"wb") as fwb:
         pickle.dump(result,fwb)
-

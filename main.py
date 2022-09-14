@@ -4,9 +4,9 @@ from make_all_distance import make_all_distance as mad
 from make_all_clustring import make_all_clusering as mac
 from make_picup_cluster import make_picup_cluster as mpc
 
-dir='result/allzeorite'
-"""msd(dir)
+dir='result/testcif'
+msd(dir)
 msc(dir)
-mpc(dir)"""
+mpc(dir)
 mad(dir)
 mac(dir)
