@@ -1,6 +1,4 @@
 from cmath import  nan
-import os
-import sys
 import pandas as pd
 import pulp
 
@@ -12,7 +10,7 @@ def calcost(data1,data2):
         return redata.x**2+redata.y**2+redata.z**2
     return 1000
 
-def make_distance(csv_adress1,csv_adress2):
+def make_distance(csv_adress1,csv_adress2,values=False):
     cluster1=pd.read_csv(csv_adress1,index_col=0)
     cluster2=pd.read_csv(csv_adress2,index_col=0)
     #make cost and constrains
@@ -38,7 +36,14 @@ def make_distance(csv_adress1,csv_adress2):
         model+= pulp.lpSum([f[(i,j)] for i,_ in cluster1.iterrows()])==1
 
     result=model.solve(pulp.PULP_CBC_CMD(msg = False))
+    
     if result==1:
+        if values:
+            val=list()
+            for var_ in f.values():
+                if var_.varValue!=0:
+                    val.append((str(var_),float(var_.varValue)))
+            return val
         dis_=float()
         sumf=float()
         for val in f.values():
