@@ -25,6 +25,7 @@ def make_self_distance(dir):
         cifdirs= cifdirs.split('\n')
         del cifdirs[0]
     allciflen=str(len(cifdirs))
+    etiem=time.perf_counter()
     for  i,cifdir in  enumerate(cifdirs):
             stime=time.perf_counter()
             cifid=re.split('/',cifdir)[-1]

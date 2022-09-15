@@ -5,11 +5,11 @@ import pandas as pd
 import subprocess
 from collections import defaultdict
 
-def make_fcluster_list(csvlist):
-    if type(csvlist) is str:
-        cifdirs=pd.read_csv(csvlist,index_col=0).cifadress.to_list()
+def make_fcluster_list(dir):
+    if os.path.isfile('{}/picupadress'.format(dir)):
+        cifdirs=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
     else:
-        cifdirs= subprocess.getoutput("find {0} -type d | sort".format(csvlist))
+        cifdirs= subprocess.getoutput("find {0} -type d | sort".format(dir))
         cifdirs= cifdirs.split('\n')
         del cifdirs[0]
     picinfo=list()
@@ -30,7 +30,8 @@ def make_fcluster_list(csvlist):
         os.chdir(cwd)
 
     totalinfo=pd.DataFrame(picinfo,columns=['cifid','adress','isite'])
-    totalinfo.to_csv('{}/allcif_cluster'.format(csvlist))
+    totalinfo.to_csv('{}/allcif_cluster'.format(dir))
+    return totalinfo
 
 def make_isite_list(dir):
     #for i,adress in enumerate(csvlist):
@@ -57,6 +58,7 @@ def make_classification_ring(csvlist,outdir=None):
         df=pd.read_csv(csvname,index_col=0).round(6)
         #counting duplicate isite
         disite=df.index.size-df.loc[:,'x':'z'].drop_duplicates().index.size
+        #counting duplicate bond
         nooddf=pd.DataFrame(read_nood(df)).astype(str)
         dnood=nooddf.index.size-nooddf.drop_duplicates().index.size
         ring=disite-dnood

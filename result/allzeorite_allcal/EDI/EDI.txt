@@ -1,0 +1,297 @@
+Full Formula (Si5 O10)
+Reduced Formula: SiO2
+abc   :   6.926000   6.926000   6.410000
+angles:  90.000000  90.000000  90.000000
+Sites (15)
+  #  SP         a       b       c
+---  ----  ------  ------  ------
+  0  Si    0       0.2679  0.1184
+  1  Si    0.7321  0       0.8816
+  2  Si    0       0.7321  0.1184
+  3  Si    0.2679  0       0.8816
+  4  Si    0       0       0.5
+  5  O     0       0.1898  0.355
+  6  O     0.8102  0       0.645
+  7  O     0       0.8102  0.355
+  8  O     0.1898  0       0.645
+  9  O     0.8103  0.1897  0
+ 10  O     0.8103  0.8103  0
+ 11  O     0.1897  0.8103  0
+ 12  O     0.1897  0.1897  0
+ 13  O     0       0.5     0.1183
+ 14  O     0.5     0       0.8817
+
+space_group_IT_number None
+
+*** lse ***
+
+
+**isite= 0
+Si1 : [0.        1.8554754 0.758944 ]
+
+ce_symbol  = T:4
+ce_fraction=  1.0
+species:coords:index
+O1 : [0.        1.3145548 2.27555  ] : 5
+O1 : [1.3138622 1.3138622 0.       ] : 12
+O1 : [-1.3138622  1.3138622  0.       ] : 9
+O1 : [0.       3.463    0.758303] : 13
+species:coords:indexend
+
+END
+
+
+**isite= 1
+Si1 : [5.0705246 0.        5.651056 ]
+
+ce_symbol  = T:4
+ce_fraction=  1.0
+species:coords:index
+O1 : [5.6114452 0.        4.13445  ] : 6
+O1 : [ 5.6121378 -1.3138622  6.41     ] : 10
+O1 : [5.6121378 1.3138622 6.41     ] : 9
+O1 : [3.463    0.       5.651697] : 14
+species:coords:indexend
+!!!atention to nb coordination!!!
+         [1.6101828637581386, 1.611078748584029, 1.611078748584029, 1.607524727799283]
+         [1.6101828637581383, 1.611078748584029, 1.611078748584029, 1.607524727799283]
+
+END
+
+
+**isite= 2
+Si1 : [0.        5.0705246 0.758944 ]
+
+ce_symbol  = T:4
+ce_fraction=  1.0
+species:coords:index
+O1 : [0.        5.6114452 2.27555  ] : 7
+O1 : [-1.3138622  5.6121378  0.       ] : 10
+O1 : [1.3138622 5.6121378 0.       ] : 11
+O1 : [0.       3.463    0.758303] : 13
+species:coords:indexend
+!!!atention to nb coordination!!!
+         [1.610182863758139, 1.611078748584029, 1.611078748584029, 1.607524727799283]
+         [1.6101828637581386, 1.611078748584029, 1.611078748584029, 1.607524727799283]
+
+END
+
+
+**isite= 3
+Si1 : [1.8554754 0.        5.651056 ]
+
+ce_symbol  = T:4
+ce_fraction=  1.0
+species:coords:index
+O1 : [1.3138622 1.3138622 6.41     ] : 12
+O1 : [ 1.3138622 -1.3138622  6.41     ] : 11
+O1 : [1.3145548 0.        4.13445  ] : 8
+O1 : [3.463    0.       5.651697] : 14
+species:coords:indexend
+
+END
+
+
+**isite= 4
+Si1 : [0.    0.    3.205]
+
+ce_symbol  = T:4
+ce_fraction=  1.0
+species:coords:index
+O1 : [0.        1.3145548 2.27555  ] : 5
+O1 : [1.3145548 0.        4.13445  ] : 8
+O1 : [-1.3145548  0.         4.13445  ] : 6
+O1 : [ 0.        -1.3145548  2.27555  ] : 7
+species:coords:indexend
+!!!atention to nb coordination!!!
+         [1.6099477086859193, 1.6099477086859193, 1.609947708685918, 1.609947708685918]
+         [1.609947708685919, 1.609947708685919, 1.6099477086859186, 1.6099477086859186]
+
+END
+
+
+**isite= 5
+O1 : [0.        1.3145548 2.27555  ]
+
+ce_symbol  = A:2
+ce_fraction=  0.8092424079891015
+species:coords:index
+Si1 : [0.    0.    3.205] : 4
+Si1 : [0.        1.8554754 0.758944 ] : 0
+species:coords:indexend
+
+ce_symbol  = L:2
+ce_fraction=  0.19075759201089845
+species:coords:index
+Si1 : [0.    0.    3.205] : 4
+Si1 : [0.        1.8554754 0.758944 ] : 0
+species:coords:indexend
+
+END
+
+
+**isite= 6
+O1 : [5.6114452 0.        4.13445  ]
+
+ce_symbol  = A:2
+ce_fraction=  0.8092424079890992
+species:coords:index
+Si1 : [6.926 0.    3.205] : 4
+Si1 : [5.0705246 0.        5.651056 ] : 1
+species:coords:indexend
+
+ce_symbol  = L:2
+ce_fraction=  0.19075759201090078
+species:coords:index
+Si1 : [6.926 0.    3.205] : 4
+Si1 : [5.0705246 0.        5.651056 ] : 1
+species:coords:indexend
+
+END
+
+
+**isite= 7
+O1 : [0.        5.6114452 2.27555  ]
+
+ce_symbol  = A:2
+ce_fraction=  0.8092424079890995
+species:coords:index
+Si1 : [0.        5.0705246 0.758944 ] : 2
+Si1 : [0.    6.926 3.205] : 4
+species:coords:indexend
+
+ce_symbol  = L:2
+ce_fraction=  0.1907575920109004
+species:coords:index
+Si1 : [0.        5.0705246 0.758944 ] : 2
+Si1 : [0.    6.926 3.205] : 4
+species:coords:indexend
+
+END
+
+
+**isite= 8
+O1 : [1.3145548 0.        4.13445  ]
+
+ce_symbol  = A:2
+ce_fraction=  0.8092424079891009
+species:coords:index
+Si1 : [0.    0.    3.205] : 4
+Si1 : [1.8554754 0.        5.651056 ] : 3
+species:coords:indexend
+
+ce_symbol  = L:2
+ce_fraction=  0.19075759201089912
+species:coords:index
+Si1 : [0.    0.    3.205] : 4
+Si1 : [1.8554754 0.        5.651056 ] : 3
+species:coords:indexend
+
+END
+
+
+**isite= 9
+O1 : [5.6121378 1.3138622 0.       ]
+
+ce_symbol  = A:2
+ce_fraction=  0.9653428877871719
+species:coords:index
+Si1 : [6.926     1.8554754 0.758944 ] : 0
+Si1 : [ 5.0705246  0.        -0.758944 ] : 1
+species:coords:indexend
+
+ce_symbol  = L:2
+ce_fraction=  0.03465711221282817
+species:coords:index
+Si1 : [6.926     1.8554754 0.758944 ] : 0
+Si1 : [ 5.0705246  0.        -0.758944 ] : 1
+species:coords:indexend
+
+END
+
+
+**isite= 10
+O1 : [5.6121378 5.6121378 0.       ]
+
+ce_symbol  = A:2
+ce_fraction=  0.9653428877871717
+species:coords:index
+Si1 : [ 5.0705246  6.926     -0.758944 ] : 1
+Si1 : [6.926     5.0705246 0.758944 ] : 2
+species:coords:indexend
+
+ce_symbol  = L:2
+ce_fraction=  0.03465711221282824
+species:coords:index
+Si1 : [ 5.0705246  6.926     -0.758944 ] : 1
+Si1 : [6.926     5.0705246 0.758944 ] : 2
+species:coords:indexend
+
+END
+
+
+**isite= 11
+O1 : [1.3138622 5.6121378 0.       ]
+
+ce_symbol  = A:2
+ce_fraction=  0.9653428877871716
+species:coords:index
+Si1 : [0.        5.0705246 0.758944 ] : 2
+Si1 : [ 1.8554754  6.926     -0.758944 ] : 3
+species:coords:indexend
+
+ce_symbol  = L:2
+ce_fraction=  0.03465711221282833
+species:coords:index
+Si1 : [0.        5.0705246 0.758944 ] : 2
+Si1 : [ 1.8554754  6.926     -0.758944 ] : 3
+species:coords:indexend
+
+END
+
+
+**isite= 12
+O1 : [1.3138622 1.3138622 0.       ]
+
+ce_symbol  = A:2
+ce_fraction=  0.9653428877871718
+species:coords:index
+Si1 : [ 1.8554754  0.        -0.758944 ] : 3
+Si1 : [0.        1.8554754 0.758944 ] : 0
+species:coords:indexend
+
+ce_symbol  = L:2
+ce_fraction=  0.034657112212828176
+species:coords:index
+Si1 : [ 1.8554754  0.        -0.758944 ] : 3
+Si1 : [0.        1.8554754 0.758944 ] : 0
+species:coords:indexend
+
+END
+
+
+**isite= 13
+O1 : [0.       3.463    0.758303]
+
+ce_symbol  = L:2
+ce_fraction=  1.0
+species:coords:index
+Si1 : [0.        1.8554754 0.758944 ] : 0
+Si1 : [0.        5.0705246 0.758944 ] : 2
+species:coords:indexend
+
+END
+
+
+**isite= 14
+O1 : [3.463    0.       5.651697]
+
+ce_symbol  = L:2
+ce_fraction=  1.0
+species:coords:index
+Si1 : [5.0705246 0.        5.651056 ] : 1
+Si1 : [1.8554754 0.        5.651056 ] : 3
+species:coords:indexend
+
+END
+
