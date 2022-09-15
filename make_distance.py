@@ -16,15 +16,12 @@ def parallel_self_distance(clusterdf,comb,pattern_j):
     disij=make_distance(csvi,csvj)
     return ('{}_{}'.format(data_i.cifid,str(data_i.isite)),'{}_{}'.format(data_j.cifid,str(data_j.isite)),0,pattern_j,disij)
 
-
-
-def make_all_distance(dir):
+def make_distance(listadress,resultname):
     tstime=time.perf_counter()
-    outcsvname='all_distance.csv'
-    all_cluser=pd.read_csv('{}/allcif_cluster'.format(dir),index_col=0)
+    if type(listadress) is str:
+        all_cluser=pd.read_csv(listadress,index_col=0)
     all_index=all_cluser.index.to_list()
     comb=list(itertools.combinations(all_index,2))
-    stime=time.perf_counter()
     plist=[i for i in range(12)]
     alllen=12
     cont=0
@@ -39,7 +36,8 @@ def make_all_distance(dir):
         print('\ncomputation time {}'.format(etiem-fstime))
     disfile_colname=['isite_i','isite_j','pattern_i','pattern_j','distance']
     distancedf=pd.DataFrame(distance,columns=disfile_colname)
-    distancedf.to_csv('{}/{}'.format(dir,outcsvname))
+    distancedf.to_csv('{}/{}'.format(dir,resultname))
     print()
-    print('output {}'.format(outcsvname))
+    print('output {}'.format(resultname))
     print('total computation time {}'.format(etiem-tstime))
+

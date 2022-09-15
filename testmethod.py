@@ -1,10 +1,10 @@
-from dataclasses import replace
-from turtle import Turtle
-from distance_func import make_distance
+import pandas as pd
 
 csv1='result/testcif/ABW/ABW_0_0.csv'
-csv2='result/testcif/ABW/ABW_2_0.csv'
 
-val=make_distance(csv1,csv2,values=True)
+df=pd.read_csv(csv1,index_col=0)
 
-print(val)
+
+
+
+

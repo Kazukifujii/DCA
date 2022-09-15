@@ -115,7 +115,22 @@ class Set_Cluster_Info():
 		for i,data in self.cluster_coords.loc[:,'x':'z'].iterrows():
 			self.cluster_coords.loc[i,'x':'z']=data.dot(self.rot)
 	
-
+def read_nood(clusterdf):
+	noods=list()
+	for index,i in clusterdf.iterrows():
+		if index==0:
+			continue
+		front_idx=i.loc['front_index']
+		a=clusterdf.loc[front_idx].loc['x':'z']
+		b=i.loc['x':'z']
+		bondx=[a.x,b.x]
+		bondy=[a.y,b.y]
+		bondz=[a.z,b.z]
+		bondx.sort()
+		bondy.sort()
+		bondz.sort()
+		noods.append((bondx,bondy,bondz))
+	return noods
 def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
 	noods=list()
 	for index,i in clusterdf.iterrows():
