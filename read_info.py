@@ -1,13 +1,10 @@
-import copy
 import numpy as np
 import pandas as pd
 import mpl_toolkits.mplot3d.art3d as art3d
 import matplotlib.pyplot as plt
-import itertools
 from cmath import nan
-import copy
+import copy,re,itertools
 from constant import cluster_name
-import pandas as pd
 
 
 def first_cycle_func(isite,nn_data):
@@ -158,34 +155,27 @@ def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
 	if show:
 		plt.show()
 	plt.close()
-	
 
-"""
-import os,pickle,re,sys
-import subprocess
-result_dir='/home/fujikazuki/crystal_emd/result/cod'
-atom='Si'
-cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(result_dir))
-cifdir = cifdir_.split('\n')
-del cifdir[0]
-cifnum=os.path.basename(result_dir)
-
-#read nn_data
-cifdir_nn_i_data = subprocess.getoutput("find {0} -name nb_*.pickle".format(cifdir[0]))
-with open(cifdir_nn_i_data,"rb") as frb:
-	nn_data = pickle.load(frb)
-
-
-#read neighbor_data
-cifdir_neighbor_i_data = subprocess.getoutput("find {0} -name neighbor_data_*.pickle".format(cifdir[0]))
-with open(cifdir_neighbor_i_data,"rb") as frb:
-	neighbor_data = pickle.load(frb)
-
-#filterling by atom
-for isite in nn_data.keys():
-	isite_atom = re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
-	if isite_atom == atom:
-		cluster_1=Set_Cluster_Info(isite,nn_data,3)
-		cluster_1.parallel_shift_of_center()
-		sys.exit()
-"""
+def remake_csv(csvn,outname=True,atom='Si1'):
+    df=pd.read_csv(csvn,index_col=0)
+    from copy import deepcopy
+    df2=df[df.atom=='Si1'].copy()
+    for i,data in df[df.atom==atom].iterrows():
+        if i==0:
+            continue
+        idx=df.loc[data.front_index].front_index
+        df2.loc[i,'front_index']=deepcopy(idx)
+    oldindexlist=df2.index.to_list()
+    df2=df2.reset_index().copy()
+    newindexlist=df2.index.to_list()
+    numdict=dict()
+    for i,number in enumerate(oldindexlist):
+        numdict[number]=newindexlist[i]
+    df2=df2.replace(numdict).copy()
+    csvname=re.split('/',csvn)[-1]
+    dir=csvn.replace(csvname,'')
+    if outname: 
+        df2.to_csv('{}{}_{}'.format(dir,atom,csvname))
+    else:
+        df2.to_csv(outname)
+    return df2
