@@ -9,7 +9,7 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 
 csv1='result/allzeorite/NAB/NAB_1_0.csv'
-csv2='result/allzeorite/SBN/SBN_0_7.csv'
+csv2='result/allzeorite/SBN/SBN_0_0.csv'
 xlist=[]
 ylist=[]
 zlist=[]
@@ -34,10 +34,10 @@ with open(csv2,newline='') as inputfile:
 
 from dataclasses import replace
 from turtle import Turtle
-from distance_func import make_distance
+from make_distance import cal_distance
 import re
 
-val=make_distance(csv1,csv2,values=True)
+val=cal_distance(csv1,csv2,values=True)
 
 ulist2=[]
 vlist2=[]
@@ -50,7 +50,6 @@ for i in range(len(val)):
     wlist2.append(wlist[int(a)])
 #print(alist)
 #print(u)
-
 for i in val:
     print(i)
 

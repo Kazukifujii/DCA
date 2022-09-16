@@ -23,10 +23,8 @@ for i in cifdir:
         if isite_atom == 'Si':
             cluster=Set_Cluster_Info(isite,nn_data,4)
             alllen=alllen_*len(cluster.shaft_comb)
-            print('{} {} {}'.format(isite,isite_atom,len(cluster.shaft_comb)))
             for pattern in range(len(cluster.shaft_comb)):
                 cont+=1
-                print('{} {}'.format(isite,pattern))
                 print("\r"+str(cont)+'/'+str(alllen),end="")
                 cluster.parallel_shift_of_center()
                 cluster.rotation(pattern=pattern)

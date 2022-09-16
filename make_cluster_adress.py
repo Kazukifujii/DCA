@@ -1,11 +1,9 @@
 import copy,os,glob,re
-from operator import index
-import sys
 import pandas as pd
 import subprocess
 from collections import defaultdict
 
-def make_fcluster_list(dir):
+def fcluster_list(dir):
     if os.path.isfile('{}/picupadress'.format(dir)):
         cifdirs=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
     else:
@@ -33,7 +31,7 @@ def make_fcluster_list(dir):
     totalinfo.to_csv('{}/allcif_cluster'.format(dir))
     return totalinfo
 
-def make_isite_list(dir):
+def isite_list(dir):
     #for i,adress in enumerate(csvlist):
     cifid=re.split('/',dir)[-1]
     ciflist=glob.glob('{}/{}_[0-9]*.csv'.format(dir,cifid))
@@ -48,7 +46,7 @@ def make_isite_list(dir):
 
 from read_info import read_nood
 
-def make_classification_ring(csvlist,outdir=None):
+def classification_ring_list(csvlist,outdir=None):
     if type(csvlist) is str:
         csvlist=pd.read_csv(csvlist,index_col=0)
     class_dict=defaultdict(list)

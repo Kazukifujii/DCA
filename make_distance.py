@@ -11,7 +11,7 @@ def calcost(data1,data2):
         return redata.x**2+redata.y**2+redata.z**2
     return 1000
 
-def make_distance(csv_adress1,csv_adress2,values=False):
+def cal_distance(csv_adress1,csv_adress2,values=False):
     cluster1=pd.read_csv(csv_adress1,index_col=0)
     cluster2=pd.read_csv(csv_adress2,index_col=0)
     #make cost and constrains
@@ -63,7 +63,7 @@ def parallel_self_distance(clusterdf,comb,pattern_j):
     csvj='{}/{}_{}_{}.csv'.format(data_j.adress,data_j.cifid,data_j.isite,pattern_j)
     if not (os.path.isfile(csvi) and os.path.isfile(csvj)):
         return ('{}_{}'.format(data_i.cifid,str(data_i.isite)),'{}_{}'.format(data_j.cifid,str(data_j.isite)),0,pattern_j,nan)
-    disij=make_distance(csvi,csvj)
+    disij=cal_distance(csvi,csvj)
     return ('{}_{}'.format(data_i.cifid,str(data_i.isite)),'{}_{}'.format(data_j.cifid,str(data_j.isite)),0,pattern_j,disij)
 
 def make_distance_csv(listadress,resultname,outdir=False):
