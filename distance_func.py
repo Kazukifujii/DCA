@@ -69,8 +69,12 @@ def parallel_self_distance(clusterdf,comb,pattern_j):
 def make_distance_csv(listadress,resultname,outdir=False):
     tstime=time.perf_counter()
     if type(listadress) is str:
-        all_cluser=pd.read_csv(listadress,index_col=0)
-    all_index=all_cluser.index.to_list()
+        all_cluster=pd.read_csv(listadress,index_col=0)
+    elif type(listadress) is pd.DataFrame:
+        all_cluster=listadress
+    else:
+        print('make_distance_csv error')
+    all_index=all_cluster.index.to_list()
     comb=list(itertools.combinations(all_index,2))
     plist=[i for i in range(12)]
     alllen=12
@@ -80,7 +84,7 @@ def make_distance_csv(listadress,resultname,outdir=False):
         cont+=1
         print("\r"+str(cont)+'/'+str(alllen),end="")
         fstime=time.perf_counter()
-        distance_=Parallel(n_jobs=-1)(delayed(parallel_self_distance)(all_cluser,comb_,pi) for comb_ in comb)
+        distance_=Parallel(n_jobs=-1)(delayed(parallel_self_distance)(all_cluster,comb_,pi) for comb_ in comb)
         distance+=distance_
         etiem=time.perf_counter()
         print('\ncomputation time {}'.format(etiem-fstime))

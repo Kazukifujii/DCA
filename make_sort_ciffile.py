@@ -15,8 +15,7 @@ for i in cifdir:
         continue
     isiteinfo.append((i,maxisite))
 isiteinfo.sort(key=lambda x:x[1])
-#h=5*60*60
-#estimecont=int((h/1.28/12)*1.5)
+
 estimecont=2000
 cont=0
 picupadress=list()
