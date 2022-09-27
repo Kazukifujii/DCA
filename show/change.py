@@ -2,9 +2,12 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import axes3d
+from crystal_emd.distance_func import cal_distance
+import re
 
-csv1='ABW_0_0.csv'
-csv2='ABW_2_0.csv'
+csv1='result/testcif/ABW/ABW_0_0.csv'
+csv2='result/testcif/ABW/ABW_2_0.csv'
+
 
 xlist=[]
 ylist=[]
@@ -38,12 +41,9 @@ with open(csv2,newline='') as inputfile:
         isitelist2.append(int(row[2]))
         atomlist2.append(row[3])
 
-from dataclasses import replace
-from turtle import Turtle
-from distance_func import make_distance
-import re
 
-val=make_distance(csv1,csv2,values=True)
+
+val=cal_distance(csv1,csv2,values=True)
 
 ulist2=[]
 vlist2=[]
