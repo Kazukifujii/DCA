@@ -2,7 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import axes3d
-from crystal_emd.distance_func import cal_distance
+from distance_func import cal_distance
 import re
 
 csv1='result/testcif/ABW/ABW_0_0.csv'
