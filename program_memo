@@ -1,26 +1,15 @@
-test1.py
+make_adiacent_table.py
 	testprogram:python3 test1.py --codpath ciflist
 	各引数に
 	--codpath:cifファイルをまとめているディレクトリ、デフォルトはCOD/O
 	--output1:出力結果をまとめたディレクトリ、デフォルトはresult
 	--output2:output1のひとつ下の出力ディレクトリ、デフォルトはcod
-"""""
-/home/fujikazuki/.local/lib/python3.8/site-packages/pymatgen/io/cif.py:1155: UserWarning: Issues encountered while parsing CIF: Some fractional coordinates rounded to ideal values to avoid issues with finite precision.
-  warnings.warn("Issues encountered while parsing CIF: " + "\n".join(self.warnings))
-""""""
 
 
-test2.py:
+make_nn_data.py:
 	nn_dataを生成しdatファイルとそれと同じ情報を持つpickleファイルの２つを生成
 	
-test3.py
-	隣接情報を生成しpickleファイルに保存
-test4_4.py:
-	#事前に準備するデータ例
-		result/cod/1000007/
-	・指定したディレクトリ内に存在するディレクトリをfindを用いてリストアップしソート(デフォルトはresult/cod
-	・リストアップした各ディレクトリ内に存在する.pickleファイルのデータを整理し取り出す
-	・取り出したデータを元にpngを出力
+
 
 
 ・isite:原子サイトの番号
@@ -40,7 +29,5 @@ adjacent_site_number_i:第i隣接の原子サイト番号をリストアップ.�
  2: [[1], [3], [6], [3]]は第二隣接の情報を表しており、第一隣接の原子とつながっている原子のサイト番号を注目原子を除いて表している。おそらく順番は第一隣接原子の順番に沿っているものと思われる。
  
  
-今後の方針
-・第一隣接のボンドの情報から基準とな軸の選定をおこなう
-・クラスターの情報をまとめて変換しやすいように一つのデータ型として置き換える
+
 
