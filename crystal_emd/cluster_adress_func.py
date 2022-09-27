@@ -2,6 +2,7 @@ import copy,os,glob,re
 import pandas as pd
 import subprocess
 from collections import defaultdict
+from .read_info import read_nood
 
 def fcluster_list(dir):
     if os.path.isfile('{}/picupadress'.format(dir)):
@@ -44,7 +45,6 @@ def isite_list(dir):
     resultdf.to_csv('{}/isite_list'.format(dir))
     return resultdf
 
-from read_info import read_nood
 
 def classification_ring_list(csvlist,outdir=None):
     if type(csvlist) is str:

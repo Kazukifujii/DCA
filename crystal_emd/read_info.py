@@ -4,7 +4,7 @@ import mpl_toolkits.mplot3d.art3d as art3d
 import matplotlib.pyplot as plt
 from cmath import nan
 import copy,re,itertools
-from constant import cluster_name
+from .constant import cluster_name
 
 
 def first_cycle_func(isite,nn_data):
