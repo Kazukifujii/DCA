@@ -2,6 +2,7 @@ import os,pickle,subprocess,re
 from crystal_emd.read_info import Set_Cluster_Info
 import pandas as pd
 
+
 dir='result/allzeorite'
 cifdir=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
 cwd = os.getcwd()
