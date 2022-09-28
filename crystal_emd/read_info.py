@@ -174,7 +174,7 @@ def remake_csv(csvn,outname=True,atom='Si1'):
     df2=df2.replace(numdict).copy()
     csvname=re.split('/',csvn)[-1]
     dir=csvn.replace(csvname,'')
-    if outname: 
+    if not type(outname) is str:
         df2.to_csv('{}{}_{}'.format(dir,atom,csvname))
     else:
         df2.to_csv(outname)
