@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from cmath import nan
 import copy,re,itertools
 from .constant import cluster_name
+from copy import deepcopy
 
 
 def first_cycle_func(isite,nn_data):
@@ -179,3 +180,25 @@ def remake_csv(csvn,outname=True,atom='Si1'):
     else:
         df2.to_csv(outname)
     return df2
+
+
+def readd(clusterdf,indexnum,initial=pd.DataFrame()):
+    result=deepcopy(initial)
+    if (clusterdf.front_index==indexnum).sum()==0:
+        return result
+    for i,data in clusterdf[clusterdf.front_index==indexnum].iterrows():
+        result=pd.concat([result,data],axis=1)
+        result=readd(clusterdf=clusterdf,indexnum=i,initial=result)
+    return result
+
+def cluster_branch(clusterdf):
+	"""
+	from crystal_emd.read_info import cluster_branch
+	df=pd.read_csv('test.csv',index_col=0)
+	a=cluster_branch(df)
+	print(a)
+	"""
+	branch=list()
+	for i,data in clusterdf[clusterdf.front_index==0].iterrows():
+		branch.append(readd(clusterdf=clusterdf,indexnum=1,initial=data).T)
+	return branch
