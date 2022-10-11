@@ -3,7 +3,7 @@ import pandas as pd
 import subprocess
 from collections import defaultdict
 from .read_info import read_nood
-
+import re
 def fcluster_list(dir):
     if os.path.isfile('{}/picupadress'.format(dir)):
         cifdirs=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
@@ -21,9 +21,11 @@ def fcluster_list(dir):
             csvn=glob.glob('*fcluster*')[0]
         except:
             print('no such file')
+            os.chdir(cwd)
             continue
         info=pd.read_csv(csvn,index_col=0)
         picisite=copy.deepcopy(info.iloc[info.fclusternum.drop_duplicates().index].isite.values)
+        picisite=[re.split("_", picisite_)[1] for picisite_ in picisite]
         picinfo_=[(cifid,cifdir,isite) for isite in picisite]
         picinfo+=picinfo_
         os.chdir(cwd)
