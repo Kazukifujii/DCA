@@ -3,6 +3,12 @@
 		{
 			"name": "crystal_emd",
 			"path": "."
+		},
+		{
+			"path": "../クラスタリング/clustering"
+		},
+		{
+			"path": "../clustering"
 		}
 	]
 }

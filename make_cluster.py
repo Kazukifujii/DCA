@@ -22,7 +22,7 @@ for i in cifdir:
     for isite in nn_data.keys():
         isite_atom=re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
         if isite_atom == 'Si':
-            cluster=Set_Cluster_Info(isite,nn_data,4)
+            cluster=Set_Cluster_Info(isite,nn_data,2)#隣接数
             alllen=alllen_*len(cluster.shaft_comb)
             for pattern in range(len(cluster.shaft_comb)):
                 cont+=1
