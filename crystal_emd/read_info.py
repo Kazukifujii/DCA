@@ -188,7 +188,7 @@ def readd(clusterdf,indexnum,initial=pd.DataFrame()):
         return result
     for i,data in clusterdf[clusterdf.front_index==indexnum].iterrows():
         result=pd.concat([result,data],axis=1)
-        result=readd(clusterdf=clusterdf,indexnum=i,initial=result)
+        result=readd(clusterdf,i,result)
     return result
 
 def cluster_branch(clusterdf):
@@ -199,6 +199,8 @@ def cluster_branch(clusterdf):
 	print(a)
 	"""
 	branch=list()
+	centerdf=clusterdf.iloc[0].copy()
 	for i,data in clusterdf[clusterdf.front_index==0].iterrows():
-		branch.append(readd(clusterdf=clusterdf,indexnum=1,initial=data).T)
+		branchdf=pd.concat([readd(clusterdf=clusterdf,indexnum=i,initial=data),centerdf],axis=1).T.copy().sort_values(by='neighbor_num')
+		branch.append(branchdf)
 	return branch
