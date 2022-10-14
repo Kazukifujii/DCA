@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import pandas as pd
 import mpl_toolkits.mplot3d.art3d as art3d
@@ -159,7 +160,6 @@ def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
 
 def remake_csv(csvn,outname=True,atom='Si1'):
     df=pd.read_csv(csvn,index_col=0)
-    from copy import deepcopy
     df2=df[df.atom=='Si1'].copy()
     for i,data in df[df.atom==atom].iterrows():
         if i==0:
@@ -182,13 +182,13 @@ def remake_csv(csvn,outname=True,atom='Si1'):
     return df2
 
 
-def readd(clusterdf,indexnum,initial=pd.DataFrame()):
+def reconstruction_branch(clusterdf,indexnum,initial=pd.DataFrame()):
     result=deepcopy(initial)
     if (clusterdf.front_index==indexnum).sum()==0:
         return result
     for i,data in clusterdf[clusterdf.front_index==indexnum].iterrows():
         result=pd.concat([result,data],axis=1)
-        result=readd(clusterdf,i,result)
+        result=reconstruction_branch(clusterdf,i,result)
     return result
 
 def cluster_branch(clusterdf):
@@ -201,7 +201,7 @@ def cluster_branch(clusterdf):
 	branch=list()
 	centerdf=clusterdf.iloc[0].copy()
 	for i,data in clusterdf[clusterdf.front_index==0].iterrows():
-		branchdf=pd.concat([readd(clusterdf=clusterdf,indexnum=i,initial=data),centerdf],axis=1).T.copy().sort_values(by='neighbor_num')
+		branchdf=pd.concat([reconstruction_branch(clusterdf=clusterdf,indexnum=i,initial=data),centerdf],axis=1).T.copy().sort_values(by='neighbor_num')
 		branch.append(branchdf)
 	return branch
 

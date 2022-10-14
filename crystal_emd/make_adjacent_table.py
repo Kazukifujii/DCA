@@ -130,10 +130,6 @@ def main():
 	for i in ciffilelist:
 		#cifnum = re.findall('\/(\w+)\.cif',i)[0]
 		cifnum=os.path.basename(i).replace('.cif','')
-		if cont==0:
-			if cifnum=='LTL':
-				cont+=1
-			continue
 		if cifnum == args.restart or not checker:
 			checker = True
 		
