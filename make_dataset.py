@@ -1,14 +1,16 @@
 from subprocess import run
 import os,pickle,subprocess,re
-from crystal_emd.read_info import Set_Cluster_Info
+from crystal_emd.read_info import Set_Cluster_Info,make_sort_ciffile
 import pandas as pd
 cifdir="testcif"
 run('python3 crystal_emd/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
 print('emd make_adjacent_tabel')
 run('python3 crystal_emd/make_nn_data.py --output2 {}'.format(cifdir),shell=True)
 print('emd make_nn_data')
-run("python3 make_sort_ciffile.py",shell=True)
+
 dir='result/{}'.format(cifdir)
+
+make_sort_ciffile(dir)
 cifdir=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
 cwd = os.getcwd()
 for i in cifdir:
