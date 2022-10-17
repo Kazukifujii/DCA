@@ -1,4 +1,5 @@
 import sys
+from unicodedata import numeric
 import numpy as np
 import pandas as pd
 import mpl_toolkits.mplot3d.art3d as art3d
@@ -7,7 +8,8 @@ from cmath import nan
 import copy,re,itertools
 from .constant import cluster_name
 from copy import deepcopy
-
+import subprocess
+import re
 
 def first_cycle_func(isite,nn_data):
     #print(isite,nnlist)
@@ -191,6 +193,7 @@ def reconstruction_branch(clusterdf,indexnum,initial=pd.DataFrame()):
         result=reconstruction_branch(clusterdf,i,result)
     return result
 
+
 def cluster_branch(clusterdf):
 	"""
 	from crystal_emd.read_info import cluster_branch
@@ -202,11 +205,10 @@ def cluster_branch(clusterdf):
 	centerdf=clusterdf.iloc[0].copy()
 	for i,data in clusterdf[clusterdf.front_index==0].iterrows():
 		branchdf=pd.concat([reconstruction_branch(clusterdf=clusterdf,indexnum=i,initial=data),centerdf],axis=1).T.copy().sort_values(by='neighbor_num')
+		numericcolumns=['neighbor_num','isite','x','y','z','front_index']
+		branchdf[numericcolumns]=branchdf[numericcolumns].astype(float)
 		branch.append(branchdf)
 	return branch
-
-import subprocess
-import re
 
 def make_sort_ciffile(dir,estimecont=2000):
     cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(dir))
@@ -236,3 +238,22 @@ def make_sort_ciffile(dir,estimecont=2000):
     import pandas as pd
     info=pd.DataFrame(picupadress,columns=['cifadress','Si_len'])
     info.to_csv('{}/picupadress'.format(dir))
+
+
+from .connection_func import IterativeClosestPoint as icp
+def cluster_match(clusterdf1,clusterdf2,convergence_val=10**(-8)):
+    a=cluster_branch(clusterdf1)
+    b=cluster_branch(clusterdf2)
+    fmachnum=list()
+    for i,ai in enumerate(a):
+        for j,bi in enumerate(b):
+            if j in fmachnum:
+                continue
+            branch_matching=icp(ai,bi)
+            mcheck=branch_matching.start_cal(convergence_val=convergence_val)
+            if mcheck:
+                fmachnum.append(j)
+                break
+    if len(fmachnum)==len(a):
+        return True
+    return False

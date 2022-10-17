@@ -75,3 +75,46 @@ def change(csv1,csv2):
         ax.add_line(line)
 
     plt.show()
+
+
+def double_clusterplot(clusterdf1,clusterdf2,title='cluster.png',show=None,save=True):
+    noods=list()
+    fig = plt.figure(figsize = (12, 12))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_xlim(-5,5)
+    ax.set_ylim(-5,5)
+    ax.set_zlim(-5,5)
+    for clusterdf in [clusterdf1,clusterdf2]:
+        for index,i in clusterdf.iterrows():
+            if index==0:
+                continue
+            front_idx=i.loc['front_index']
+            a=clusterdf.loc[front_idx].loc['x':'z']
+            b=i.loc['x':'z']
+            noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
+        ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
+        for index,i in clusterdf.iterrows():
+            text=i.atom+'_'+str(int(i.isite))
+            ax.text(i.x,i.y,i.z,text)
+        for nood in noods:
+            line = art3d.Line3D(*nood)
+            ax.add_line(line)
+        fig.suptitle(title)
+        if save:
+            fig.savefig(title)
+        if show:
+            plt.show()
+        plt.close()
+from PIL import Image
+class DrawGif:
+    def __init__(self):
+        self.image=list()
+    def set_data(self,clusterdf1,clusterdf2):
+        pngname='cluster.png'
+        double_clusterplot(clusterdf1,clusterdf2,title=pngname)
+        self.image.append(Image.open(pngname))
+        os.remove(pngname)
+        return
+    def makegif(self,filename='clustergif.gif'):
+        self.image[0].save(filename,save_all=True, append_images=self.image[1:],optimize=False, duration=500, loop=0)
+        return
