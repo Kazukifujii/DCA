@@ -106,7 +106,7 @@ def double_clusterplot(clusterdf1,clusterdf2,title='cluster.png',show=None,save=
             plt.show()
         plt.close()
 from PIL import Image
-class DrawGif:
+class DrawGif():
     def __init__(self):
         self.image=list()
     def set_data(self,clusterdf1,clusterdf2):

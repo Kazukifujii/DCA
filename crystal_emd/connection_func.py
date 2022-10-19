@@ -1,6 +1,5 @@
 from cmath import nan
 from copy import deepcopy
-import pandas as pd
 import numpy as np
 from crystal_emd.distance_func import cal_distance_df
 import math
@@ -12,14 +11,12 @@ def cal_r_t(clusterdf1,clsuterdf2):
     a-=c_a
     b-=c_b
     h=np.dot(a.T,b)
-    u,s,v=np.linalg.svd(h)
-    #r=pd.DataFrame(np.dot(v.T,u.T))
-    #t=pd.DataFrame(np.dot(-r,c_a)+c_b)
+    u,_,v=np.linalg.svd(h)
     r=np.dot(v.T,u.T)
     t=np.dot(-r,c_a)+c_b
     return r,t
 from .show import DrawGif
-class IterativeClosestPoint:
+class IterativeClosestPoint():
     def __init__(self,clusterdf1,clusterdf2):
         self.clusterdf1=deepcopy(clusterdf1)
         self.clusterdf2=deepcopy(clusterdf2)
