@@ -257,3 +257,30 @@ def cluster_match(clusterdf1,clusterdf2,convergence_val=10**(-8)):
     if len(fmachnum)==len(a):
         return True
     return False
+
+
+def Si_distance(csv):
+    df=pd.read_csv(csv,index_col=0)
+    branch=cluster_branch(df)
+    alist=[]
+    blist=[]
+    for i in branch:
+        xi=i['x'].iloc[2]
+        yi=i['y'].iloc[2]
+        zi=i['z'].iloc[2]
+        a=(xi**2+yi**2+zi**2)**0.5
+        alist.append(a)
+    for j in itertools.product(branch, repeat=2):
+        xj=j[0]['x'].iloc[2]-j[1]['x'].iloc[2]
+        yj=j[0]['y'].iloc[2]-j[1]['y'].iloc[2]
+        zj=j[0]['z'].iloc[2]-j[1]['z'].iloc[2]
+        b=(xj**2+yj**2+zj**2)**0.5
+        blist.append(b)
+    
+    alist.extend(blist)
+    ablist=alist
+    columns=['ai', 'b0i','b1i','b2i','b3i']
+    df2 = pd.DataFrame()
+    for i in range(len(branch)+1):
+        df2[columns[i]] = ablist[i*len(branch):(i+1)*len(branch)]
+    return(df2)
