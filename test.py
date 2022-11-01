@@ -1,7 +1,8 @@
-f=open('read_cryspy/init_poscars/ID_1_POSCAR.nnlist','r').readlines()
+f=open('read_cryspy/init_poscars/ID_0_POSCAR.nnlist','r').readlines()
 #print(r'{}'.format(f[0]),end=' ')
 from collections import defaultdict
 import re
+import sys
 nnlist=defaultdict(list)
 import pandas as pd
 for i in f:
@@ -16,5 +17,17 @@ for i in range(1,9,1):
     print((1,i))
     nnlist[(1,i)].sort(key=lambda x:x[0])
     a=nnlist[(1,i)][1:adjacent_num+1]
-    _,coord,_=a[0]
-    
+    md,mcoord,_=a[0]
+    print(a[0])
+    break
+
+mcoord=[-1*mcoord_ for mcoord_ in mcoord]
+
+for i in range(1,9,1):
+    print('i=',i)
+    nnlist[(1,i)].sort(key=lambda x:x[0])
+    a=nnlist[(1,i)][1:adjacent_num+1]
+    for ai in a:
+        distance,coord,_=ai
+        if coord==mcoord:
+            print(ai)
