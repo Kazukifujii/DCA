@@ -1,9 +1,7 @@
+import os,re,pickle
 from collections import defaultdict
-import re
-import sys
-import pickle
 from numpy import nan
-import os
+
 def make_nn_data_from_nnlist(fileadress,siteinfo):
     #make nn_data.pickle from file of nnlis
     #set init info
@@ -46,16 +44,26 @@ def read_sitinfo_poscar(filename):
             break
         siteinfo.append(splitinfo[-1])
     return siteinfo
-
-"""
-fileadress='read_cryspy/init_poscars/ID_0_POSCAR.nnlist'
-siteinfo=read_sitinfo_poscar('read_cryspy/init_poscars/ID_0_POSCAR')
-make_nn_data_from_nnlist(fileadress,siteinfo=siteinfo)
-"""
-from crystal_emd.read_cryspy_info import isolation_poscars as ip
-
-ip('result/testdir/init_POSCARS')
-#fileadress='read_cryspy/init_poscars/ID_0_POSCAR.nnlist'
-siteinfo=read_sitinfo_poscar('result/testdir/ID_0_POSCAR')
-print(siteinfo)
-#make_nn_data_from_nnlist(fileadress,siteinfo=siteinfo)
+def isolation_poscars(fileadress='init_POSCARS'):
+    filename=os.path.basename(fileadress)
+    dirname=os.path.dirname(fileadress)
+    d=open(fileadress,'r').readlines()
+    idlist=list()
+    for I,i in enumerate(d):
+        if re.match('ID',i):
+            idlist.append(I)
+    cwd=os.getcwd()
+    os.chdir(dirname)
+    for I,i in enumerate(idlist):
+        idname=d[idlist[I]].replace('\n','')
+        if int(len(idlist)-1)==I:
+            poscar=d[idlist[I]::]
+            f=open('{}_POSCAR'.format(idname),'w')
+            f.writelines(poscar)
+            f.close()
+            continue
+        poscar=d[idlist[I]:idlist[I+1]]
+        f=open('{}_POSCAR'.format(idname),'w')
+        f.writelines(poscar)
+        f.close()
+    os.chdir(cwd)

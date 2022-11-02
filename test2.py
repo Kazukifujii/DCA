@@ -19,11 +19,7 @@ for i in cifdir:
         isite_atom=re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
         if isite_atom == 'Si':
             cluster=Set_Cluster_Info(isite,nn_data,2)
-            #from crystal_emd.read_info import clusterplot as clp
-            print(cluster.shaft_comb[1])
-            import sys
-            sys.exit()
-            cluster.rotation(pattern=0)
-            clp(clusterdf=cluster.rot_cluster_coords,show=True)
+            from crystal_emd.read_info import clusterplot as clp
+            clp(clusterdf=cluster.cluster_coords,show=True)
     os.chdir(cwd)
     #print()
