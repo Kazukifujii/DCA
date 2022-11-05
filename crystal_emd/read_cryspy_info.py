@@ -44,6 +44,7 @@ def read_sitinfo_poscar(filename):
             break
         siteinfo.append(splitinfo[-1])
     return siteinfo
+
 def isolation_poscars(fileadress='init_POSCARS'):
     filename=os.path.basename(fileadress)
     dirname=os.path.dirname(fileadress)
@@ -67,3 +68,14 @@ def isolation_poscars(fileadress='init_POSCARS'):
         f.writelines(poscar)
         f.close()
     os.chdir(cwd)
+
+import subprocess 
+def make_nnlist(fileadress='POSCAR',rmax=1.0):
+    cwd=os.getcwd()
+    dirname=os.path.dirname(fileadress)
+    filename=os.path.basename(fileadress)
+    os.chdir(dirname)
+    print(dirname)
+    subprocess.run('a.out {} {}'.format(filename,rmax),shell=True)
+    os.chdir(cwd)
+    return
