@@ -38,7 +38,7 @@ def isite_list(dir):
     #for i,adress in enumerate(csvlist):
     cifid=re.split('/',dir)[-1]
     ciflist=glob.glob('{}/{}_[0-9]*.csv'.format(dir,cifid))
-    isitelist=[re.findall('[0-9]{1,}',csvname)[0] for csvname in ciflist]
+    isitelist=[re.split('_',csvname)[-2] for csvname in ciflist]
     isitelist=list(set(isitelist))
     isitelist=[int(isitelist_) for isitelist_ in isitelist]
     isitelist.sort()

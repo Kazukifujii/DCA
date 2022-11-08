@@ -1,6 +1,6 @@
 #poscarからnn_dataを各ディレクトリごとに作成する
 import os,subprocess,glob,re,sys
-indir='indirs/testposcar'
+indir='read_cryspy/Si_materialproject'
 resultdir='result/{}'.format(os.path.basename(indir))
 poscarfils=glob.glob('{}/*POSCAR'.format(indir))
 
