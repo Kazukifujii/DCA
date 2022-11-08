@@ -1,5 +1,4 @@
 import sys
-from unicodedata import numeric
 import numpy as np
 import pandas as pd
 import mpl_toolkits.mplot3d.art3d as art3d
@@ -10,6 +9,8 @@ from .constant import cluster_name
 from copy import deepcopy
 import subprocess
 import re
+from math import isclose
+
 
 def first_cycle_func(isite,nn_data):
     #print(isite,nnlist)
@@ -112,7 +113,7 @@ class Set_Cluster_Info():
 		rot3=ra/z1
 		z2=np.dot(rb,rot3)
 		x2=np.linalg.norm(rb-z2*rot3)
-		if x2==0:
+		if isclose(x2,0,abs_tol=1e-8):
 			rot1=[1,0,1]
 		else:
 			rot1=(rb-z2*rot3)/x2

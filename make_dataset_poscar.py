@@ -47,8 +47,8 @@ for i in nn_data_dirs:
             cluster.parallel_shift_of_center()
             for pattern in range(len(cluster.shaft_comb)):
                 cont+=1
-                #print("\r{}/{}".format(cont,alllen),end="")
-                print("\r{}/{}".format(isite,pattern),end="")
+                print("\r{}/{}".format(cont,alllen),end="")
+                #print("\r{}/{}".format(isite,pattern),end="")
                 #print("\risite={},pattrn={}".format(isite,pattern),end="")
                 cluster.rotation(pattern=pattern)
                 cluster.cluster_coords.to_csv('{}_{}_{}.csv'.format(cifid,isite,pattern))
