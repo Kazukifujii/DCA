@@ -71,11 +71,12 @@ def isolation_poscars(fileadress='init_POSCARS'):
 
 import subprocess 
 def make_nnlist(fileadress='POSCAR',rmax=1.0):
-    cwd=os.getcwd()
+    
+    """cwd=os.getcwd()
     dirname=os.path.dirname(fileadress)
     filename=os.path.basename(fileadress)
     os.chdir(dirname)
-    print(dirname)
-    subprocess.run('a.out {} {}'.format(filename,rmax),shell=True)
-    os.chdir(cwd)
+    print(dirname)"""
+    subprocess.run('a.out {} {}'.format(fileadress,rmax),shell=True)
+    #s.chdir(cwd)
     return

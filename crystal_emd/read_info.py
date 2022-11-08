@@ -66,6 +66,7 @@ def shaft_info(coords_):
 	center_c=coords.loc[0,'x':'z']
 	for data in shaft_comb(coords):
 		lenge=[]
+		"""
 		for shaft in data:
 			ic=shaft[-3::]
 			i_site=shaft[0]
@@ -74,6 +75,8 @@ def shaft_info(coords_):
 			lenge.sort(key=lambda x:x[0])
 		main_c=coords[(coords.neighbor_num==1) & (coords.isite==lenge[0][1])].iloc[:,1:-1].values.tolist()[0]
 		sub_c=coords[(coords.neighbor_num==1) & (coords.isite==lenge[1][1])].iloc[:,1:-1].values.tolist()[0]
+		"""
+		main_c,sub_c=data
 		comb.append((main_c,sub_c))
 		main_c2=copy.deepcopy(sub_c)
 		sub_c2=copy.deepcopy(main_c)
@@ -97,7 +100,8 @@ class Set_Cluster_Info():
 		self.cluster_coords.x=self.cluster_coords.x+difdf.x
 		self.cluster_coords.y=self.cluster_coords.y+difdf.y
 		self.cluster_coords.z=self.cluster_coords.z+difdf.z
-		self.shaft_comb=shaft_info(self.cluster_coords)	
+		self.shaft_comb=shaft_info(self.cluster_coords)
+		self.orignal_cluster_coords=copy.deepcopy(self.cluster_coords)
 
 	def rotation(self,pattern=0):
 		self.main_shaft_c,self.sub_shaft_c=self.shaft_comb[pattern]
@@ -108,12 +112,14 @@ class Set_Cluster_Info():
 		rot3=ra/z1
 		z2=np.dot(rb,rot3)
 		x2=np.linalg.norm(rb-z2*rot3)
-		rot1=(rb-z2*rot3)/x2
+		if x2==0:
+			rot1=[1,0,1]
+		else:
+			rot1=(rb-z2*rot3)/x2
 		rot2=np.cross(rot3,rot1)
 		rot_=np.array([rot1,rot2,rot3])
 		self.rot=np.linalg.inv(rot_)
-		self.rot_cluster_coords=copy.deepcopy(self.cluster_coords)
-		for i,data in self.cluster_coords.loc[:,'x':'z'].iterrows():
+		for i,data in self.orignal_cluster_coords.loc[:,'x':'z'].iterrows():
 			self.cluster_coords.loc[i,'x':'z']=data.dot(self.rot)
 	
 def read_nood(clusterdf):
