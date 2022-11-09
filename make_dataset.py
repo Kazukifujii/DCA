@@ -3,8 +3,8 @@ import os,pickle,subprocess,re
 import sys
 from crystal_emd.read_info import Set_Cluster_Info,make_sort_ciffile
 import pandas as pd
-cifdir="/home/fujikazuki/cryspy_project/materialsproject"
-resultdir=re.split('/',cifdir)[-1]
+cifdir="testcif"
+resultdir=cifdir
 run('python3 crystal_emd/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,resultdir),shell=True)
 print('emd make_adjacent_tabel')
 run('python3 crystal_emd/make_nn_data.py --output2 {}'.format(resultdir),shell=True)

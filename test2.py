@@ -26,7 +26,7 @@ def make_cluster_point(clusteradress,datasetadress,outdir=False):
         cont+=1
         print("\r"+str(cont)+'/'+str(alllen),end="")
         fstime=time.perf_counter()
-        distance_=Parallel(n_jobs=6)(delayed(parallel_self_distance)(datalist,comb_,pi) for comb_ in comb)
+        distance_=Parallel(n_jobs=-1)(delayed(parallel_self_distance)(datalist,comb_,pi) for comb_ in comb)
         distance+=distance_
         etiem=time.perf_counter()
         print('\ncomputation time {}'.format(etiem-fstime))
@@ -37,6 +37,6 @@ def make_cluster_point(clusteradress,datasetadress,outdir=False):
     return distancedf.sort_values(by='distance').iloc[0].distance
 
 datasetadress='cluster_dataset'
-cluster_adress='result/testposcar/ID_0/ID_0_1_0.csv'
+cluster_adress='result/pointtest/ABW/ABW_0_0.csv'
 point=make_cluster_point(clusteradress=cluster_adress,datasetadress=datasetadress)
 print(point)
