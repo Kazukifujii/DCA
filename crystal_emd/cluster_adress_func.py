@@ -47,6 +47,18 @@ def isite_list(dir):
     resultdf.to_csv('{}/isite_list'.format(dir))
     return resultdf
 
+def cluster_list(dir):
+    #for i,adress in enumerate(csvlist):
+    clusterlist=glob.glob('{}/*_[0-9]*.csv'.format(dir))
+    result_=list()
+    for i in clusterlist:
+        filename=os.path.basename(i)
+        cifid,isite,_=tuple(re.split('_',filename))
+        result_.append((cifid,dir,int(isite)))
+    resultdf=pd.DataFrame(result_,columns=['cifid','adress','isite']).drop_duplicates()
+    resultdf=resultdf.sort_values(by='cifid').reset_index(drop=True)
+    return resultdf
+
 
 def classification_ring_list(csvlist,outdir=None):
     if type(csvlist) is str:
