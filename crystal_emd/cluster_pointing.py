@@ -34,7 +34,7 @@ class make_cluster_point:
             #print('\r\ncomputation time {}'.format(etiem-fstime))
         disfile_colname=['isite_i','isite_j','pattern_i','pattern_j','distance']
         self.distancedf=pd.DataFrame(distance,columns=disfile_colname).sort_values(by='distance')
-        self.distancedf.to_csv('{}/{}_{}_distance.csv'.format(dirname,basename.replace('.csv',''),os.path.basename(self.datasetbasename)))
+        self.distancedf.to_csv('{}/{}_{}_distance.csv'.format(dirname,basename.replace('\.csv',''),os.path.basename(self.datasetbasename)))
         print('total computation time {}'.format(etiem-tstime))
         self.cluster_point=self.distancedf.iloc[0].distance
 
