@@ -231,8 +231,11 @@ def make_sort_ciffile(dir,estimecont=2000):
             continue
         isiteinfo.append((i,maxisite))
     isiteinfo.sort(key=lambda x:x[1])
-
-    estimecont=estimecont
+    if estimecont=='all':
+        info=pd.DataFrame(isiteinfo,columns=['cifadress','Si_len'])
+        info.to_csv('{}/picupadress'.format(dir))
+        print(info.Si_len.sum())
+        return info
     cont=0
     picupadress=list()
     for i in isiteinfo:
@@ -242,9 +245,9 @@ def make_sort_ciffile(dir,estimecont=2000):
             break
         continue
     print(cont)
-    import pandas as pd
     info=pd.DataFrame(picupadress,columns=['cifadress','Si_len'])
     info.to_csv('{}/picupadress'.format(dir))
+    return info
 
 
 from .connection_func import IterativeClosestPoint as icp
