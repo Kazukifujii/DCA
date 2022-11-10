@@ -3,14 +3,15 @@ from .distance_func import parallel_self_distance
 import time,re,os
 import pandas as pd
 from joblib import Parallel,delayed
-
+from glob import glob
 
 
 class make_cluster_point:
-    def __init__(self,datasetadress,):
-        self.datalist=cluster_list(datasetadress)
+    def __init__(self,datasetadress):
+        #self.datalist=cluster_list(datasetadress)
+        self.datalist=cluster_list(datasetadress,dirs=len(glob('{}/*.csv'.format(datasetadress)))==0)
         self.datasetbasename=os.path.basename(datasetadress)
-    def point(self,clusteradress,n_job,outdir=False):
+    def cal_cluster_point(self,clusteradress,n_job,outdir=False):
         tstime=time.perf_counter()
         dirname=os.path.dirname(clusteradress)
         basename=os.path.basename(clusteradress)
@@ -32,7 +33,18 @@ class make_cluster_point:
             etiem=time.perf_counter()
             #print('\r\ncomputation time {}'.format(etiem-fstime))
         disfile_colname=['isite_i','isite_j','pattern_i','pattern_j','distance']
-        distancedf=pd.DataFrame(distance,columns=disfile_colname)
-        distancedf.to_csv('{}/{}_{}_distance.csv'.format(dirname,basename,os.path.basename(self.datasetbasename)))
+        self.distancedf=pd.DataFrame(distance,columns=disfile_colname).sort_values(by='distance')
+        self.distancedf.to_csv('{}/{}_{}_distance.csv'.format(dirname,basename,os.path.basename(self.datasetbasename)))
         print('total computation time {}'.format(etiem-tstime))
-        return distancedf.sort_values(by='distance').iloc[0].distance
+        self.cluster_point=self.distancedf.iloc[0].distance
+
+
+class make_crystall_point(make_cluster_point):
+    def __init__(self,datasetadress):
+        super().__init__(datasetadress)
+    def cal_crystal_point(self, cifdiradress,n_job=6):
+        self.crystal_point=float()
+        for i,data in cluster_list(cifdiradress).iterrows():
+            clusteradress='{}/{}_{}_0.csv'.format(data.adress,data.cifid,data.isite)
+            self.cal_cluster_point(clusteradress, n_job=n_job)
+            self.crystal_point+=self.cluster_point
