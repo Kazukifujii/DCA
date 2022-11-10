@@ -3,12 +3,15 @@ import os,pickle,subprocess,re
 import sys
 from crystal_emd.read_info import Set_Cluster_Info,make_sort_ciffile
 import pandas as pd
+from glob import glob as gl
 cifdir="allzeorite"
 resultdir=cifdir
+'''
 run('python3 crystal_emd/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,resultdir),shell=True)
 print('emd make_adjacent_tabel')
 run('python3 crystal_emd/make_nn_data.py --output2 {}'.format(resultdir),shell=True)
 print('emd make_nn_data')
+'''
 dir='result/{}'.format(resultdir)
 
 picadress=make_sort_ciffile(dir,estimecont='all')
