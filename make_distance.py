@@ -9,7 +9,7 @@ make_sort_ciffile(dir)
 cifdir=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
 cwd = os.getcwd()
 errorid=list()
-"""
+
 for i in cifdir:
     cifid=os.path.basename(i)
     print(cifid)
@@ -19,7 +19,7 @@ for i in cifdir:
     flusterdf.to_csv("{}/{}_fcluster.csv".format(i,cifid))
 
 fclusterdf=fcluster_list(dir)
-"""
+
 #make_distance_csv(listadress=fclusterdf,resultname ="all_distance.csv")
 from crystal_emd.distance_func import remake_distance
 remake_distance('all_distance.csv')
