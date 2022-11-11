@@ -106,3 +106,15 @@ def make_distance_csv(listadress,resultname,outdir=False):
     print('output {}'.format(resultname))
     print('total computation time {}'.format(etiem-tstime))
 
+def remake_distance(distanceadress,resultname=True,error_val=10**-8):
+    if resultname:
+        diradress=os.path.dirname(distanceadress)
+        basename=os.path.basename(distanceadress).replace('.csv','')
+        if len(diradress)==0:
+            resultname='{}_remake.csv'.format(basename)
+        else:
+            resultname='{}/{}_remake.csv'.format(diradress,basename)
+    distancedf=pd.read_csv(distanceadress,index_col=0)
+    distancedf.loc[(distancedf.distance<=error_val),'distance']=0.0
+    distancedf.to_csv(resultname)
+    return

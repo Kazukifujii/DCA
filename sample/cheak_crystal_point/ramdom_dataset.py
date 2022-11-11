@@ -1,7 +1,6 @@
 from glob import glob as gl
 import random,sys
 import shutil,os
-from crystal_emd.cluster_pointing import make_cluster_point
 datasetadress='result/allzeorite'
 import pandas as pd
 d=pd.read_csv('result/allzeorite/picupadress',index_col=0)
