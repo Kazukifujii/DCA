@@ -167,7 +167,7 @@ def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
 		plt.show()
 	plt.close()
 
-def remake_csv(csvn,outname=True,atom='Si1'):
+def remake_csv(csvn,outname=False,atom='Si1'):
     df=pd.read_csv(csvn,index_col=0)
     df2=df[df.atom=='Si1'].copy()
     for i,data in df[df.atom==atom].iterrows():
@@ -184,10 +184,10 @@ def remake_csv(csvn,outname=True,atom='Si1'):
     df2=df2.replace(numdict).copy()
     csvname=re.split('/',csvn)[-1]
     dir=csvn.replace(csvname,'')
-    if not type(outname) is str:
-        df2.to_csv('{}{}_{}'.format(dir,atom,csvname))
-    else:
+    if outname:
         df2.to_csv(outname)
+    else:
+        df2.to_csv('{}{}_{}'.format(dir,atom,csvname))
     return df2
 
 
