@@ -1,5 +1,4 @@
 import sys
-from unicodedata import numeric
 import numpy as np
 import pandas as pd
 import mpl_toolkits.mplot3d.art3d as art3d
@@ -10,6 +9,8 @@ from .constant import cluster_name
 from copy import deepcopy
 import subprocess
 import re
+from math import isclose
+
 
 def first_cycle_func(isite,nn_data):
     #print(isite,nnlist)
@@ -66,6 +67,7 @@ def shaft_info(coords_):
 	center_c=coords.loc[0,'x':'z']
 	for data in shaft_comb(coords):
 		lenge=[]
+		"""
 		for shaft in data:
 			ic=shaft[-3::]
 			i_site=shaft[0]
@@ -74,6 +76,8 @@ def shaft_info(coords_):
 			lenge.sort(key=lambda x:x[0])
 		main_c=coords[(coords.neighbor_num==1) & (coords.isite==lenge[0][1])].iloc[:,1:-1].values.tolist()[0]
 		sub_c=coords[(coords.neighbor_num==1) & (coords.isite==lenge[1][1])].iloc[:,1:-1].values.tolist()[0]
+		"""
+		main_c,sub_c=data
 		comb.append((main_c,sub_c))
 		main_c2=copy.deepcopy(sub_c)
 		sub_c2=copy.deepcopy(main_c)
@@ -97,7 +101,8 @@ class Set_Cluster_Info():
 		self.cluster_coords.x=self.cluster_coords.x+difdf.x
 		self.cluster_coords.y=self.cluster_coords.y+difdf.y
 		self.cluster_coords.z=self.cluster_coords.z+difdf.z
-		self.shaft_comb=shaft_info(self.cluster_coords)	
+		self.shaft_comb=shaft_info(self.cluster_coords)
+		self.orignal_cluster_coords=copy.deepcopy(self.cluster_coords)
 
 	def rotation(self,pattern=0):
 		self.main_shaft_c,self.sub_shaft_c=self.shaft_comb[pattern]
@@ -108,12 +113,14 @@ class Set_Cluster_Info():
 		rot3=ra/z1
 		z2=np.dot(rb,rot3)
 		x2=np.linalg.norm(rb-z2*rot3)
-		rot1=(rb-z2*rot3)/x2
+		if isclose(x2,0,abs_tol=1e-8):
+			rot1=[1,0,1]
+		else:
+			rot1=(rb-z2*rot3)/x2
 		rot2=np.cross(rot3,rot1)
 		rot_=np.array([rot1,rot2,rot3])
 		self.rot=np.linalg.inv(rot_)
-		self.rot_cluster_coords=copy.deepcopy(self.cluster_coords)
-		for i,data in self.cluster_coords.loc[:,'x':'z'].iterrows():
+		for i,data in self.orignal_cluster_coords.loc[:,'x':'z'].iterrows():
 			self.cluster_coords.loc[i,'x':'z']=data.dot(self.rot)
 	
 def read_nood(clusterdf):
@@ -224,8 +231,11 @@ def make_sort_ciffile(dir,estimecont=2000):
             continue
         isiteinfo.append((i,maxisite))
     isiteinfo.sort(key=lambda x:x[1])
-
-    estimecont=estimecont
+    if estimecont=='all':
+        info=pd.DataFrame(isiteinfo,columns=['cifadress','Si_len'])
+        info.to_csv('{}/picupadress'.format(dir))
+        print(info.Si_len.sum())
+        return info
     cont=0
     picupadress=list()
     for i in isiteinfo:
@@ -235,9 +245,9 @@ def make_sort_ciffile(dir,estimecont=2000):
             break
         continue
     print(cont)
-    import pandas as pd
     info=pd.DataFrame(picupadress,columns=['cifadress','Si_len'])
     info.to_csv('{}/picupadress'.format(dir))
+    return info
 
 
 from .connection_func import IterativeClosestPoint as icp

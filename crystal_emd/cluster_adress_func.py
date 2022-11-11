@@ -38,13 +38,29 @@ def isite_list(dir):
     #for i,adress in enumerate(csvlist):
     cifid=re.split('/',dir)[-1]
     ciflist=glob.glob('{}/{}_[0-9]*.csv'.format(dir,cifid))
-    isitelist=[re.findall('[0-9]{1,}',csvname)[0] for csvname in ciflist]
+    isitelist=[re.split('_',csvname)[-2] for csvname in ciflist]
     isitelist=list(set(isitelist))
     isitelist=[int(isitelist_) for isitelist_ in isitelist]
     isitelist.sort()
     picinfo=[(('{}').format(cifid),dir,isite) for isite in isitelist]
     resultdf=pd.DataFrame(picinfo,columns=['cifid','adress','isite'])
     resultdf.to_csv('{}/isite_list'.format(dir))
+    return resultdf
+
+def cluster_list(dir,dirs=False):
+    #for i,adress in enumerate(csvlist):
+    if dirs:
+      clusterlist=glob.glob('{}/*/*_[0-9]*.csv'.format(dir))
+    else:
+      clusterlist=glob.glob('{}/*_[0-9]*.csv'.format(dir))
+    result_=list()
+    for i in clusterlist:
+        filename=os.path.basename(i)
+        dirname=os.path.dirname(i)
+        cifid,isite,_=tuple(re.split('_',filename))
+        result_.append((cifid,dirname,int(isite)))
+    resultdf=pd.DataFrame(result_,columns=['cifid','adress','isite']).drop_duplicates()
+    resultdf=resultdf.sort_values(by='cifid').reset_index(drop=True)
     return resultdf
 
 
