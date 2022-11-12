@@ -1,7 +1,7 @@
 from crystal_emd.read_info import remake_csv
 from crystal_emd.cluster_adress_func import cluster_list
 import sys,os
-clusterlistdf=cluster_list('cluster_dataset',dirs=True)
+clusterlistdf=cluster_list('result/testcif',dirs=True)
 alllen=clusterlistdf.shape[0]*12
 cont=0
 
