@@ -86,13 +86,19 @@ def shaft_info(coords_):
 	return comb
 
 class Set_Cluster_Info():
-	def __init__(self,isite,nn_data_,adjacent_number=2):
+	def __init__(self,isite=None,nn_data=None,adjacent_number=None,clusterdf=None):
 		#_c:_coordinate
-		self.nn_data=copy.deepcopy(nn_data_)
+		if not clusterdf is None:
+			self.cluster_coords=deepcopy(clusterdf)
+			self.isite=self.cluster_coords.loc[0,'isite']
+			self.shaft_comb=shaft_info(self.cluster_coords)
+			self.orignal_cluster_coords=copy.deepcopy(self.cluster_coords)
+			return
+		self.nn_data=copy.deepcopy(nn_data)
 		self.cluster_coords=recoords(isite,self.nn_data,adjacent_number)
 		self.isite=isite
 		self.shaft_comb=shaft_info(self.cluster_coords)
-
+		self.orignal_cluster_coords=copy.deepcopy(self.cluster_coords)
 	def parallel_shift_of_center(self,coords=[0,0,0]):
 		dif_coords=np.array(coords)-self.cluster_coords.loc[0].loc['x':'z'].to_list()
 		difdf=pd.DataFrame(columns=['x','y','z'],index=self.cluster_coords.index.to_list())
