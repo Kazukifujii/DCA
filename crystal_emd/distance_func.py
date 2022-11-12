@@ -95,7 +95,7 @@ def make_distance_csv(listadress,resultname,outdir=False):
         distance_=Parallel(n_jobs=-1)(delayed(parallel_self_distance)(all_cluster,comb_,pi) for comb_ in comb)
         distance+=distance_
         etiem=time.perf_counter()
-        print('\ncomputation time {}'.format(etiem-fstime))
+        #print('\r\ncomputation time {}'.format(etiem-fstime))
     disfile_colname=['isite_i','isite_j','pattern_i','pattern_j','distance']
     distancedf=pd.DataFrame(distance,columns=disfile_colname)
     if outdir:
@@ -106,3 +106,15 @@ def make_distance_csv(listadress,resultname,outdir=False):
     print('output {}'.format(resultname))
     print('total computation time {}'.format(etiem-tstime))
 
+def remake_distance(distanceadress,resultname=True,error_val=10**-8):
+    if resultname:
+        diradress=os.path.dirname(distanceadress)
+        basename=os.path.basename(distanceadress).replace('.csv','')
+        if len(diradress)==0:
+            resultname='{}_remake'.format(basename)
+        else:
+            resultname='{}/{}_remake'.format(diradress,basename)
+    distancedf=pd.read_csv(distanceadress,index_col=0)
+    distancedf.loc[(distancedf.distance<=error_val),'distance']=0.0
+    distancedf.to_csv(resultname)
+    return

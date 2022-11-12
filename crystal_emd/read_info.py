@@ -29,13 +29,14 @@ def center_info(isite,nn_data):
 
 def recoords(isite,nn_data_,adjacent_number=2,adj_j=1,clusterdf=nan):
 	nn_data=copy.deepcopy(nn_data_)
-	if adj_j==adjacent_number:
-		return clusterdf
+	
 	if adj_j==1:
 		firstdata=[[0]+center_info(isite,nn_data)+[nan]]
 		for i in first_cycle_func(isite,nn_data):
 			firstdata.append([1]+i+[0])
 		clusterdf=pd.DataFrame(firstdata,columns=cluster_name)
+	if adj_j==adjacent_number:
+		return clusterdf
 	neigbordata=[]
 	for num,idata in clusterdf.loc[clusterdf['neighbor_num']==adj_j].iterrows():
 		front_index=clusterdf.loc[idata.front_index].isite
@@ -56,7 +57,10 @@ def recoords(isite,nn_data_,adjacent_number=2,adj_j=1,clusterdf=nan):
 
 def shaft_comb(coords):
 	#print(coords.head(5))
-	shaftdata=coords[coords.neighbor_num==1].iloc[:,1:-1].values.tolist()
+	neighbor_num_=coords.neighbor_num.to_list()
+	neighbor_num_.sort()
+	neighbor_num_=neighbor_num_[1]
+	shaftdata=coords[coords.neighbor_num==neighbor_num_].iloc[:,1:-1].values.tolist()
 	combinations=list(itertools.combinations(shaftdata,2))
 	return copy.deepcopy(combinations)
 
@@ -85,13 +89,19 @@ def shaft_info(coords_):
 	return comb
 
 class Set_Cluster_Info():
-	def __init__(self,isite,nn_data_,adjacent_number=2):
+	def __init__(self,isite=None,nn_data=None,adjacent_number=None,clusterdf=None):
 		#_c:_coordinate
-		self.nn_data=copy.deepcopy(nn_data_)
+		if not clusterdf is None:
+			self.cluster_coords=deepcopy(clusterdf)
+			self.isite=self.cluster_coords.loc[0,'isite']
+			self.shaft_comb=shaft_info(self.cluster_coords)
+			self.orignal_cluster_coords=copy.deepcopy(self.cluster_coords)
+			return
+		self.nn_data=copy.deepcopy(nn_data)
 		self.cluster_coords=recoords(isite,self.nn_data,adjacent_number)
 		self.isite=isite
 		self.shaft_comb=shaft_info(self.cluster_coords)
-
+		self.orignal_cluster_coords=copy.deepcopy(self.cluster_coords)
 	def parallel_shift_of_center(self,coords=[0,0,0]):
 		dif_coords=np.array(coords)-self.cluster_coords.loc[0].loc['x':'z'].to_list()
 		difdf=pd.DataFrame(columns=['x','y','z'],index=self.cluster_coords.index.to_list())
@@ -167,7 +177,7 @@ def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
 		plt.show()
 	plt.close()
 
-def remake_csv(csvn,outname=True,atom='Si1'):
+def remake_csv(csvn,outname=False,atom='Si1'):
     df=pd.read_csv(csvn,index_col=0)
     df2=df[df.atom=='Si1'].copy()
     for i,data in df[df.atom==atom].iterrows():
@@ -184,10 +194,10 @@ def remake_csv(csvn,outname=True,atom='Si1'):
     df2=df2.replace(numdict).copy()
     csvname=re.split('/',csvn)[-1]
     dir=csvn.replace(csvname,'')
-    if not type(outname) is str:
-        df2.to_csv('{}{}_{}'.format(dir,atom,csvname))
-    else:
+    if outname:
         df2.to_csv(outname)
+    else:
+        df2.to_csv('{}{}_{}'.format(dir,atom,csvname))
     return df2
 
 

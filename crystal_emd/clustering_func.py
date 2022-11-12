@@ -31,7 +31,7 @@ def make_sort_distance(selfcsv,csvn='sort_distanc.csv'):
         matrixdf.loc[dig,dig]=0
     matrixdf.dropna(inplace=True,how='all')
     matrixdf.dropna(inplace=True,axis=1,how='all')
-    #matrixdf.to_csv('{}/matrix_{}'.format(os.path.dirname(csvn),os.path.basename(csvn)))
+    matrixdf.to_csv('{}/matrix_{}'.format(os.path.dirname(csvn),os.path.basename(csvn)))
     return matrixdf
 
 def make_clusering(csvadress,csvn='sort_distance.csv',pngn='cluster.png',method='single',fclusternum=0.0,cal_matrixdf=True):
@@ -43,8 +43,8 @@ def make_clusering(csvadress,csvn='sort_distance.csv',pngn='cluster.png',method=
     idx=matrixdf.index.to_list()
     dendrogram(result,labels=idx)
     #plt.title(pngn)
-    plt.ylim(0,0.1)
-    plt.xlim(0,800)
+    #plt.ylim(0,0.1)
+    #plt.xlim(0,800)
     plt.ylabel("angstrom")
     plt.savefig(pngn)
     plt.close()
