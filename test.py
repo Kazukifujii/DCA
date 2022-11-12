@@ -1,11 +1,9 @@
-from crystal_emd.distance_func import make_distance_csv,recal_distance
-from crystal_emd.cluster_adress_func import cluster_list
-clusterlistdf=cluster_list('result/pointtest/ABW')
-make_distance_csv(clusterlistdf,resultname='testdistance_abw.csv')
-from crystal_emd.clustering_func import make_clusering
-import pandas as pd
-import os
+from crystal_emd.read_info import recoords,clusterplot,Set_Cluster_Info
+import pickle
 
-recal_distance('testdistance_abw.csv')
-fluster=make_clusering('testdistance_abw_remake.csv',pngn='test.svg')
-print(fluster)
+f=pickle.load(open('result/testcif/ABW/nb_ABW.pickle','rb'))
+info=Set_Cluster_Info(1,nn_data_=f,adjacent_number=1)
+info.parallel_shift_of_center()
+info.rotation(pattern=0)
+print('end rot')
+clusterplot(info.cluster_coords,show=True,save=False)

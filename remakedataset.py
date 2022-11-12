@@ -1,11 +1,9 @@
 from crystal_emd.read_info import remake_csv
 from crystal_emd.cluster_adress_func import cluster_list
 import sys,os
-clusterlistdf=cluster_list('result/allzeorite',dirs=True)
+clusterlistdf=cluster_list('cluster_dataset',dirs=True)
 alllen=clusterlistdf.shape[0]*12
 cont=0
-
-
 
 for i,data in clusterlistdf.iterrows() :
     for pattern in range(0,12):

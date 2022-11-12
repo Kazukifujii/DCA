@@ -29,13 +29,14 @@ def center_info(isite,nn_data):
 
 def recoords(isite,nn_data_,adjacent_number=2,adj_j=1,clusterdf=nan):
 	nn_data=copy.deepcopy(nn_data_)
-	if adj_j==adjacent_number:
-		return clusterdf
+	
 	if adj_j==1:
 		firstdata=[[0]+center_info(isite,nn_data)+[nan]]
 		for i in first_cycle_func(isite,nn_data):
 			firstdata.append([1]+i+[0])
 		clusterdf=pd.DataFrame(firstdata,columns=cluster_name)
+	if adj_j==adjacent_number:
+		return clusterdf
 	neigbordata=[]
 	for num,idata in clusterdf.loc[clusterdf['neighbor_num']==adj_j].iterrows():
 		front_index=clusterdf.loc[idata.front_index].isite
