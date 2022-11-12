@@ -57,7 +57,10 @@ def recoords(isite,nn_data_,adjacent_number=2,adj_j=1,clusterdf=nan):
 
 def shaft_comb(coords):
 	#print(coords.head(5))
-	shaftdata=coords[coords.neighbor_num==1].iloc[:,1:-1].values.tolist()
+	neighbor_num_=coords.neighbor_num.to_list()
+	neighbor_num_.sort()
+	neighbor_num_=neighbor_num_[1]
+	shaftdata=coords[coords.neighbor_num==neighbor_num_].iloc[:,1:-1].values.tolist()
 	combinations=list(itertools.combinations(shaftdata,2))
 	return copy.deepcopy(combinations)
 
