@@ -11,10 +11,10 @@ def make_randzeo(file_num,outdir=None):
             shutil.rmtree(outdir)
         os.mkdir(outdir)
         for i in range(file_num):
-            run('randzeo.out 5.0  7.0 8.0  2.8 3.2  6 >> {}/ID_{}.randzeo'.format(outdir,i),shell=True)
+            run('randzeo.out 5.0  7.0 8.0  2.8 3.2  6 >> {}/ID{}.randzeo'.format(outdir,i),shell=True)
         return
     for i in range(file_num):
-            run('randzeo.out 5.0  7.0 8.0  2.8 3.2  6 >> ID_{}.randzeo'.format(i),shell=True)
+            run('randzeo.out 5.0  7.0 8.0  2.8 3.2  6 >> ID{}.randzeo'.format(i),shell=True)
     return
 
 def make_nn_data_from_randzeo(filename):

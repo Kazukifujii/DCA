@@ -5,9 +5,9 @@ from crystal_emd.clustering_func import make_clusering
 import os
 from crystal_emd.read_info import make_sort_ciffile
 from crystal_emd.distance_func import remake_distance
-dir='result/testcif'
+dir='cluster_dataset'
 
-make_sort_ciffile(dir)
+make_sort_ciffile(dir,estimecont='all')
 cifdir=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
 cwd = os.getcwd()
 errorid=list()

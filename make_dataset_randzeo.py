@@ -6,9 +6,9 @@ from glob import glob
 
 resultdir='result/randzeo'
 filenum=3
-adjacent_num=2
+adjacent_num=1
 cwd=os.getcwd()
-"""
+
 #randzeoファイルを作成
 make_randzeo(file_num=filenum,outdir=resultdir)
 filelist=glob('{}/*randzeo'.format(resultdir))
@@ -22,7 +22,7 @@ for i,path in enumerate(filelist):
     dirname=os.path.dirname(path)
     os.mkdir('{}/{}'.format(dirname,fileid))
     shutil.move(path,'{}/{}/'.format(dirname,fileid))
-"""
+
 dirlist=glob('{}/*'.format(resultdir))
 
 for i in dirlist:
