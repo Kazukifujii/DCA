@@ -11,9 +11,14 @@ make_sort_ciffile(dir,estimecont='all')
 cifdir=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
 cwd = os.getcwd()
 errorid=list()
-
+cont=0
 for i in cifdir:
     cifid=os.path.basename(i)
+    if cifid=='CHA':
+        cont+=1
+    elif cont==0:
+        continue
+    cont+=1
     print(cifid)
     listadress_=isite_list(i)
     make_distance_csv(listadress=listadress_,resultname="{}/{}_self_distance".format(i,cifid))
