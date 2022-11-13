@@ -11,16 +11,19 @@ def make_randzeo(file_num,outdir=None):
             shutil.rmtree(outdir)
         os.mkdir(outdir)
         for i in range(file_num):
-            run('./crystal_emd/fortran/randzeo 5.0  7.0 8.0  2.8 3.2  6 >> {}/{}.randzeo'.format(outdir,i),shell=True)
+            run('randzeo.out 5.0  7.0 8.0  2.8 3.2  6 >> {}/ID_{}.randzeo'.format(outdir,i),shell=True)
         return
     for i in range(file_num):
-            run('./crystal_emd/fortran/randzeo 5.0  7.0 8.0  2.8 3.2  6 >> {}.randzeo'.format(i),shell=True)
+            run('randzeo.out 5.0  7.0 8.0  2.8 3.2  6 >> ID_{}.randzeo'.format(i),shell=True)
     return
 
 def make_nn_data_from_randzeo(filename):
     bn=os.path.basename(filename)
     di=os.path.dirname(filename)
-    resultadress='{}/{}.pickle'.format(di,bn)
+    if len(di)!=0:
+        resultadress='{}/{}.pickle'.format(di,bn)
+    else:
+        resultadress='{}.pickle'.format(bn)
     f=open(filename,'r').readlines()
     nn_data=defaultdict(list)
     site_coords=dict()
