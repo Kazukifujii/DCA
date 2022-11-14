@@ -183,6 +183,8 @@ def remake_csv(csvn,outname=False,atom='Si1'):
     for i,data in df[df.atom==atom].iterrows():
         if i==0:
             continue
+        if df.loc[data.front_index].atom==atom:
+            continue
         idx=df.loc[data.front_index].front_index
         df2.loc[i,'front_index']=deepcopy(idx)
     oldindexlist=df2.index.to_list()
@@ -191,7 +193,7 @@ def remake_csv(csvn,outname=False,atom='Si1'):
     numdict=dict()
     for i,number in enumerate(oldindexlist):
         numdict[number]=newindexlist[i]
-    df2=df2.replace(numdict).copy()
+    df2.loc[:,'front_index']=df2.front_index.replace(numdict).copy()
     csvname=re.split('/',csvn)[-1]
     dir=csvn.replace(csvname,'')
     if outname:

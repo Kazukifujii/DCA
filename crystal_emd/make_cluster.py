@@ -23,10 +23,10 @@ def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,a
         if not clusterdf is None:
             clusterinfo=Set_Cluster_Info(clusterdf=clusterdf)
             isite=clusterdf.iloc[0].isite
-            
         else:
             clusterinfo=Set_Cluster_Info(isite,nn_data,adjacent_num)
         for pattern in range(len(clusterinfo.shaft_comb)):
+            #print('\risite={} {}'.format(isite,pattern+1),end='')
             clusterinfo.parallel_shift_of_center()
             clusterinfo.rotation(pattern=pattern)
             clusterinfo.cluster_coords.to_csv('{}_{}_{}.csv'.format(cifid,isite,pattern))
@@ -45,8 +45,7 @@ def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,a
                 clusterinfo=Set_Cluster_Info(isite,nn_data,2)
                 alllen=alllen_*len(clusterinfo.shaft_comb)
                 for pattern in range(len(clusterinfo.shaft_comb)):
-                    cont+=1
-                    #print("\r"+str(cont)+'/'+str(alllen),end="")
+                    #print("\r{}".format(pattern+1),end="")
                     clusterinfo.parallel_shift_of_center()
                     clusterinfo.rotation(pattern=pattern)
                     clusterinfo.cluster_coords.to_csv('{}_{}_{}.csv'.format(cifid,isite,pattern))
@@ -54,7 +53,3 @@ def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,a
                         break     
     os.chdir(cwd)
     return
-
-#make_cluster_dataset(cifid='ABW',nn_data_adress='result/testcif/ABW/nb_ABW.pickle',adjacent_num=2,rotation=False,outdir='result')
-
-make_cluster_dataset(cluster_adress='result/testcif/ABW/ABW_0_0.csv',outdir='result')
