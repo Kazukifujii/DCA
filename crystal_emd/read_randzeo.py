@@ -34,7 +34,7 @@ def make_nn_data_from_randzeo(filename):
         if re.search('!pos cartsian',txt):
             float_info=list(map(float,re.findall('\-*\d+\.?\d+',txt)))
             isite=int(re.findall('\d+',txt)[-1])
-            center_info=['Si',nan,*float_info]
+            center_info=['Si1',nan,*float_info]
             site_coords[isite]=deepcopy(np.array(float_info))
             nn_data[isite].append(center_info)
         if re.search('!pair index',txt):
@@ -51,7 +51,7 @@ def make_nn_data_from_randzeo(filename):
                         if mdi>=di:
                             mdi=deepcopy(di)
                             recoord=deepcopy(recoord_+site_coord_i)
-            nn_data[isite_i].append([isite_j,'Si',*recoord])
+            nn_data[isite_i].append([isite_j,'Si1',*recoord])
     with open(resultadress,'wb') as bd:
         pickle.dump(nn_data,bd)
     return nn_data
