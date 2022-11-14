@@ -1,4 +1,4 @@
-from crystal_emd.read_info import Set_Cluster_Info
+from .read_info import Set_Cluster_Info
 import pickle,os,re
 import pandas as pd
 def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,adjacent_num=None,isite=None,cluster_adress=None,clusterdf=None,rotation=True,outdir=None):
