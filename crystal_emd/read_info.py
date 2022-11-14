@@ -239,23 +239,23 @@ def make_sort_ciffile(dir,estimecont=2000):
             maxisite=int(re.split('Si',lasttxt)[0].replace(' ',''))
         except:
             continue
-        isiteinfo.append((i,maxisite))
-    isiteinfo.sort(key=lambda x:x[1])
+        isiteinfo.append((cifid,i,maxisite))
+    isiteinfo.sort(key=lambda x:x[-1])
     if estimecont=='all':
-        info=pd.DataFrame(isiteinfo,columns=['cifadress','Si_len'])
+        info=pd.DataFrame(isiteinfo,columns=['cifid','cifadress','Si_len'])
         info.to_csv('{}/picupadress'.format(dir))
         print(info.Si_len.sum())
         return info
     cont=0
     picupadress=list()
     for i in isiteinfo:
-        cont+=i[1]
+        cont+=i[-1]
         picupadress.append(i)
         if cont>=estimecont:
             break
         continue
     print(cont)
-    info=pd.DataFrame(picupadress,columns=['cifadress','Si_len'])
+    info=pd.DataFrame(picupadress,columns=['cifid','cifadress','Si_len'])
     info.to_csv('{}/picupadress'.format(dir))
     return info
 
