@@ -3,6 +3,7 @@ import os,subprocess,re,pickle,sys
 from crystal_emd.read_info import Set_Cluster_Info
 from crystal_emd.read_randzeo import make_nn_data_from_randzeo,make_randzeo
 from glob import glob
+import shutil
 
 resultdir='result/randzeo'
 filenum=3
@@ -15,7 +16,7 @@ filelist=glob('{}/*randzeo'.format(resultdir))
 
 
 
-import shutil
+
 for i,path in enumerate(filelist):
     filename=os.path.basename(path)
     fileid=filename.replace('.randzeo','')
@@ -36,7 +37,7 @@ for i in dirlist:
         isite_atom=re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
         if isite_atom == 'Si':
             alllen_+=1
-    cont=0
+    cont=0 
     for isite in nn_data.keys():
         isite_atom=re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
         if isite_atom == 'Si':

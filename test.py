@@ -1,7 +1,7 @@
 from crystal_emd.cluster_pointing import make_crystall_point
 from crystal_emd.cluster_adress_func import cluster_list
 import os,sys
-d=make_crystall_point('cluster_dataset')
+d=make_crystall_point('database')
 resulttxt='result/randzeo/pointlist'
 text_file=open(resulttxt,'w')
 text_file.write('cifid,point\n')
@@ -10,8 +10,6 @@ from glob import glob
 clusteradress_list=glob('result/randzeo/*')
 
 for i,cifadress in enumerate(clusteradress_list):
-    print(cifadress)
-    ddd=cluster_list(cifadress)
     cifid=os.path.basename(cifadress)
     print('{}/{}'.format(i+1,len(clusteradress_list)))
     print(cifid)
@@ -19,4 +17,3 @@ for i,cifadress in enumerate(clusteradress_list):
     text_file=open(resulttxt,'a')
     text_file.write('{},{}\n'.format(cifid,d.crystal_point))
     text_file.close()
-    break
