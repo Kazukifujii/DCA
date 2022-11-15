@@ -7,7 +7,7 @@ text_file=open(resulttxt,'w')
 text_file.write('cifid,point\n')
 text_file.close()
 from glob import glob
-clusteradress_list=glob('result/randzeo/*')
+clusteradress_list=glob('result/randzeo/ID*')
 
 for i,cifadress in enumerate(clusteradress_list):
     cifid=os.path.basename(cifadress)
