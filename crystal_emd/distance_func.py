@@ -12,7 +12,7 @@ def calcost(data1,data2):
         return redata.x**2+redata.y**2+redata.z**2
     return 1000
 
-def cal_distance_df(clusterdf1,clusterdf2,values=False):
+def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False):
     cluster1=deepcopy(clusterdf1)
     cluster2=deepcopy(clusterdf2)
     #make cost and constrains
@@ -46,22 +46,28 @@ def cal_distance_df(clusterdf1,clusterdf2,values=False):
                 if var_.varValue!=0:
                     val.append((str(var_),float(var_.varValue)))
             return val
+        if histgram:
+            hist=list()
+            for key,var_ in f.items():
+                if var_.varValue!=0:
+                    hist.append(var_.varValue*pow(costs[key],0.5))
+            return hist
         dis_=float()
         sumf=float()
         for val in f.values():
             sumf+=val.varValue
         for key,val in f.items():
-            dis_+=val.varValue*costs[key]
-        dis_=pow(dis_,0.5)
+            dis_+=val.varValue*pow(costs[key],0.5)
+        #dis_=pow(dis_,0.5)
         return dis_/sumf
     else:
         return nan
 
 
-def cal_distance(csv_adress1,csv_adress2,values=False):
+def cal_distance(csv_adress1,csv_adress2,values=False,histgram=False):
     cluster1=pd.read_csv(csv_adress1,index_col=0)
     cluster2=pd.read_csv(csv_adress2,index_col=0)
-    return cal_distance_df(clusterdf1=cluster1,clusterdf2=cluster2,values=values)
+    return cal_distance_df(clusterdf1=cluster1,clusterdf2=cluster2,values=values,histgram=histgram)
 
 def parallel_self_distance(clusterdf,comb,pattern_j):
     index_i,index_j=comb

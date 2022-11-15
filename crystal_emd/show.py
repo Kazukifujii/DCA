@@ -3,7 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.art3d as art3d
 from .distance_func import cal_distance
-
+from copy import deepcopy
+from glob import glob
 def change(csv1,csv2):
     #print(os.getcwd())
     #sys.exit()
@@ -118,3 +119,21 @@ class DrawGif():
     def makegif(self,filename='clustergif.gif'):
         self.image[0].save(filename,save_all=True, append_images=self.image[1:],optimize=False, duration=500, loop=0)
         return
+
+def distance_histgram(cifdir,database_adress='database',show=False,save=True):
+    distanlist=glob('{}/*distance'.format(cifdir))
+    histdf=pd.DataFrame()
+    for dataadress in distanlist:
+        data=pd.read_csv(dataadress,index_col=0).iloc[0]
+        clusteradress_base='{}/{}_{}.csv'.format(database_adress,data.isite_j,data.pattern_j)
+        clusteradress_cif='{}/{}_{}.csv'.format(cifdir,data.isite_i,data.pattern_i)
+        d=cal_distance(csv_adress1=clusteradress_cif,csv_adress2=clusteradress_base,histgram=True)
+        d.sort(reverse=True)
+        histdf.loc[:,'{}_{}'.format(data.isite_i,data.isite_j)]=deepcopy(d)
+    histdf=histdf.sort_index(axis=1)
+    histdf.plot(kind='bar')
+    if show:
+        plt.show()
+    if save:
+        plt.savefig('{}/{}_move.png'.format(cifdir,data.isite_i))
+    return
