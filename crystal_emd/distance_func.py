@@ -58,7 +58,6 @@ def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False):
             sumf+=val.varValue
         for key,val in f.items():
             dis_+=val.varValue*pow(costs[key],0.5)
-        #dis_=pow(dis_,0.5)
         return dis_/sumf
     else:
         return nan
