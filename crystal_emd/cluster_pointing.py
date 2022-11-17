@@ -11,7 +11,7 @@ class make_cluster_point:
         #self.datalist=cluster_list(datasetadress)
         self.datalist=cluster_list(datasetadress,dirs=len(glob('{}/*.csv'.format(datasetadress)))==0)
         self.datasetbasename=os.path.basename(datasetadress)
-    def cal_cluster_point(self,clusteradress,n_job,outdir=False):
+    def cal_cluster_point(self,clusteradress,n_job,outdir=False,method='average'):
         tstime=time.perf_counter()
         dirname=os.path.dirname(clusteradress)
         basename=os.path.basename(clusteradress)
@@ -28,7 +28,7 @@ class make_cluster_point:
             cont+=1
             print("\r"+str(cont)+'/'+str(alllen),end="")
             fstime=time.perf_counter()
-            distance_=Parallel(n_jobs=n_job)(delayed(parallel_self_distance)(datalist_,comb_,pi) for comb_ in comb)
+            distance_=Parallel(n_jobs=n_job)(delayed(parallel_self_distance)(datalist_,comb_,pi,method) for comb_ in comb)
             distance+=distance_
             etiem=time.perf_counter()
             #print('\r\ncomputation time {}'.format(etiem-fstime))
@@ -42,9 +42,9 @@ class make_cluster_point:
 class make_crystall_point(make_cluster_point):
     def __init__(self,datasetadress):
         super().__init__(datasetadress)
-    def cal_crystal_point(self, cifdiradress,n_job=6):
+    def cal_crystal_point(self,cifdiradress,n_job=6,method='average'):
         self.crystal_point=float()
         for i,data in cluster_list(cifdiradress).iterrows():
             clusteradress='{}/{}_{}_0.csv'.format(data.adress,data.cifid,data.isite)
-            self.cal_cluster_point(clusteradress, n_job=n_job)
+            self.cal_cluster_point(clusteradress, n_job=n_job,method=method)
             self.crystal_point+=self.cluster_point
