@@ -149,7 +149,7 @@ def read_nood(clusterdf):
 		bondz.sort()
 		noods.append((bondx,bondy,bondz))
 	return noods
-def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
+def clusterplot(clusterdf,text=True,title='cluster.png',show=None,save=True):
 	noods=list()
 	for index,i in clusterdf.iterrows():
 		if index==0:
@@ -164,9 +164,10 @@ def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
 	ax.set_ylim(-5,5)
 	ax.set_zlim(-5,5)
 	ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
-	for index,i in clusterdf.iterrows():
-		text=i.atom+'_'+str(i.isite)
-		ax.text(i.x,i.y,i.z,text)
+	if text:
+		for index,i in clusterdf.iterrows():
+			text=i.atom+'_'+str(i.isite)
+			ax.text(i.x,i.y,i.z,text)
 	for nood in noods:
 		line = art3d.Line3D(*nood)
 		ax.add_line(line)
@@ -183,6 +184,8 @@ def remake_csv(csvn,outname=False,atom='Si1'):
     for i,data in df[df.atom==atom].iterrows():
         if i==0:
             continue
+        if df.loc[data.front_index].atom==atom:
+            continue
         idx=df.loc[data.front_index].front_index
         df2.loc[i,'front_index']=deepcopy(idx)
     oldindexlist=df2.index.to_list()
@@ -191,7 +194,7 @@ def remake_csv(csvn,outname=False,atom='Si1'):
     numdict=dict()
     for i,number in enumerate(oldindexlist):
         numdict[number]=newindexlist[i]
-    df2=df2.replace(numdict).copy()
+    df2.loc[:,'front_index']=df2.front_index.replace(numdict).copy()
     csvname=re.split('/',csvn)[-1]
     dir=csvn.replace(csvname,'')
     if outname:
@@ -239,23 +242,23 @@ def make_sort_ciffile(dir,estimecont=2000):
             maxisite=int(re.split('Si',lasttxt)[0].replace(' ',''))
         except:
             continue
-        isiteinfo.append((i,maxisite))
-    isiteinfo.sort(key=lambda x:x[1])
+        isiteinfo.append((cifid,i,maxisite))
+    isiteinfo.sort(key=lambda x:x[-1])
     if estimecont=='all':
-        info=pd.DataFrame(isiteinfo,columns=['cifadress','Si_len'])
+        info=pd.DataFrame(isiteinfo,columns=['cifid','cifadress','Si_len'])
         info.to_csv('{}/picupadress'.format(dir))
         print(info.Si_len.sum())
         return info
     cont=0
     picupadress=list()
     for i in isiteinfo:
-        cont+=i[1]
+        cont+=i[-1]
         picupadress.append(i)
         if cont>=estimecont:
             break
         continue
     print(cont)
-    info=pd.DataFrame(picupadress,columns=['cifadress','Si_len'])
+    info=pd.DataFrame(picupadress,columns=['cifid','cifadress','Si_len'])
     info.to_csv('{}/picupadress'.format(dir))
     return info
 

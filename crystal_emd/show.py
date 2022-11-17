@@ -3,8 +3,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.art3d as art3d
 from .distance_func import cal_distance
-
-def change(csv1,csv2):
+from copy import deepcopy
+from glob import glob
+import os
+def change(csv2,csv1,show=True,save=False,hist=False):
     #print(os.getcwd())
     #sys.exit()
     csvadress1=csv1
@@ -48,10 +50,11 @@ def change(csv1,csv2):
 		#ax.set_xlabel('x')
 		#ax.set_ylabel('y')
 		#ax.set_zlabel('z')
-        ax.set_title(csvadress1+'(blue) to ' +csvadress2+'(green)',size=10) # タイトル
+        ax.set_title(os.path.basename(csvadress1).replace('.csv','')+'(blue) to ' +os.path.basename(csvadress2).replace('.csv','')+'(green)',size=10) # タイトル
         ax.set_xlim(-5, 5)
         ax.set_ylim(-5, 5)
         ax.set_zlim(-5, 5)
+    parlist=list()
     for i in range(len(x)):
         text=str(atom[i])+'_'+str(isite[i])
         #text=str(isite[0])+'_'+str(isite[i])
@@ -61,6 +64,7 @@ def change(csv1,csv2):
 		#text2='ABW_'+str(isite2[0])+'_'+str(isite3[i])
         ax.text(x[i],y[i],z[i],text,size=8)
         ax.text(u2[i],v2[i],w2[i],text2,size=8)
+        parlist.append(('{}_{}'.format(text,text2)))
 
     noods=list()
     for index,i in csv1.iterrows():
@@ -73,8 +77,14 @@ def change(csv1,csv2):
     for nood in noods:
         line = art3d.Line3D(*nood)
         ax.add_line(line)
-
-    plt.show()
+    if show:
+        plt.show()
+    if save:
+        plt.savefig('change.svg')
+    plt.close()
+    if hist:
+        df=pd.Series(cal_distance(csvadress1,csvadress2,histgram=True),index=parlist)
+        return df
 
 
 def double_clusterplot(clusterdf1,clusterdf2,title='cluster.png',show=None,save=True):
@@ -118,3 +128,21 @@ class DrawGif():
     def makegif(self,filename='clustergif.gif'):
         self.image[0].save(filename,save_all=True, append_images=self.image[1:],optimize=False, duration=500, loop=0)
         return
+
+def emd_histgram(cifdir,database_adress='database',show=False,save=True):
+    distanlist=glob('{}/*distance'.format(cifdir))
+    histdf=pd.DataFrame()
+    for dataadress in distanlist:
+        data=pd.read_csv(dataadress,index_col=0).iloc[0]
+        clusteradress_base='{}/{}_{}.csv'.format(database_adress,data.isite_j,data.pattern_j)
+        clusteradress_cif='{}/{}_{}.csv'.format(cifdir,data.isite_i,data.pattern_i)
+        d=cal_distance(csv_adress1=clusteradress_cif,csv_adress2=clusteradress_base,histgram=True)
+        d.sort(reverse=True)
+        histdf.loc[:,'{}_{}'.format(data.isite_i,data.isite_j)]=deepcopy(d)
+    histdf=histdf.sort_index(axis=1)
+    histdf.plot(kind='bar')
+    if show:
+        plt.show()
+    if save:
+        plt.savefig('{}/{}_move.png'.format(cifdir,data.isite_i))
+    return histdf
