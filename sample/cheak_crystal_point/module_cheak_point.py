@@ -13,7 +13,9 @@ for i,cifadress in enumerate(cifadress_list):
   cifid=os.path.basename(cifadress)
   print('cif {}/{}'.format(i+1,len(cifadress_list)))
   print(cifid)
-  d.cal_crystal_point(cifadress)
+  d.cal_crystal_point(cifadress,n_job=-1)
   text_file=open(resulttxt,'a')
   text_file.write('{},{}\n'.format(cifid,d.crystal_point))
   text_file.close()
+  if i==3:
+    break
