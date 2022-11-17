@@ -8,5 +8,13 @@ from crystal_emd.show import change
 from glob import glob
 adress1='{}/{}_{}_{}.csv'.format('database','CHI',24,3)
 adress2='{}/{}_{}_{}.csv'.format('result/randzeo/ID302','ID302',1,0)
-change(adress1, adress2)
+#change(adress1, adress2)
 #clusterplot(info.cluster_coords,show=True,save=False)
+from crystal_emd.distance_func import cal_distance
+d=cal_distance(adress1,adress2)
+print(d)
+dmax=cal_distance(adress1,adress2,method='max')
+print(dmax)
+hist=cal_distance(adress1,adress2,histgram=True)
+print(hist)
+print(sum(hist)/len(hist))
