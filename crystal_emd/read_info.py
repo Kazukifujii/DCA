@@ -149,7 +149,7 @@ def read_nood(clusterdf):
 		bondz.sort()
 		noods.append((bondx,bondy,bondz))
 	return noods
-def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
+def clusterplot(clusterdf,text=True,title='cluster.png',show=None,save=True):
 	noods=list()
 	for index,i in clusterdf.iterrows():
 		if index==0:
@@ -164,9 +164,10 @@ def clusterplot(clusterdf,title='cluster.png',show=None,save=True):
 	ax.set_ylim(-5,5)
 	ax.set_zlim(-5,5)
 	ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
-	for index,i in clusterdf.iterrows():
-		text=i.atom+'_'+str(i.isite)
-		ax.text(i.x,i.y,i.z,text)
+	if text:
+		for index,i in clusterdf.iterrows():
+			text=i.atom+'_'+str(i.isite)
+			ax.text(i.x,i.y,i.z,text)
 	for nood in noods:
 		line = art3d.Line3D(*nood)
 		ax.add_line(line)

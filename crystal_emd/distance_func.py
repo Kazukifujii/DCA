@@ -12,7 +12,7 @@ def calcost(data1,data2):
         return redata.x**2+redata.y**2+redata.z**2
     return 1000
 
-def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False):
+def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False,method='average'):
     cluster1=deepcopy(clusterdf1)
     cluster2=deepcopy(clusterdf2)
     #make cost and constrains
@@ -54,22 +54,28 @@ def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False):
             return hist
         dis_=float()
         sumf=float()
-        for val in f.values():
-            sumf+=val.varValue
-        for key,val in f.items():
-            dis_+=val.varValue*pow(costs[key],0.5)
-        #dis_=pow(dis_,0.5)
-        return dis_/sumf
+        if method=='average':
+            for val in f.values():
+                sumf+=val.varValue
+            for key,val in f.items():
+                dis_+=val.varValue*pow(costs[key],0.5)
+            return dis_/sumf
+        elif method=='max':
+            hist=list()
+            for key,var_ in f.items():
+                if var_.varValue!=0:
+                    hist.append(var_.varValue*pow(costs[key],0.5))
+            return max(hist)
     else:
         return nan
 
 
-def cal_distance(csv_adress1,csv_adress2,values=False,histgram=False):
+def cal_distance(csv_adress1,csv_adress2,values=False,histgram=False,method='average'):
     cluster1=pd.read_csv(csv_adress1,index_col=0)
     cluster2=pd.read_csv(csv_adress2,index_col=0)
-    return cal_distance_df(clusterdf1=cluster1,clusterdf2=cluster2,values=values,histgram=histgram)
+    return cal_distance_df(clusterdf1=cluster1,clusterdf2=cluster2,values=values,histgram=histgram,method=method)
 
-def parallel_self_distance(clusterdf,comb,pattern_j):
+def parallel_self_distance(clusterdf,comb,pattern_j,method='average'):
     index_i,index_j=comb
     data_i=clusterdf.loc[index_i]
     data_j=clusterdf.loc[index_j]
@@ -77,7 +83,7 @@ def parallel_self_distance(clusterdf,comb,pattern_j):
     csvj='{}/{}_{}_{}.csv'.format(data_j.adress,data_j.cifid,data_j.isite,pattern_j)
     if not (os.path.isfile(csvi) and os.path.isfile(csvj)):
         return ('{}_{}'.format(data_i.cifid,str(data_i.isite)),'{}_{}'.format(data_j.cifid,str(data_j.isite)),0,pattern_j,nan)
-    disij=cal_distance(csvi,csvj)
+    disij=cal_distance(csvi,csvj,method=method)
     return ('{}_{}'.format(data_i.cifid,str(data_i.isite)),'{}_{}'.format(data_j.cifid,str(data_j.isite)),0,pattern_j,disij)
 
 def make_distance_csv(listadress,resultname,outdir=False):
