@@ -17,5 +17,3 @@ for i,cifadress in enumerate(cifadress_list):
   text_file=open(resulttxt,'a')
   text_file.write('{},{}\n'.format(cifid,d.crystal_point))
   text_file.close()
-  if i==3:
-    break
