@@ -1,20 +1,19 @@
-from crystal_emd.read_info import Set_Cluster_Info
-import pickle
+from crystal_emd.cluster_pointing import make_crystall_point
+from crystal_emd.cluster_adress_func import cluster_list
 
-nn_data=pickle.load(open('result/randzeo/ID302/ID302.randzeo.pickle','rb'))
-#info=Set_Cluster_Info(nn_data=nn_data,isite=1,adjacent_number=4)
-from crystal_emd.read_info import clusterplot
-from crystal_emd.show import change
-from glob import glob
-adress1='{}/{}_{}_{}.csv'.format('database','CHI',24,3)
-adress2='{}/{}_{}_{}.csv'.format('result/randzeo/ID302','ID302',1,0)
-#change(adress1, adress2)
-#clusterplot(info.cluster_coords,show=True,save=False)
-from crystal_emd.distance_func import cal_distance
-d=cal_distance(adress1,adress2)
-print(d)
-dmax=cal_distance(adress1,adress2,method='max')
-print(dmax)
-hist=cal_distance(adress1,adress2,histgram=True)
-print(hist)
-print(sum(hist)/len(hist))
+d=make_crystall_point('database2',method='max')
+import pandas as pd
+resulttxt='result/sort_volume_ciffiles_top_100_max/cifpoint'
+text_file=open(resulttxt,'w')
+text_file.write('cifid,point\n')
+text_file.close()
+cifadress_list=pd.read_csv('result/sort_volume_ciffiles_top_100_max/picupadress',index_col=0).cifadress.to_list()
+import os
+for i,cifadress in enumerate(cifadress_list):
+  cifid=os.path.basename(cifadress)
+  print('cif {}/{}'.format(i+1,len(cifadress_list)))
+  print('cifid {}'.format(cifid))
+  d.cal_crystal_point(cifadress,n_job=-1)
+  text_file=open(resulttxt,'a')
+  text_file.write('{},{}\n'.format(cifid,d.crystal_point))
+  text_file.close()

@@ -38,13 +38,16 @@ class make_cluster_point:
         print('total computation time {}'.format(etiem-tstime))
         self.cluster_point=self.distancedf.iloc[0].distance
 
-
 class make_crystall_point(make_cluster_point):
-    def __init__(self,datasetadress):
+    def __init__(self,datasetadress,method='average'):
         super().__init__(datasetadress)
-    def cal_crystal_point(self,cifdiradress,n_job=6,method='average'):
+        self.method=method
+    def cal_crystal_point(self,cifdiradress,n_job=6):
         self.crystal_point=float()
-        for i,data in cluster_list(cifdiradress).iterrows():
+        cluster_list_df=cluster_list(cifdiradress)
+        print('number of cluster {}'.format(cluster_list_df.shape[0]))
+        for i,data in cluster_list_df.iterrows():
             clusteradress='{}/{}_{}_0.csv'.format(data.adress,data.cifid,data.isite)
-            self.cal_cluster_point(clusteradress, n_job=n_job,method=method)
+            self.cal_cluster_point(clusteradress, n_job=n_job,method=self.method)
             self.crystal_point+=self.cluster_point
+        self.crystal_point=self.crystal_point/int(cluster_list_df.shape[0])
