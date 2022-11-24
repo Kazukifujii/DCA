@@ -11,10 +11,11 @@ adress2='{}/{}_{}_{}.csv'.format('result/randzeo/ID302','ID302',1,0)
 #change(adress1, adress2)
 #clusterplot(info.cluster_coords,show=True,save=False)
 from crystal_emd.distance_func import cal_distance
-d=cal_distance(adress1,adress2)
-print(d)
-dmax=cal_distance(adress1,adress2,method='max')
-print(dmax)
 hist=cal_distance(adress1,adress2,histgram=True)
-print(hist)
-print(sum(hist)/len(hist))
+import pandas as pd
+histdf=pd.DataFrame(hist)
+pairlist=cal_distance(adress1,adress2,pair_atoms=True)
+pairdf=pd.DataFrame(pairlist)
+
+df=pd.concat([pairdf,histdf],axis=1)
+df.to_csv('test.csv')

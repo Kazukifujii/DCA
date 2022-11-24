@@ -12,7 +12,7 @@ def calcost(data1,data2):
         return redata.x**2+redata.y**2+redata.z**2
     return 1000
 
-def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False,method='average'):
+def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False,method='average',pair_atoms=False):
     cluster1=deepcopy(clusterdf1)
     cluster2=deepcopy(clusterdf2)
     #make cost and constrains
@@ -52,6 +52,14 @@ def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False,method='av
                 if var_.varValue!=0:
                     hist.append(var_.varValue*pow(costs[key],0.5))
             return hist
+        if pair_atoms:
+            pairlist=list()
+            for key,var_ in f.items():
+                if var_.varValue!=0:
+                    site1='{}_{}'.format(cluster1.loc[key[0]].atom,cluster1.loc[key[0]].isite)
+                    site2='{}_{}'.format(cluster2.loc[key[1]].atom,cluster2.loc[key[1]].isite)
+                    pairlist.append((site1,site2))
+            return pairlist
         dis_=float()
         sumf=float()
         if method=='average':
@@ -70,10 +78,10 @@ def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False,method='av
         return nan
 
 
-def cal_distance(csv_adress1,csv_adress2,values=False,histgram=False,method='average'):
+def cal_distance(csv_adress1,csv_adress2,values=False,histgram=False,method='average',pair_atoms=False):
     cluster1=pd.read_csv(csv_adress1,index_col=0)
     cluster2=pd.read_csv(csv_adress2,index_col=0)
-    return cal_distance_df(clusterdf1=cluster1,clusterdf2=cluster2,values=values,histgram=histgram,method=method)
+    return cal_distance_df(clusterdf1=cluster1,clusterdf2=cluster2,values=values,histgram=histgram,method=method,pair_atoms=pair_atoms)
 
 def parallel_self_distance(clusterdf,comb,pattern_j,method='average'):
     index_i,index_j=comb
