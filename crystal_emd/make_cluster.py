@@ -47,7 +47,10 @@ def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,a
         cont=0
         for isite in nn_data.keys():
             isite_atom=re.split(r'([a-zA-Z]+)',nn_data[isite][0][0])[1]
-            if isite_atom ==atom:
+            if isite_atom == 'Si':
+                if adjacent_num is None:
+                    print('please enter adjacent_num')
+                    return
                 clusterinfo=Set_Cluster_Info(isite,nn_data,adjacent_number=adjacent_num)
                 alllen=alllen_*len(clusterinfo.shaft_comb)
                 for pattern in range(len(clusterinfo.shaft_comb)):
