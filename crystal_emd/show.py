@@ -6,7 +6,7 @@ from .distance_func import cal_distance
 from copy import deepcopy
 from glob import glob
 import os
-def change(csv2,csv1,show=True,save=False,hist=False):
+def change(csv2,csv1,show=True,save=False,hist=False,text=True):
     #print(os.getcwd())
     #sys.exit()
     csvadress1=csv1
@@ -51,20 +51,21 @@ def change(csv2,csv1,show=True,save=False,hist=False):
 		#ax.set_ylabel('y')
 		#ax.set_zlabel('z')
         ax.set_title(os.path.basename(csvadress1).replace('.csv','')+'(blue) to ' +os.path.basename(csvadress2).replace('.csv','')+'(green)',size=10) # タイトル
-        ax.set_xlim(-5, 5)
-        ax.set_ylim(-5, 5)
-        ax.set_zlim(-5, 5)
+        #ax.set_xlim(-5, 5)
+        #ax.set_ylim(-5, 5)
+        #ax.set_zlim(-5, 5)
     parlist=list()
-    for i in range(len(x)):
-        text=str(atom[i])+'_'+str(isite[i])
-        #text=str(isite[0])+'_'+str(isite[i])
-		#text='ABW_'+str(isite[0])+'_'+str(isite[i])
-        text2=str(atom3[i])+'_'+str(isite3[i])
-		#text2=str(isite2[0])+'_'+str(isite3[i])
-		#text2='ABW_'+str(isite2[0])+'_'+str(isite3[i])
-        ax.text(x[i],y[i],z[i],text,size=8)
-        ax.text(u2[i],v2[i],w2[i],text2,size=8)
-        parlist.append(('{}_{}'.format(text,text2)))
+    if text:
+        for i in range(len(x)):
+            text=str(atom[i])+'_'+str(isite[i])
+            #text=str(isite[0])+'_'+str(isite[i])
+            #text='ABW_'+str(isite[0])+'_'+str(isite[i])
+            text2=str(atom3[i])+'_'+str(isite3[i])
+            #text2=str(isite2[0])+'_'+str(isite3[i])
+            #text2='ABW_'+str(isite2[0])+'_'+str(isite3[i])
+            ax.text(x[i],y[i],z[i],text,size=8)
+            ax.text(u2[i],v2[i],w2[i],text2,size=8)
+            parlist.append(('{}_{}'.format(text,text2)))
 
     noods=list()
     for index,i in csv1.iterrows():
@@ -146,3 +147,38 @@ def emd_histgram(cifdir,database_adress='database',show=False,save=True):
     if save:
         plt.savefig('{}/{}_move.png'.format(cifdir,data.isite_i))
     return histdf
+
+
+def clusterplot(clusterdf,text=True,color=False):
+    #set nood
+    noods=list()
+    for index,i in clusterdf.iterrows():
+        if index==0:
+            continue
+        front_idx=i.loc['front_index']
+        a=clusterdf.loc[front_idx].loc['x':'z']
+        b=i.loc['x':'z']
+        noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
+    
+    fig = plt.figure(figsize = (6, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    '''
+    ax.set_xlim(-5,5)
+    ax.set_ylim(-5,5)
+    ax.set_zlim(-5,5)
+    '''
+    if text:
+        for index,i in clusterdf.iterrows():
+            text=i.atom+'_'+str(i.isite)
+            ax.text(i.x,i.y,i.z,text)
+    
+    if not color is False:
+        for atom,color_ in color.items():
+            specific_atom=clusterdf[clusterdf.atom==atom].copy()
+            ax.scatter(specific_atom.x,specific_atom.y,specific_atom.z,color=color_,label=atom)
+    else:
+        ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
+
+    for nood in noods:
+        line = art3d.Line3D(*nood)
+        ax.add_line(line)

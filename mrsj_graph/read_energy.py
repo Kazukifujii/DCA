@@ -29,8 +29,12 @@ pointdf=pd.read_csv(pointfile)
 pointdf=pointdf.dropna()
 pointdf=pd.merge(pointdf,energydf)
 import matplotlib.pyplot as plt
+plt.figure(figsize=(10,10))
 plt.scatter(pointdf.iloc[:,1],pointdf.iloc[:,2])
-plt.xlabel('{}  (angstrom)'.format('distance base cluster anarysis'))
-plt.ylabel('{}  (kJ/mol)'.format(pointdf.iloc[:,1:3].columns.to_list()[1]))
-plt.title(pointfile)
-plt.show()
+plt.xlabel('{}  (angstrom)'.format('Distance based on Cluster Analysis'),fontsize=18)
+plt.ylabel('{}  (kJ/mol)'.format(pointdf.iloc[:,1:3].columns.to_list()[1]),fontsize=18)
+
+import re
+plt.title('emd {}'.format(re.split('_',pointfile)[-1]),fontsize=18)
+#plt.show()
+plt.savefig('dca_energy_{}.svg'.format(re.split('_',pointfile)[-1]))
