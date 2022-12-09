@@ -11,7 +11,7 @@ class make_cluster_point:
         #self.datalist=cluster_list(datasetadress)
         self.datalist=cluster_list(datasetadress,dirs=len(glob('{}/*.csv'.format(datasetadress)))==0)
         self.datasetbasename=os.path.basename(datasetadress)
-    def cal_cluster_point(self,clusteradress,n_job,outdir=False):
+    def cal_cluster_point(self,clusteradress,n_job,outdir=False,method='average'):
         tstime=time.perf_counter()
         dirname=os.path.dirname(clusteradress)
         basename=os.path.basename(clusteradress)
@@ -28,7 +28,7 @@ class make_cluster_point:
             cont+=1
             print("\r"+str(cont)+'/'+str(alllen),end="")
             fstime=time.perf_counter()
-            distance_=Parallel(n_jobs=n_job)(delayed(parallel_self_distance)(datalist_,comb_,pi) for comb_ in comb)
+            distance_=Parallel(n_jobs=n_job)(delayed(parallel_self_distance)(datalist_,comb_,pi,method) for comb_ in comb)
             distance+=distance_
             etiem=time.perf_counter()
             #print('\r\ncomputation time {}'.format(etiem-fstime))
@@ -38,13 +38,16 @@ class make_cluster_point:
         print('total computation time {}'.format(etiem-tstime))
         self.cluster_point=self.distancedf.iloc[0].distance
 
-
 class make_crystall_point(make_cluster_point):
-    def __init__(self,datasetadress):
+    def __init__(self,datasetadress,method='average'):
         super().__init__(datasetadress)
-    def cal_crystal_point(self, cifdiradress,n_job=6):
+        self.method=method
+    def cal_crystal_point(self,cifdiradress,n_job=6):
         self.crystal_point=float()
-        for i,data in cluster_list(cifdiradress).iterrows():
+        cluster_list_df=cluster_list(cifdiradress)
+        print('number of cluster {}'.format(cluster_list_df.shape[0]))
+        for i,data in cluster_list_df.iterrows():
             clusteradress='{}/{}_{}_0.csv'.format(data.adress,data.cifid,data.isite)
-            self.cal_cluster_point(clusteradress, n_job=n_job)
+            self.cal_cluster_point(clusteradress, n_job=n_job,method=self.method)
             self.crystal_point+=self.cluster_point
+        self.crystal_point=self.crystal_point/int(cluster_list_df.shape[0])
