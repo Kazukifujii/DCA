@@ -2,3 +2,6 @@ result
 testcif
 mrsj_graph
 cluster_database
+cifdirs
+remakedataset.py
+clean up_cluster.log
