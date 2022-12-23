@@ -1,6 +1,6 @@
 from subprocess import run
 import os,subprocess
-from crystal_emd.read_info import make_sort_ciffile
+from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
 import pandas as pd
 
 import argparse
@@ -17,12 +17,12 @@ def main():
   adjacent_num=pares.adjacent_num
   databaseadress=pares.database_path
   #cifから隣接情報の取出し
-  run('python3 crystal_emd/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
+  run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
   print('emd make_adjacent_tabel')
-  run('python3 crystal_emd/make_nn_data.py --output2 {}'.format(cifdir),shell=True)
+  run('python3 Distance_based_on_Cluster_Analysis/make_nn_data.py --output2 {}'.format(cifdir),shell=True)
   print('emd make_nn_data')
   #隣接情報からクラスターを生成
-  from crystal_emd.make_cluster import make_cluster_dataset
+  from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
   picdata=make_sort_ciffile('result/{}'.format(cifdir),estimecont='all')
   allciflen=picdata.shape[0]
   for i,data in picdata.iterrows():
@@ -32,8 +32,8 @@ def main():
   print()
 
   #各cifファイルの特徴量を計算
-  from crystal_emd.cluster_pointing import make_crystall_point
-  from crystal_emd.cluster_adress_func import cluster_list
+  from Distance_based_on_Cluster_Analysis.cluster_pointing import make_crystall_point
+  from Distance_based_on_Cluster_Analysis.cluster_adress_func import cluster_list
   d=make_crystall_point(databaseadress)
   import pandas as pd
   resulttxt='result/{}/cifpoint'.format(cifdir)

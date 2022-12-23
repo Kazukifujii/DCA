@@ -216,7 +216,7 @@ def reconstruction_branch(clusterdf,indexnum,initial=pd.DataFrame()):
 
 def cluster_branch(clusterdf):
 	"""
-	from crystal_emd.read_info import cluster_branch
+	from Distance_based_on_Cluster_Analysis.read_info import cluster_branch
 	df=pd.read_csv('test.csv',index_col=0)
 	a=cluster_branch(df)
 	print(a)

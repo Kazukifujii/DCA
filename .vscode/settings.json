@@ -1,5 +1,5 @@
 {
     "python.analysis.extraPaths": [
-        "./crystal_emd"
+        "./Distance_based_on_Cluster_Analysis"
     ]
 }

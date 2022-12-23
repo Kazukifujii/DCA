@@ -1,7 +1,7 @@
 from cmath import nan
 from copy import deepcopy
 import numpy as np
-from crystal_emd.distance_func import cal_distance_df
+from Distance_based_on_Cluster_Analysis.distance_func import cal_distance_df
 import math
 def cal_r_t(clusterdf1,clsuterdf2):
     a=clusterdf1.loc[:,'x':'z'].values.astype(float)
@@ -59,7 +59,7 @@ icp=IterativeClosestPoint(df1,df2)
 icp.stat_cal()
 icp.reccal_clusterdf.to_csv('test.csv')
 sys.exit()
-from crystal_emd.show import change
+from Distance_based_on_Cluster_Analysis.show import change
 
 csvn1='test.csv'
 csvn2='{}/ABW_0_0.csv'.format(dir)
