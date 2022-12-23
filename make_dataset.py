@@ -12,7 +12,8 @@ def pares_args():
     pares.add_argument('--adjacent_num',default=2,help='(int)')
     pares.add_argument('--cluster_atom_num',default=8,help='(int)')
     pares.add_argument('--outdirname',default='cluster_database')
-    return pares
+    return pares.parse_args()
+
 def main():
     pares=pares_args()
     cifdir=pares.cifdir
