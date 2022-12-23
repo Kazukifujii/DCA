@@ -120,7 +120,7 @@ def main():
 		os.makedirs(args.output1 + "/" + args.output2)
 	else:
 		if not os.path.isdir(args.output1 + "/" + args.output2):
-			os.mkdir(args.output1 + "/" + args.output2)
+			os.makedirs(args.output1 + "/" + args.output2)
 	
 	ciffile = subprocess.getoutput("find {0} -name '*.cif'|sort".format(args.codpath))
 	ciffilelist = ciffile.split('\n')
