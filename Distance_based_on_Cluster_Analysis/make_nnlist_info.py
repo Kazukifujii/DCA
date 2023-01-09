@@ -80,3 +80,12 @@ def make_nnlist(fileadress='POSCAR',rmax=1.0):
     subprocess.run('a.out {} {}'.format(fileadress,rmax),shell=True)
     #s.chdir(cwd)
     return
+
+from pymatgen.io.vasp.inputs import Poscar
+from pymatgen.core.structure import IStructure
+import os
+def make_nnlist(ciffile):
+    filename=os.path.basename(ciffile)
+    poscar=Poscar(IStructure.from_file('{}'.format(ciffile)))
+    outposcar='{}_poscar'.format(filename)
+    poscar.write_file(outposcar)
