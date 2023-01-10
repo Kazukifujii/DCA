@@ -43,6 +43,7 @@ def read_sitinfo_poscar(filename):
         if len(splitinfo)==1:
             break
         siteinfo.append(splitinfo[-1])
+    siteinfo.reverse()
     return siteinfo
 
 def isolation_poscars(fileadress='init_POSCARS'):
@@ -84,8 +85,8 @@ def make_nnlist(fileadress='POSCAR',rmax=1.0):
 from pymatgen.io.vasp.inputs import Poscar
 from pymatgen.core.structure import IStructure
 import os
-def make_nnlist(ciffile):
+def make_poscar(ciffile):
     filename=os.path.basename(ciffile)
     poscar=Poscar(IStructure.from_file('{}'.format(ciffile)))
-    outposcar='{}_poscar'.format(filename)
+    outposcar='{}.poscar'.format(filename)
     poscar.write_file(outposcar)
