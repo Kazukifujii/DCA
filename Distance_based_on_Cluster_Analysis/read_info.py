@@ -1,8 +1,5 @@
-import sys
 import numpy as np
 import pandas as pd
-import mpl_toolkits.mplot3d.art3d as art3d
-import matplotlib.pyplot as plt
 from cmath import nan
 import copy,re,itertools
 from .constant import cluster_name

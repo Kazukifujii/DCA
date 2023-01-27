@@ -1,7 +1,6 @@
 import copy,os,glob,re
 import pandas as pd
 import subprocess
-from collections import defaultdict
 import re
 def fcluster_list(dir):
     if os.path.isfile('{}/picupadress'.format(dir)):
