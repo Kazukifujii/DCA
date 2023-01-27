@@ -132,51 +132,7 @@ class Set_Cluster_Info():
 		self.rot=np.linalg.inv(rot_)
 		for i,data in self.orignal_cluster_coords.loc[:,'x':'z'].iterrows():
 			self.cluster_coords.loc[i,'x':'z']=data.dot(self.rot)
-	
-def read_nood(clusterdf):
-	noods=list()
-	for index,i in clusterdf.iterrows():
-		if index==0:
-			continue
-		front_idx=i.loc['front_index']
-		a=clusterdf.loc[front_idx].loc['x':'z']
-		b=i.loc['x':'z']
-		bondx=[a.x,b.x]
-		bondy=[a.y,b.y]
-		bondz=[a.z,b.z]
-		bondx.sort()
-		bondy.sort()
-		bondz.sort()
-		noods.append((bondx,bondy,bondz))
-	return noods
-def clusterplot(clusterdf,text=True,title='cluster.png',show=None,save=True):
-	noods=list()
-	for index,i in clusterdf.iterrows():
-		if index==0:
-			continue
-		front_idx=i.loc['front_index']
-		a=clusterdf.loc[front_idx].loc['x':'z']
-		b=i.loc['x':'z']
-		noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
-	fig = plt.figure(figsize = (12, 12))
-	ax = fig.add_subplot(111, projection='3d')
-	ax.set_xlim(-5,5)
-	ax.set_ylim(-5,5)
-	ax.set_zlim(-5,5)
-	ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
-	if text:
-		for index,i in clusterdf.iterrows():
-			text=i.atom+'_'+str(i.isite)
-			ax.text(i.x,i.y,i.z,text)
-	for nood in noods:
-		line = art3d.Line3D(*nood)
-		ax.add_line(line)
-	fig.suptitle(title)
-	if save:
-		fig.savefig(title)
-	if show:
-		plt.show()
-	plt.close()
+
 
 def remake_csv(csvn,outname=False,atom='Si1'):
     df=pd.read_csv(csvn,index_col=0)

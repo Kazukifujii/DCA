@@ -2,7 +2,6 @@ import copy,os,glob,re
 import pandas as pd
 import subprocess
 from collections import defaultdict
-from .read_info import read_nood
 import re
 def fcluster_list(dir):
     if os.path.isfile('{}/picupadress'.format(dir)):
@@ -62,28 +61,4 @@ def cluster_list(dir,dirs=False):
     resultdf=pd.DataFrame(result_,columns=['cifid','adress','isite']).drop_duplicates()
     resultdf=resultdf.sort_values(by='cifid').reset_index(drop=True)
     return resultdf
-
-
-def classification_ring_list(csvlist,outdir=None):
-    if type(csvlist) is str:
-        csvlist=pd.read_csv(csvlist,index_col=0)
-    class_dict=defaultdict(list)
-    
-    for _,csv_ in csvlist.iterrows():
-        csvname='{}/{}_{}_0.csv'.format(csv_.adress,csv_.cifid,csv_.isite)
-        df=pd.read_csv(csvname,index_col=0).round(6)
-        #counting duplicate isite
-        disite=df.index.size-df.loc[:,'x':'z'].drop_duplicates().index.size
-        #counting duplicate bond
-        nooddf=pd.DataFrame(read_nood(df)).astype(str)
-        dnood=nooddf.index.size-nooddf.drop_duplicates().index.size
-        ring=disite-dnood
-        class_dict[str(ring)].append((csv_.cifid,csv_.adress,csv_.isite))
-    
-    for key,adress in class_dict.items():
-        if not type(outdir) is str:
-            pd.DataFrame(adress,columns=['cifid','adress','isite']).to_csv('cluster_adress_ring={}'.format(key))
-        else:
-            pd.DataFrame(adress,columns=['cifid','adress','isite']).to_csv('{}/cluster_adress_ring={}'.format(outdir,key))
-
 

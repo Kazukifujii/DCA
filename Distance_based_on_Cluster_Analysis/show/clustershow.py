@@ -1,4 +1,4 @@
-#!/usr/bin/env pytho
+#!/usr/bin/env python3
 import sys,re,argparse
 import pandas as pd
 import matplotlib.pyplot as plt
