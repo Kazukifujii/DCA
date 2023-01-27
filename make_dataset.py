@@ -1,6 +1,10 @@
 from subprocess import run
 import os,subprocess
-
+from Distance_based_on_Cluster_Analysis.cluster_adress_func import isite_list
+from Distance_based_on_Cluster_Analysis.distance_func import make_distance_csv,remake_distance
+from Distance_based_on_Cluster_Analysis.clustering_func import make_clusering
+from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
+from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
 import argparse
 def pares_args():
     pares=argparse.ArgumentParser()
@@ -21,8 +25,6 @@ def main():
     run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
     run('python3 Distance_based_on_Cluster_Analysis/make_nn_data.py --output2 {}'.format(cifdir),shell=True)
     #隣接情報からクラスターを生成
-    from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
-    from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
     picdata=make_sort_ciffile('result/{}'.format(cifdir),estimecont='all')
     cwd = os.getcwd()
     allciflen=picdata.shape[0]
@@ -30,7 +32,7 @@ def main():
     for i,data in picdata.iterrows():
         print('\r{} {}/{}'.format(data.cifid,i+1,allciflen),end='')
         nn_data_adress= subprocess.getoutput("find {0} -name nb_*.pickle".format(data.cifadress))
-        make_cluster_dataset(cifid=data.cifid,adjacent_num=adjacent_num,nn_data_adress=nn_data_adress,outdir=data.cifadress)
+        make_cluster_dataset(cifid=data.cifid,adjacent_num=adjacent_num,nn_data_adress=nn_data_adress,outdir=data.cifadress,rotation=False)
     print('')
     #壊れているクラスターの削除
 
@@ -49,14 +51,13 @@ def main():
     f.close()
 
     #残っているクラスターの回転パターンを全て取る
-
-
+    listdf=cluster_list('result/{}'.format(cifdir),dirs=True)
+    for i,data in listdf.iterrows():
+        clusteradress='{}/{}_{}_0.csv'.format(data.adress,data.cifid,data.isite)
+        make_cluster_dataset(cluster_adress=clusteradress,outdir=data.adress)
+    print('')
 
     #各結晶に属するクラスターの距離を計算(等価なクラスターを取り出すため)
-    from Distance_based_on_Cluster_Analysis.cluster_adress_func import isite_list
-    from Distance_based_on_Cluster_Analysis.distance_func import make_distance_csv,remake_distance
-    from Distance_based_on_Cluster_Analysis.clustering_func import make_clusering
-    cont=0
 
     for i,data in picdata.iterrows():
         cifid=data.cifid
