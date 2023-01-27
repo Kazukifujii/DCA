@@ -1,10 +1,6 @@
 from subprocess import run
 import os,subprocess
 
-cifdir="testcif"
-adjacent_num=2
-cluster_atom_num=8
-database='cluster_database'
 import argparse
 def pares_args():
     pares=argparse.ArgumentParser()
