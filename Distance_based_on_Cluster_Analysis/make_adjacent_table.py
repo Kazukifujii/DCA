@@ -7,6 +7,7 @@ from pymatgen.analysis.chemenv.coordination_environments.chemenv_strategies impo
 from pymatgen.analysis.chemenv.coordination_environments.structure_environments import LightStructureEnvironments
 from pymatgen.analysis.chemenv.coordination_environments.coordination_geometry_finder import LocalGeometryFinder
 from pymatgen.analysis.chemenv.coordination_environments.chemenv_strategies import MultiWeightsChemenvStrategy
+from tqdm import tqdm
 
 def adjacent_table1(cif_file,checktag):
 	### Setup the local geometry finder ###
@@ -125,9 +126,10 @@ def main():
 	ciffile = subprocess.getoutput("find {0} -name '*.cif'|sort".format(args.codpath))
 	ciffilelist = ciffile.split('\n')
 	#print(ciffilelist)
-	cont=0
+	
 	checker = args.restart
-	for i in ciffilelist:
+	print('make adjacent info by pymatgen')
+	for i in tqdm(ciffilelist):
 		#cifnum = re.findall('\/(\w+)\.cif',i)[0]
 		cifnum=os.path.basename(i).replace('.cif','')
 		if cifnum == args.restart or not checker:
@@ -140,12 +142,12 @@ def main():
 					os.mkdir(cifdataout)
 				#subprocess.getoutput("cp {0} {1}".format(i,cifdataout))
 			
-				print(cifnum)
+				#print(cifnum)
 				adjacent_table2(i,cifnum,cifdataout)
 			
 			else:
 				print("{0} : error".format(cifnum))
-
+	print('end adjacent info')
 if __name__ == '__main__':
 	main()
 

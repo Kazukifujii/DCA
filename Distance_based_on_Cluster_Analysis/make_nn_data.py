@@ -5,6 +5,7 @@ import pickle
 import argparse
 import subprocess
 import numpy as np
+from tqdm import tqdm
 
 def change_dir(dirpath):
 	os.chdir(dirpath)
@@ -55,29 +56,24 @@ def create_dataset(datafile):
 
 def main():
 	cwd = os.getcwd()
-
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--output1', default='result')
 	parser.add_argument('--output2', default='cod')
 	parser.add_argument('-e','--explanation', default=False)
 	args = parser.parse_args()
-	
+
 	if args.explanation:
 		print('''cifdir : ['result/cod', 'result/cod/1000007', 'result/cod/1000017',...''')
 		print('''cifdir_i_file : 'result/cod/1000007/1000007.txt' ''')
 		print('''isite_data_list : ['Ca1', -1.07652858, 6.22898225, 3.78771229]''')
 		print('''''')
 		sys.exit()
-	
-	
 	cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(args.output1 + "/" + args.output2))
 	cifdir = cifdir_.split('\n')
 	del cifdir[0]
-
-	
-	for i in cifdir:
-		cifdir_i_file = subprocess.getoutput("find {0} -name *.txt".format(i))
-		
+	print('make nn_data.pickle')
+	for i in tqdm(cifdir):
+		cifdir_i_file = subprocess.getoutput("find {0}/*.txt".format(i))
 		try:
 			cifdir_o_file = create_dataset(cifdir_i_file)
 		except FileNotFoundError:
@@ -88,7 +84,7 @@ def main():
 		
 		#cifnum = re.findall('\/(\w+)',i)[0]
 		cifnum=os.path.basename(i)
-		print(cifnum)
+		#print(cifnum)
 		with open(("{0}" + "/" + "nb_{1}.dat").format(i,cifnum),"w") as file2:
 			for j in cifdir_o_file.keys():
 				print('isite = {0}  :  ce_fraction = {1}'.format(j,cifdir_o_file[j][0][1]),file=file2)
@@ -100,7 +96,7 @@ def main():
 				print(file=file2)
 		
 		with open(("{0}" + "/" + "nb_{1}.pickle").format(i,cifnum),"wb") as fwb:
-	   		pickle.dump(cifdir_o_file,fwb)
-	
+			pickle.dump(cifdir_o_file,fwb)
+	print('end nn_data.pickle')
 if __name__ == '__main__':
 	main()

@@ -19,10 +19,7 @@ def main():
 
     #cifから隣接情報の取出し
     run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
-    print('emd make_adjacent_tabel')
     run('python3 Distance_based_on_Cluster_Analysis/make_nn_data.py --output2 {}'.format(cifdir),shell=True)
-    print('emd make_nn_data')
-
     #隣接情報からクラスターを生成
     from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
     from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
