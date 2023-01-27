@@ -3,8 +3,9 @@ import pickle,os,re
 import pandas as pd
 import traceback
 def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,adjacent_num=None,isite=None,cluster_adress=None,clusterdf=None,rotation=True,outdir=None):
+    cwd=os.getcwd()
     try:
-        cwd=os.getcwd()
+        
         if not nn_data_adress is None:
             nn_data=pickle.load(open(nn_data_adress,'rb'))
             if cifid is None:
@@ -62,7 +63,7 @@ def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,a
                         clusterinfo.cluster_coords.to_csv('{}_{}_{}.csv'.format(cifid,isite,pattern))
                         if not rotation:
                             break     
-        os.chdir(cwd)
     except:
         traceback.print_exc()
+    os.chdir(cwd)
     return
