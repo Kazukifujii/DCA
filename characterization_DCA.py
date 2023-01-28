@@ -1,9 +1,10 @@
 from subprocess import run
-import os,subprocess
+import subprocess
 from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
+from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
+import argparse,os
 import pandas as pd
-
-import argparse
+from Distance_based_on_Cluster_Analysis.cluster_pointing import make_crystall_point
 def pares_args():
     pares=argparse.ArgumentParser()
     pares.add_argument('--cifdir',default='cifdirs/sort_volume_ciffiles_top_100',help='zeolitecif')
@@ -22,7 +23,7 @@ def main():
   run('python3 Distance_based_on_Cluster_Analysis/make_nn_data.py --output2 {}'.format(cifdir),shell=True)
   print('emd make_nn_data')
   #隣接情報からクラスターを生成
-  from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
+  
   picdata=make_sort_ciffile('result/{}'.format(cifdir),estimecont='all')
   allciflen=picdata.shape[0]
   for i,data in picdata.iterrows():
@@ -32,16 +33,12 @@ def main():
   print()
 
   #各cifファイルの特徴量を計算
-  from Distance_based_on_Cluster_Analysis.cluster_pointing import make_crystall_point
-  from Distance_based_on_Cluster_Analysis.cluster_adress_func import cluster_list
   d=make_crystall_point(databaseadress)
-  import pandas as pd
   resulttxt='result/{}/cifpoint'.format(cifdir)
   text_file=open(resulttxt,'w')
   text_file.write('cifid,point\n')
   text_file.close()
   cifadress_list=pd.read_csv('result/{}/picupadress'.format(cifdir),index_col=0).cifadress.to_list()
-  import os
   for i,cifadress in enumerate(cifadress_list):
     cifid=os.path.basename(cifadress)
     print('cif {}/{}'.format(i+1,len(cifadress_list)))
