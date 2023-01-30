@@ -6,3 +6,7 @@ cifdirs
 remakedataset.py
 clean up_cluster.log
 make_distance.py
+picupciffile.py
+Distance_based_on_Cluster_Analysis/__pycache__
+__pycache__
+.vscode
