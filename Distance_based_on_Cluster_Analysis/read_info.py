@@ -215,7 +215,7 @@ def make_sort_ciffile(dir,estimecont=2000):
     info.to_csv('{}/picupadress'.format(dir))
     return info
 
-
+'''
 from .connection_func import IterativeClosestPoint as icp
 def cluster_match(clusterdf1,clusterdf2,convergence_val=10**(-8)):
     a=cluster_branch(clusterdf1)
@@ -233,7 +233,7 @@ def cluster_match(clusterdf1,clusterdf2,convergence_val=10**(-8)):
     if len(fmachnum)==len(a):
         return True
     return False
-
+'''
 
 def Si_distance(csv):
     df=pd.read_csv(csv,index_col=0)

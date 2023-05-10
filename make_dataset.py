@@ -17,8 +17,8 @@ def pares_args():
 def main():
     pares=pares_args()
     cifdir=pares.cifdir
-    adjacent_num=pares.adjacent_num
-    cluster_atom_num=pares.cluster_atom_num
+    adjacent_num=int(pares.adjacent_num)
+    cluster_atom_num=int(pares.cluster_atom_num)
     database=pares.outdirname
 
     #cifから隣接情報の取出し

@@ -4,6 +4,7 @@ from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
 from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
 import argparse,os
 import pandas as pd
+from glob import glob
 from Distance_based_on_Cluster_Analysis.cluster_pointing import make_crystall_point
 def pares_args():
     pares=argparse.ArgumentParser()
@@ -15,7 +16,7 @@ def pares_args():
 def main():
   pares=pares_args()
   cifdir=pares.cifdir
-  adjacent_num=pares.adjacent_num
+  adjacent_num=int(pares.adjacent_num)
   databaseadress=pares.database_path
   #cifから隣接情報の取出し
   run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
@@ -26,9 +27,10 @@ def main():
   
   picdata=make_sort_ciffile('result/{}'.format(cifdir),estimecont='all')
   allciflen=picdata.shape[0]
-  for i,data in picdata.iterrows():
+  for i in range(len(picdata)):
+      data=picdata.iloc[i,:]
       print('\r{} {}/{}'.format(data.cifid,i+1,allciflen),end='')
-      nn_data_adress= subprocess.getoutput("find {0} -name nb_*.pickle".format(data.cifadress))
+      nn_data_adress= os.path.join(data.cifadress,f"nb_{data.cifid}.pickle")
       make_cluster_dataset(cifid=data.cifid,nn_data_adress=nn_data_adress,adjacent_num=adjacent_num,rotation=False,outdir=data.cifadress)
   print()
 
