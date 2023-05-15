@@ -1,0 +1,3 @@
+[submodule "datas"]
+	path = datas
+	url = https://github.com/Kazukifujii/DCA_database.git
