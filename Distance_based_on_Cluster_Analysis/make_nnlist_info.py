@@ -87,5 +87,5 @@ import os
 def make_poscar(ciffile):
     filename=os.path.basename(ciffile)
     poscar=Poscar(IStructure.from_file('{}'.format(ciffile)))
-    outposcar='{}_poscar'.format(filename)
+    outposcar='{}.poscar'.format(filename)
     poscar.write_file(outposcar)
