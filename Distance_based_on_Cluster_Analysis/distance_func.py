@@ -12,9 +12,9 @@ def calcost(data1,data2):
         return redata.x**2+redata.y**2+redata.z**2
     return 1000
 
-def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False,method='average',pair_atoms=False):
-    cluster1=deepcopy(clusterdf1)
-    cluster2=deepcopy(clusterdf2)
+def cal_distance_df(cluster_df1,cluster_df2,values=False,histgram=False,method='average',pair_atoms=False):
+    cluster1=deepcopy(cluster_df1)
+    cluster2=deepcopy(cluster_df2)
     #make cost and constrains
     costs=dict()
     for i,data1 in cluster1.iterrows():
@@ -81,12 +81,12 @@ def cal_distance_df(clusterdf1,clusterdf2,values=False,histgram=False,method='av
 def cal_distance(csv_adress1,csv_adress2,values=False,histgram=False,method='average',pair_atoms=False):
     cluster1=pd.read_csv(csv_adress1,index_col=0)
     cluster2=pd.read_csv(csv_adress2,index_col=0)
-    return cal_distance_df(clusterdf1=cluster1,clusterdf2=cluster2,values=values,histgram=histgram,method=method,pair_atoms=pair_atoms)
+    return cal_distance_df(cluster_df1=cluster1,cluster_df2=cluster2,values=values,histgram=histgram,method=method,pair_atoms=pair_atoms)
 
-def parallel_self_distance(clusterdf,comb,pattern_j,method='average'):
+def parallel_self_distance(cluster_df,comb,pattern_j,method='average'):
     index_i,index_j=comb
-    data_i=clusterdf.loc[index_i]
-    data_j=clusterdf.loc[index_j]
+    data_i=cluster_df.loc[index_i]
+    data_j=cluster_df.loc[index_j]
     csvi='{}/{}_{}_0.csv'.format(data_i.adress,data_i.cifid,data_i.isite,0)
     csvj='{}/{}_{}_{}.csv'.format(data_j.adress,data_j.cifid,data_j.isite,pattern_j)
     if not (os.path.isfile(csvi) and os.path.isfile(csvj)):

@@ -1,134 +1,169 @@
-import numpy as np
 import pandas as pd
-from cmath import nan
-import copy,re,itertools
-from .constant import cluster_name
-from copy import deepcopy
-import subprocess
-import re
-from math import isclose
+import numpy as np
+import copy,re,itertools,subprocess,os
+from .constant import CLUSTER_NAME
 
 
-def first_cycle_func(isite,nn_data):
-    #print(isite,nnlist)
-    cycle_data = [coords for coords in nn_data[isite][1::]]
+
+def first_cycle_func(isite, nn_data):
+    cycle_data = [coords for coords in nn_data[isite][1:]]
     return cycle_data
 
-def search_index(isite,front_isite,nn_data):
-    isite_list=[i[0] for i in nn_data[front_isite]]
+
+def search_index(isite, front_isite, nn_data):
+    isite_list = [i[0] for i in nn_data[front_isite]]
     return isite_list.index(isite)
 
-def center_info(isite,nn_data):
-	first_info=[isite,nn_data[isite][0][0]]
-	for i in nn_data[isite][0][-3::]:
-		first_info.append(i)
-	return first_info
 
-def recoords(isite,nn_data_,adjacent_number=2,adj_j=1,clusterdf=nan):
-	nn_data=copy.deepcopy(nn_data_)
-	
-	if adj_j==1:
-		firstdata=[[0]+center_info(isite,nn_data)+[nan]]
-		for i in first_cycle_func(isite,nn_data):
-			firstdata.append([1]+i+[0])
-		clusterdf=pd.DataFrame(firstdata,columns=cluster_name)
-	if adj_j==adjacent_number:
-		return clusterdf
-	neigbordata=[]
-	for num,idata in clusterdf.loc[clusterdf['neighbor_num']==adj_j].iterrows():
-		front_index=clusterdf.loc[idata.front_index].isite
-		rjc=nn_data[idata.isite][0][-3::]
-		rijn=idata.loc['x':'z']
-		difrij=rjc-rijn
-		for jdata_ in nn_data[idata.isite][1::]:
-			jdata=copy.deepcopy(jdata_)
-			if jdata[0]==front_index:
-				continue
-			rjkn=jdata[-3::]
-			rkc=rjkn-difrij
-			jdata[-3::]=rkc
-			neigbordata.append([adj_j+1]+jdata+[num])
-	clusterdf_=pd.DataFrame(neigbordata,columns=cluster_name)
-	clusterdf=pd.concat([clusterdf,clusterdf_],ignore_index=True)
-	return recoords(isite,nn_data,adjacent_number,adj_j+1,clusterdf)
+def center_info(isite, nn_data):
+    first_info = [isite, nn_data[isite][0][0]]
+    for i in nn_data[isite][0][-3:]:
+        first_info.append(i)
+    return first_info
+
+
+def recoords(isite, nn_data_, adjacent_number=2, adj_j=1, cluster_df=pd.DataFrame()):
+    nn_data = copy.deepcopy(nn_data_)
+
+    if adj_j == 1:
+        first_data = [[0] + center_info(isite, nn_data) + [np.nan]]
+        for i in first_cycle_func(isite, nn_data):
+            first_data.append([1] + i + [0])
+        cluster_df = pd.DataFrame(first_data, columns=CLUSTER_NAME)
+
+    if adj_j == adjacent_number:
+        return cluster_df
+
+    neighbor_data = []
+    for num, idata in cluster_df.loc[cluster_df['neighbor_num'] == adj_j].iterrows():
+        front_index = cluster_df.loc[idata.front_index, 'isite']
+        rjc = nn_data[idata.isite][0][-3:]
+        rij_n = idata.loc['x':'z']
+        dif_rij = rjc - rij_n
+
+        for jdata_ in nn_data[idata.isite][1:]:
+            jdata = copy.deepcopy(jdata_)
+            if jdata[0] == front_index:
+                continue
+            rjkn = jdata[-3:]
+            rkc = rjkn - dif_rij
+            jdata[-3:] = rkc
+            neighbor_data.append([adj_j + 1] + jdata + [num])
+
+    cluster_df_ = pd.DataFrame(neighbor_data, columns=CLUSTER_NAME)
+    cluster_df = pd.concat([cluster_df, cluster_df_], ignore_index=True)
+
+    return recoords(isite, nn_data, adjacent_number, adj_j + 1, cluster_df)
+
 
 def shaft_comb(coords):
-	#print(coords.head(5))
-	neighbor_num_=coords.neighbor_num.to_list()
-	neighbor_num_.sort()
-	neighbor_num_=neighbor_num_[1]
-	shaftdata=coords[coords.neighbor_num==neighbor_num_].iloc[:,1:-1].values.tolist()
-	combinations=list(itertools.combinations(shaftdata,2))
-	return copy.deepcopy(combinations)
+    neighbor_num_ = coords['neighbor_num'].tolist()
+    neighbor_num_.sort()
+    neighbor_num_ = neighbor_num_[1]
+    shaft_data = coords[coords['neighbor_num'] == neighbor_num_].iloc[:, 1:-1].values.tolist()
+    combinations = list(itertools.combinations(shaft_data, 2))
+    return copy.deepcopy(combinations)
 
 
 def shaft_info(coords_):
-	coords=copy.deepcopy(coords_)
-	comb=list()
-	center_c=coords.loc[0,'x':'z']
-	for data in shaft_comb(coords):
-		lenge=[]
-		"""
-		for shaft in data:
-			ic=shaft[-3::]
-			i_site=shaft[0]
-			ilenge=np.linalg.norm(np.array(ic)-np.array(center_c))
-			lenge.append((ilenge,i_site))
-			lenge.sort(key=lambda x:x[0])
-		main_c=coords[(coords.neighbor_num==1) & (coords.isite==lenge[0][1])].iloc[:,1:-1].values.tolist()[0]
-		sub_c=coords[(coords.neighbor_num==1) & (coords.isite==lenge[1][1])].iloc[:,1:-1].values.tolist()[0]
-		"""
-		main_c,sub_c=data
-		comb.append((main_c,sub_c))
-		main_c2=copy.deepcopy(sub_c)
-		sub_c2=copy.deepcopy(main_c)
-		comb.append((main_c2,sub_c2))
-	return comb
+    coords = copy.deepcopy(coords_)
+    comb = []
+    center_c = coords.loc[0, 'x':'z']
 
-class Set_Cluster_Info():
-	def __init__(self,isite=None,nn_data=None,adjacent_number=None,clusterdf=None):
-		#_c:_coordinate
-		if not clusterdf is None:
-			self.cluster_coords=deepcopy(clusterdf)
-			self.isite=self.cluster_coords.loc[0,'isite']
-			self.shaft_comb=shaft_info(self.cluster_coords)
-			self.orignal_cluster_coords=copy.deepcopy(self.cluster_coords)
-			return
-		self.nn_data=copy.deepcopy(nn_data)
-		self.cluster_coords=recoords(isite,self.nn_data,adjacent_number)
-		self.isite=isite
-		self.shaft_comb=shaft_info(self.cluster_coords)
-		self.orignal_cluster_coords=copy.deepcopy(self.cluster_coords)
-	def parallel_shift_of_center(self,coords=[0,0,0]):
-		dif_coords=np.array(coords)-self.cluster_coords.loc[0].loc['x':'z'].to_list()
-		difdf=pd.DataFrame(columns=['x','y','z'],index=self.cluster_coords.index.to_list())
-		difdf.x=dif_coords[0]
-		difdf.y=dif_coords[1]
-		difdf.z=dif_coords[2]
-		self.cluster_coords.x=self.cluster_coords.x+difdf.x
-		self.cluster_coords.y=self.cluster_coords.y+difdf.y
-		self.cluster_coords.z=self.cluster_coords.z+difdf.z
-		self.shaft_comb=shaft_info(self.cluster_coords)
-		self.orignal_cluster_coords=copy.deepcopy(self.cluster_coords)
+    for data in shaft_comb(coords):
+        main_c, sub_c = data
+        comb.append((main_c, sub_c))
+        main_c2 = copy.deepcopy(sub_c)
+        sub_c2 = copy.deepcopy(main_c)
+        comb.append((main_c2, sub_c2))
 
-	def rotation(self,pattern=0):
-		self.main_shaft_c,self.sub_shaft_c=self.shaft_comb[pattern]
-		ra=self.main_shaft_c[-3::]
-		rb=self.sub_shaft_c[-3::]
-		#must run parallel_shift_of_center
-		z1=np.linalg.norm(ra,ord=2)
-		rot3=ra/z1
-		z2=np.dot(rb,rot3)
-		x2=np.linalg.norm(rb-z2*rot3)
-		if isclose(x2,0,abs_tol=1e-8):
-			rot1=[1,0,1]
-		else:
-			rot1=(rb-z2*rot3)/x2
-		rot2=np.cross(rot3,rot1)
-		rot_=np.array([rot1,rot2,rot3])
-		self.rot=np.linalg.inv(rot_)
-		for i,data in self.orignal_cluster_coords.loc[:,'x':'z'].iterrows():
-			self.cluster_coords.loc[i,'x':'z']=data.dot(self.rot)
+    return comb
+
+
+class Set_Cluster_Info:
+    def __init__(self, isite=None, nn_data=None, adjacent_number=None, cluster_df=None):
+        if cluster_df is not None:
+            self.cluster_coords = copy.deepcopy(cluster_df)
+            self.isite = self.cluster_coords.loc[0, 'isite']
+            self.shaft_comb = shaft_info(self.cluster_coords)
+            self.original_cluster_coords = copy.deepcopy(self.cluster_coords)
+            return
+
+        self.nn_data = copy.deepcopy(nn_data)
+        self.cluster_coords = recoords(isite, self.nn_data, adjacent_number)
+        self.isite = isite
+        self.shaft_comb = shaft_info(self.cluster_coords)
+        self.original_cluster_coords = copy.deepcopy(self.cluster_coords)
+
+    def parallel_shift_of_center(self, coords=[0, 0, 0]):
+        dif_coords = np.array(coords) - self.cluster_coords.loc[0, 'x':'z'].tolist()
+        dif_df = pd.DataFrame(columns=['x', 'y', 'z'], index=self.cluster_coords.index.tolist())
+        dif_df['x'] = dif_coords[0]
+        dif_df['y'] = dif_coords[1]
+        dif_df['z'] = dif_coords[2]
+        self.cluster_coords['x'] = self.cluster_coords['x'] + dif_df['x']
+        self.cluster_coords['y'] = self.cluster_coords['y'] + dif_df['y']
+        self.cluster_coords['z'] = self.cluster_coords['z'] + dif_df['z']
+        self.shaft_comb = shaft_info(self.cluster_coords)
+        self.original_cluster_coords = copy.deepcopy(self.cluster_coords)
+
+    def rotation(self, pattern=0):
+        self.main_shaft_c, self.sub_shaft_c = self.shaft_comb[pattern]
+        ra = self.main_shaft_c[-3:]
+        rb = self.sub_shaft_c[-3:]
+
+        z1 = np.linalg.norm(ra, ord=2)
+        rot3 = ra / z1
+        z2 = np.dot(rb, rot3)
+        x2 = np.linalg.norm(rb - z2 * rot3)
+
+        if np.isclose(x2, 0, atol=1e-8):
+            rot1 = [1, 0, 1]
+        else:
+            rot1 = (rb - z2 * rot3) / x2
+        rot2 = np.cross(rot3, rot1)
+        rot_ = np.array([rot1, rot2, rot3])
+        self.rot = np.linalg.inv(rot_)
+
+        for i, data in self.original_cluster_coords.loc[:, 'x':'z'].iterrows():
+            self.cluster_coords.loc[i, 'x':'z'] = data.dot(self.rot)
+
+
+def make_sort_ciffile(dir, estimecont=2000):
+    cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(dir))
+    cifdir = cifdir_.split('\n')
+    del cifdir[0]
+    
+    isiteinfo = []
+    for i in cifdir:
+        cifid = os.path.split(i)[-1]
+        lasttxt = subprocess.getoutput("grep ' Si' {}/{}.txt |tail -n 1".format(i, cifid))
+        try:
+            maxisite = int(re.split('Si', lasttxt)[0].replace(' ', ''))
+        except:
+            continue
+        isiteinfo.append((cifid, i, maxisite))
+    
+    isiteinfo.sort(key=lambda x: x[-1])
+    
+    if estimecont == 'all':
+        info = pd.DataFrame(isiteinfo, columns=['cifid', 'cifadress', 'Si_len'])
+        info.to_csv('{}/picupadress'.format(dir))
+        print(info['Si_len'].sum())
+        return info
+    
+    cont = 0
+    picupadress = []
+    for i in isiteinfo:
+        cont += i[-1]
+        picupadress.append(i)
+        if cont >= estimecont:
+            break
+    
+    print(cont)
+    info = pd.DataFrame(picupadress, columns=['cifid', 'cifadress', 'Si_len'])
+    info.to_csv('{}/picupadress'.format(dir))
+    return info
 
 
 def remake_csv(csvn,outname=False,atom='Si1'):
@@ -140,7 +175,7 @@ def remake_csv(csvn,outname=False,atom='Si1'):
         if df.loc[data.front_index].atom==atom:
             continue
         idx=df.loc[data.front_index].front_index
-        df2.loc[i,'front_index']=deepcopy(idx)
+        df2.loc[i,'front_index']=copy.deepcopy(idx)
     oldindexlist=df2.index.to_list()
     df2=df2.reset_index().copy()
     newindexlist=df2.index.to_list()
@@ -157,17 +192,17 @@ def remake_csv(csvn,outname=False,atom='Si1'):
     return df2
 
 
-def reconstruction_branch(clusterdf,indexnum,initial=pd.DataFrame()):
-    result=deepcopy(initial)
-    if (clusterdf.front_index==indexnum).sum()==0:
+def reconstruction_branch(cluster_df,indexnum,initial=pd.DataFrame()):
+    result=copy.deepcopy(initial)
+    if (cluster_df.front_index==indexnum).sum()==0:
         return result
-    for i,data in clusterdf[clusterdf.front_index==indexnum].iterrows():
+    for i,data in cluster_df[cluster_df.front_index==indexnum].iterrows():
         result=pd.concat([result,data],axis=1)
-        result=reconstruction_branch(clusterdf,i,result)
+        result=reconstruction_branch(cluster_df,i,result)
     return result
 
 
-def cluster_branch(clusterdf):
+def cluster_branch(cluster_df):
 	"""
 	from Distance_based_on_Cluster_Analysis.read_info import cluster_branch
 	df=pd.read_csv('test.csv',index_col=0)
@@ -175,65 +210,13 @@ def cluster_branch(clusterdf):
 	print(a)
 	"""
 	branch=list()
-	centerdf=clusterdf.iloc[0].copy()
-	for i,data in clusterdf[clusterdf.front_index==0].iterrows():
-		branchdf=pd.concat([reconstruction_branch(clusterdf=clusterdf,indexnum=i,initial=data),centerdf],axis=1).T.copy().sort_values(by='neighbor_num')
+	centerdf=cluster_df.iloc[0].copy()
+	for i,data in cluster_df[cluster_df.front_index==0].iterrows():
+		branchdf=pd.concat([reconstruction_branch(cluster_df=cluster_df,indexnum=i,initial=data),centerdf],axis=1).T.copy().sort_values(by='neighbor_num')
 		numericcolumns=['neighbor_num','isite','x','y','z','front_index']
 		branchdf[numericcolumns]=branchdf[numericcolumns].astype(float)
 		branch.append(branchdf)
 	return branch
-
-def make_sort_ciffile(dir,estimecont=2000):
-    cifdir_ = subprocess.getoutput("find {0} -type d | sort".format(dir))
-    cifdir = cifdir_.split('\n')
-    del cifdir[0]
-    isiteinfo=list()
-    for i in cifdir:
-        cifid=re.split('/',i)[-1]
-        lasttxt=subprocess.getoutput("grep ' Si' {}/{}.txt |tail -n 1".format(i,cifid))
-        try:
-            maxisite=int(re.split('Si',lasttxt)[0].replace(' ',''))
-        except:
-            continue
-        isiteinfo.append((cifid,i,maxisite))
-    isiteinfo.sort(key=lambda x:x[-1])
-    if estimecont=='all':
-        info=pd.DataFrame(isiteinfo,columns=['cifid','cifadress','Si_len'])
-        info.to_csv('{}/picupadress'.format(dir))
-        print(info.Si_len.sum())
-        return info
-    cont=0
-    picupadress=list()
-    for i in isiteinfo:
-        cont+=i[-1]
-        picupadress.append(i)
-        if cont>=estimecont:
-            break
-        continue
-    print(cont)
-    info=pd.DataFrame(picupadress,columns=['cifid','cifadress','Si_len'])
-    info.to_csv('{}/picupadress'.format(dir))
-    return info
-
-'''
-from .connection_func import IterativeClosestPoint as icp
-def cluster_match(clusterdf1,clusterdf2,convergence_val=10**(-8)):
-    a=cluster_branch(clusterdf1)
-    b=cluster_branch(clusterdf2)
-    fmachnum=list()
-    for i,ai in enumerate(a):
-        for j,bi in enumerate(b):
-            if j in fmachnum:
-                continue
-            branch_matching=icp(ai,bi)
-            mcheck=branch_matching.start_cal(convergence_val=convergence_val)
-            if mcheck:
-                fmachnum.append(j)
-                break
-    if len(fmachnum)==len(a):
-        return True
-    return False
-'''
 
 def Si_distance(csv):
     df=pd.read_csv(csv,index_col=0)

@@ -73,14 +73,14 @@ def main():
 
     #等価なクラスターをリストアップし、一つのディレクトリにまとめる
     from Distance_based_on_Cluster_Analysis.cluster_adress_func import fcluster_list
-    fclusterdf=fcluster_list('result/{}'.format(cifdir))
+    fcluster_df=fcluster_list('result/{}'.format(cifdir))
     import shutil
 
     if os.path.isdir(database):
         shutil.rmtree(database)
     os.mkdir(database)
 
-    for i,data in fclusterdf.iterrows():
+    for i,data in fcluster_df.iterrows():
         for pattern in range(12):
             clusteradress='{}/{}_{}_{}.csv'.format(data.adress,data.cifid,data.isite,pattern)
             if not os.path.isfile(clusteradress):

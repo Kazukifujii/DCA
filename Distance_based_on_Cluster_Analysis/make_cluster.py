@@ -2,7 +2,7 @@ from .read_info import Set_Cluster_Info
 import pickle,os,re
 import pandas as pd
 import traceback
-def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,adjacent_num=None,isite=None,cluster_adress=None,clusterdf=None,rotation=True,outdir=None):
+def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,adjacent_num=None,isite=None,cluster_adress=None,cluster_df=None,rotation=True,outdir=None):
     cwd=os.getcwd()
     try:
         
@@ -12,7 +12,7 @@ def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,a
                 cifid=re.sub('\.pickle','',os.path.basename(nn_data_adress))
         
         if not cluster_adress is None:
-            clusterdf=pd.read_csv(cluster_adress,index_col=0)
+            cluster_df=pd.read_csv(cluster_adress,index_col=0)
             if cifid is None:
                 cifid=re.sub('_[0-9]*_[0-9]*\.csv','',os.path.basename(cluster_adress))
 
@@ -21,10 +21,10 @@ def make_cluster_dataset(cifid=None,atom='Si',nn_data_adress=None,nn_data=None,a
         
         if not outdir is None:
             os.chdir(outdir)
-        if not (isite is None and clusterdf is None):
-            if not clusterdf is None:
-                clusterinfo=Set_Cluster_Info(clusterdf=clusterdf)
-                isite=clusterdf.iloc[0].isite
+        if not (isite is None and cluster_df is None):
+            if not cluster_df is None:
+                clusterinfo=Set_Cluster_Info(cluster_df=cluster_df)
+                isite=cluster_df.iloc[0].isite
             else:
                 if adjacent_num is None:
                     print('please enter adjacent_num')
