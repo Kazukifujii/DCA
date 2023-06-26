@@ -4,8 +4,9 @@ from Distance_based_on_Cluster_Analysis.distance_func import make_distance_csv,r
 from Distance_based_on_Cluster_Analysis.clustering_func import make_clusering
 from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
 from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
-from Distance_based_on_Cluster_Analysis.cluster_adress_func import cluster_list
+from Distance_based_on_Cluster_Analysis.cluster_adress_func import cluster_list,fcluster_list
 import argparse
+
 def pares_args():
     pares=argparse.ArgumentParser()
     pares.add_argument('--cifdir',default='cifdirs/allzeolite',help='zeolitecif')
@@ -62,9 +63,9 @@ def main():
     for i,data in picdata.iterrows():
         cifid=data.cifid
         print(cifid)
-        listadress_=cluster_list(data.cifadress)
+        target_df=cluster_list(data.cifadress)
         #距離の計算
-        make_distance_csv(listadress=listadress_,resultname="{}/{}_self_distance".format(data.cifadress,cifid))
+        make_distance_csv(listadress=target_df,resultname="{}/{}_self_distance".format(data.cifadress,cifid))
         #10*-8以下の値を0に近似
         remake_distance("{}/{}_self_distance".format(data.cifadress,cifid))
         #クラスタリングによる分類
@@ -72,7 +73,6 @@ def main():
         flusterdf.to_csv("{}/{}_fcluster".format(data.cifadress,cifid))
 
     #等価なクラスターをリストアップし、一つのディレクトリにまとめる
-    from Distance_based_on_Cluster_Analysis.cluster_adress_func import fcluster_list
     fcluster_df=fcluster_list('result/{}'.format(cifdir))
     import shutil
 

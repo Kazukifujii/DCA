@@ -148,7 +148,7 @@ def make_sort_ciffile(dir, estimecont=2000):
     
     if estimecont == 'all':
         info = pd.DataFrame(isiteinfo, columns=['cifid', 'cifadress', 'Si_len'])
-        info.to_csv('{}/picupadress'.format(dir))
+        info.to_csv('{}/target_dirs.csv'.format(dir))
         print(info['Si_len'].sum())
         return info
     
@@ -162,7 +162,7 @@ def make_sort_ciffile(dir, estimecont=2000):
     
     print(cont)
     info = pd.DataFrame(picupadress, columns=['cifid', 'cifadress', 'Si_len'])
-    info.to_csv('{}/picupadress'.format(dir))
+    info.to_csv('{}/target_dirs.csv'.format(dir))
     return info
 
 

@@ -40,7 +40,7 @@ def main():
   text_file=open(resulttxt,'w')
   text_file.write('cifid,point\n')
   text_file.close()
-  cifadress_list=pd.read_csv('result/{}/picupadress'.format(cifdir),index_col=0).cifadress.to_list()
+  cifadress_list=pd.read_csv('result/{}/target_dirs.csv'.format(cifdir),index_col=0).cifadress.to_list()
   for i,cifadress in enumerate(cifadress_list):
     cifid=os.path.basename(cifadress)
     print('cif {}/{}'.format(i+1,len(cifadress_list)))

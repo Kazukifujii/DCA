@@ -3,8 +3,8 @@ import pandas as pd
 import subprocess
 import re
 def fcluster_list(dir):
-    if os.path.isfile('{}/picupadress'.format(dir)):
-        cifdirs=pd.read_csv('{}/picupadress'.format(dir),index_col=0).cifadress.to_list()
+    if os.path.isfile('{}/target_dirs.csv'.format(dir)):
+        cifdirs=pd.read_csv('{}/target_dirs.csv'.format(dir),index_col=0).cifadress.to_list()
     else:
         cifdirs= subprocess.getoutput("find {0} -type d | sort".format(dir))
         cifdirs= cifdirs.split('\n')
@@ -29,7 +29,7 @@ def fcluster_list(dir):
         os.chdir(cwd)
 
     totalinfo=pd.DataFrame(picinfo,columns=['cifid','adress','isite'])
-    totalinfo.to_csv('{}/allcif_cluster'.format(dir))
+    totalinfo.to_csv('{}/target_cluster_files.csv'.format(dir))
     return totalinfo
 
 """def isite_list(dir):
