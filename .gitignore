@@ -11,3 +11,4 @@ Distance_based_on_Cluster_Analysis/__pycache__
 __pycache__
 .vscode
 *database*
+ignore_dir/*
