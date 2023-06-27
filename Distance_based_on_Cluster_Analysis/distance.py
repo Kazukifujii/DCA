@@ -1,7 +1,7 @@
 from .cluster_adress_func import ClusterManager
-import torch
+import torch,time
 import pandas as pd
-def cal_distances(cluster_manager: ClusterManager):
+def cal_distances(cluster_manager: ClusterManager,reference=1e-8):
     if cluster_manager.target_combination_df is None:
         cluster_manager.calculate_self_distance_file()
 
@@ -22,6 +22,8 @@ def cal_distances(cluster_manager: ClusterManager):
         C = torch.cdist(A, B, p=2)
         time.sleep(2)
         dummy_distance=torch.rand(C.size()[0],device=device)
+        dummy_distance=torch.where(dummy_distance > reference, torch.tensor(0.0), dummy_distance)
         dummy_distance=dummy_distance.to('cpu')
         results[pickup_atom]= dummy_distance
-    cluster_manager.target_combination_df.loc[:, 'distance'] = pd.DataFrame(results).mean(axis=1)
+    results=pd.DataFrame(results).mean(axis=1)
+    return pd.concat([cluster_manager.cluster_list_df,results],axis=1)
