@@ -68,7 +68,7 @@ from itertools import combinations
 class ClusterManager:
     def __init__(self, cluster_list_df):
         self.cluster_list_df = cluster_list_df
-    
+        self.target_combination_df = None
     @classmethod
     def from_dirpath(cls, dirpath, dirs=False):
         cluster_list_df = cls.read_cluster_list(dirpath, dirs)
