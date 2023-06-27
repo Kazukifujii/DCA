@@ -12,3 +12,4 @@ __pycache__
 .vscode
 *database*
 ignore_dir/*
+test*

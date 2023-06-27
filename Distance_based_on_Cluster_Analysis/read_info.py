@@ -95,6 +95,11 @@ class Set_Cluster_Info:
         self.shaft_comb = shaft_info(self.cluster_coords)
         self.original_cluster_coords = copy.deepcopy(self.cluster_coords)
 
+    @classmethod
+    def read_csv(cls,csvn):
+        df=pd.read_csv(csvn,index_col=0)
+        return cls(cluster_df=df)
+
     def parallel_shift_of_center(self, coords=[0, 0, 0]):
         dif_coords = np.array(coords) - self.cluster_coords.loc[0, 'x':'z'].tolist()
         dif_df = pd.DataFrame(columns=['x', 'y', 'z'], index=self.cluster_coords.index.tolist())
