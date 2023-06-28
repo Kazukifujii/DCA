@@ -23,9 +23,9 @@ def main():
     database=pares.outdirname
 
     #cifから隣接情報の取出し
-    """run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
+    run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
     run('python3 Distance_based_on_Cluster_Analysis/make_nn_data.py --output2 {}'.format(cifdir),shell=True)
-    """
+    
     #隣接情報からクラスターを生成
     picdata=make_sort_ciffile(f'result/{cifdir}',estimecont='all')
     cwd = os.getcwd()
