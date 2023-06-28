@@ -34,11 +34,11 @@ def make_sort_distance(selfcsv,csvn='sort_distanc.csv'):
     matrixdf.to_csv('{}/matrix_{}'.format(os.path.dirname(csvn),os.path.basename(csvn)))
     return matrixdf
 
-def make_clusering(csvadress,csvn='sort_distance.csv',pngn='cluster.png',method='single',fclusternum=0.0,cal_matrixdf=True):
+def make_clusering(csvaddress,csvn='sort_distance.csv',pngn='cluster.png',method='single',fclusternum=0.0,cal_matrixdf=True):
     if cal_matrixdf:
-        matrixdf=make_sort_distance(csvadress,csvn)
+        matrixdf=make_sort_distance(csvaddress,csvn)
     else:
-        matrixdf=pd.read_csv(csvadress,index_col=0)
+        matrixdf=pd.read_csv(csvaddress,index_col=0)
     result=linkage(squareform(matrixdf), method = method)
     idx=matrixdf.index.to_list()
     dendrogram(result,labels=idx)

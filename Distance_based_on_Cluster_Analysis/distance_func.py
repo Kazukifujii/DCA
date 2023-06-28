@@ -78,28 +78,28 @@ def cal_distance_df(cluster_df1,cluster_df2,values=False,histgram=False,method='
         return nan
 
 
-def cal_distance(csv_adress1,csv_adress2,values=False,histgram=False,method='average',pair_atoms=False):
-    cluster1=pd.read_csv(csv_adress1,index_col=0)
-    cluster2=pd.read_csv(csv_adress2,index_col=0)
+def cal_distance(csv_address1,csv_address2,values=False,histgram=False,method='average',pair_atoms=False):
+    cluster1=pd.read_csv(csv_address1,index_col=0)
+    cluster2=pd.read_csv(csv_address2,index_col=0)
     return cal_distance_df(cluster_df1=cluster1,cluster_df2=cluster2,values=values,histgram=histgram,method=method,pair_atoms=pair_atoms)
 
 def parallel_self_distance(cluster_df,comb,pattern_j,method='average'):
     index_i,index_j=comb
     data_i=cluster_df.loc[index_i]
     data_j=cluster_df.loc[index_j]
-    csvi='{}/{}_{}_0.csv'.format(data_i.adress,data_i.cifid,data_i.isite,0)
-    csvj='{}/{}_{}_{}.csv'.format(data_j.adress,data_j.cifid,data_j.isite,pattern_j)
+    csvi='{}/{}_{}_0.csv'.format(data_i.address,data_i.cifid,data_i.isite,0)
+    csvj='{}/{}_{}_{}.csv'.format(data_j.address,data_j.cifid,data_j.isite,pattern_j)
     if not (os.path.isfile(csvi) and os.path.isfile(csvj)):
         return ('{}_{}'.format(data_i.cifid,str(data_i.isite)),'{}_{}'.format(data_j.cifid,str(data_j.isite)),0,pattern_j,nan)
     disij=cal_distance(csvi,csvj,method=method)
     return ('{}_{}'.format(data_i.cifid,str(data_i.isite)),'{}_{}'.format(data_j.cifid,str(data_j.isite)),0,pattern_j,disij)
 
-def make_distance_csv(listadress,resultname,outdir=False):
+def make_distance_csv(listaddress,resultname,outdir=False):
     tstime=time.perf_counter()
-    if type(listadress) is str:
-        all_cluster=pd.read_csv(listadress,index_col=0)
-    elif type(listadress) is pd.DataFrame:
-        all_cluster=listadress
+    if type(listaddress) is str:
+        all_cluster=pd.read_csv(listaddress,index_col=0)
+    elif type(listaddress) is pd.DataFrame:
+        all_cluster=listaddress
     else:
         print('make_distance_csv error')
     all_index=all_cluster.index.to_list()
@@ -126,15 +126,15 @@ def make_distance_csv(listadress,resultname,outdir=False):
     print('output {}'.format(resultname))
     print('total computation time {}'.format(etiem-tstime))
 
-def remake_distance(distanceadress,resultname=True,error_val=10**-8):
+def remake_distance(distanceaddress,resultname=True,error_val=10**-8):
     if resultname:
-        diradress=os.path.dirname(distanceadress)
-        basename=os.path.basename(distanceadress).replace('.csv','')
-        if len(diradress)==0:
+        diraddress=os.path.dirname(distanceaddress)
+        basename=os.path.basename(distanceaddress).replace('.csv','')
+        if len(diraddress)==0:
             resultname='{}_remake'.format(basename)
         else:
-            resultname='{}/{}_remake'.format(diradress,basename)
-    distancedf=pd.read_csv(distanceadress,index_col=0)
+            resultname='{}/{}_remake'.format(diraddress,basename)
+    distancedf=pd.read_csv(distanceaddress,index_col=0)
     distancedf.loc[(distancedf.distance<=error_val),'distance']=0.0
     distancedf.to_csv(resultname)
     return

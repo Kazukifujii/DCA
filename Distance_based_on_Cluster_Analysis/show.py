@@ -9,8 +9,8 @@ import os
 def change(csv2,csv1,show=True,save=False,hist=False,text=True):
     #print(os.getcwd())
     #sys.exit()
-    csvadress1=csv1
-    csvadress2=csv2
+    csvaddress1=csv1
+    csvaddress2=csv2
     csv1=pd.read_csv(csv1,index_col=0)
     csv2=pd.read_csv(csv2,index_col=0)
     x=csv1['x']
@@ -25,7 +25,7 @@ def change(csv2,csv1,show=True,save=False,hist=False,text=True):
     isite2=csv2['isite']
     atom2=csv2['atom']
     
-    val=cal_distance(csvadress1,csvadress2,values=True)
+    val=cal_distance(csvaddress1,csvaddress2,values=True)
     u2=[]
     v2=[]
     w2=[]
@@ -50,7 +50,7 @@ def change(csv2,csv1,show=True,save=False,hist=False,text=True):
 		#ax.set_xlabel('x')
 		#ax.set_ylabel('y')
 		#ax.set_zlabel('z')
-        ax.set_title(os.path.basename(csvadress1).replace('.csv','')+'(blue) to ' +os.path.basename(csvadress2).replace('.csv','')+'(green)',size=10) # タイトル
+        ax.set_title(os.path.basename(csvaddress1).replace('.csv','')+'(blue) to ' +os.path.basename(csvaddress2).replace('.csv','')+'(green)',size=10) # タイトル
         #ax.set_xlim(-5, 5)
         #ax.set_ylim(-5, 5)
         #ax.set_zlim(-5, 5)
@@ -84,7 +84,7 @@ def change(csv2,csv1,show=True,save=False,hist=False,text=True):
         plt.savefig('change.svg')
     plt.close()
     if hist:
-        df=pd.Series(cal_distance(csvadress1,csvadress2,histgram=True),index=parlist)
+        df=pd.Series(cal_distance(csvaddress1,csvaddress2,histgram=True),index=parlist)
         return df
 
 
@@ -130,14 +130,14 @@ class DrawGif():
         self.image[0].save(filename,save_all=True, append_images=self.image[1:],optimize=False, duration=500, loop=0)
         return
 
-def emd_histgram(cifdir,database_adress='database',show=False,save=True):
+def emd_histgram(cifdir,database_address='database',show=False,save=True):
     distanlist=glob('{}/*distance'.format(cifdir))
     histdf=pd.DataFrame()
-    for dataadress in distanlist:
-        data=pd.read_csv(dataadress,index_col=0).iloc[0]
-        clusteradress_base='{}/{}_{}.csv'.format(database_adress,data.isite_j,data.pattern_j)
-        clusteradress_cif='{}/{}_{}.csv'.format(cifdir,data.isite_i,data.pattern_i)
-        d=cal_distance(csv_adress1=clusteradress_cif,csv_adress2=clusteradress_base,histgram=True)
+    for dataaddress in distanlist:
+        data=pd.read_csv(dataaddress,index_col=0).iloc[0]
+        clusteraddress_base='{}/{}_{}.csv'.format(database_address,data.isite_j,data.pattern_j)
+        clusteraddress_cif='{}/{}_{}.csv'.format(cifdir,data.isite_i,data.pattern_i)
+        d=cal_distance(csv_address1=clusteraddress_cif,csv_address2=clusteraddress_base,histgram=True)
         d.sort(reverse=True)
         histdf.loc[:,'{}_{}'.format(data.isite_i,data.isite_j)]=deepcopy(d)
     histdf=histdf.sort_index(axis=1)

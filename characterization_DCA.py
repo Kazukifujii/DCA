@@ -17,7 +17,7 @@ def main():
   pares=pares_args()
   cifdir=pares.cifdir
   adjacent_num=int(pares.adjacent_num)
-  databaseadress=pares.database_path
+  databaseaddress=pares.database_path
   #cifから隣接情報の取出し
   run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
   print('emd make_adjacent_tabel')
@@ -30,22 +30,22 @@ def main():
   for i in range(len(picdata)):
       data=picdata.iloc[i,:]
       print('\r{} {}/{}'.format(data.cifid,i+1,allciflen),end='')
-      nn_data_adress= os.path.join(data.cifadress,f"nb_{data.cifid}.pickle")
-      make_cluster_dataset(cifid=data.cifid,nn_data_adress=nn_data_adress,adjacent_num=adjacent_num,rotation=False,outdir=data.cifadress)
+      nn_data_address= os.path.join(data.cifaddress,f"nb_{data.cifid}.pickle")
+      make_cluster_dataset(cifid=data.cifid,nn_data_address=nn_data_address,adjacent_num=adjacent_num,rotation=False,outdir=data.cifaddress)
   print()
 
   #各cifファイルの特徴量を計算
-  d=make_crystall_point(databaseadress)
+  d=make_crystall_point(databaseaddress)
   resulttxt='result/{}/cifpoint'.format(cifdir)
   text_file=open(resulttxt,'w')
   text_file.write('cifid,point\n')
   text_file.close()
-  cifadress_list=pd.read_csv('result/{}/target_dirs.csv'.format(cifdir),index_col=0).cifadress.to_list()
-  for i,cifadress in enumerate(cifadress_list):
-    cifid=os.path.basename(cifadress)
-    print('cif {}/{}'.format(i+1,len(cifadress_list)))
+  cifaddress_list=pd.read_csv('result/{}/target_dirs.csv'.format(cifdir),index_col=0).cifaddress.to_list()
+  for i,cifaddress in enumerate(cifaddress_list):
+    cifid=os.path.basename(cifaddress)
+    print('cif {}/{}'.format(i+1,len(cifaddress_list)))
     print(cifid)
-    d.cal_crystal_point(cifadress,n_job=-1)
+    d.cal_crystal_point(cifaddress,n_job=-1)
     text_file=open(resulttxt,'a')
     text_file.write('{},{}\n'.format(cifid,d.crystal_point))
     text_file.close()

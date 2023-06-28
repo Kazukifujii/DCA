@@ -2,21 +2,21 @@ from .read_info import Set_Cluster_Info
 import pickle,os,re
 import pandas as pd
 import traceback
-def make_cluster_dataset(cifid=None, atom='Si', nn_data_adress=None, nn_data=None, adjacent_num=None,
-                         isite=None, cluster_adress=None, cluster_df=None, rotation=True, outdir=None):
+def make_cluster_dataset(cifid=None, atom='Si', nn_data_address=None, nn_data=None, adjacent_num=None,
+                         isite=None, cluster_address=None, cluster_df=None, rotation=True, outdir=None):
     cwd = os.getcwd()
 
     try:
-        if nn_data_adress is not None:
-            with open(nn_data_adress, 'rb') as f:
+        if nn_data_address is not None:
+            with open(nn_data_address, 'rb') as f:
                 nn_data = pickle.load(f)
             if cifid is None:
-                cifid = re.sub('\.pickle', '', os.path.basename(nn_data_adress))
+                cifid = re.sub('\.pickle', '', os.path.basename(nn_data_address))
 
-        if cluster_adress is not None:
-            cluster_df = pd.read_csv(cluster_adress, index_col=0)
+        if cluster_address is not None:
+            cluster_df = pd.read_csv(cluster_address, index_col=0)
             if cifid is None:
-                cifid = re.sub('_[0-9]*_[0-9]*\.csv', '', os.path.basename(cluster_adress))
+                cifid = re.sub('_[0-9]*_[0-9]*\.csv', '', os.path.basename(cluster_address))
 
         if cifid is None:
             print('please enter cifid')

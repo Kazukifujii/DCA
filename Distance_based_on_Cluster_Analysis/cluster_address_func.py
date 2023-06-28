@@ -4,7 +4,7 @@ import subprocess
 import re
 def fcluster_list(dir):
     if os.path.isfile('{}/target_dirs.csv'.format(dir)):
-        cifdirs=pd.read_csv('{}/target_dirs.csv'.format(dir),index_col=0).cifadress.to_list()
+        cifdirs=pd.read_csv('{}/target_dirs.csv'.format(dir),index_col=0).cifaddress.to_list()
     else:
         cifdirs= subprocess.getoutput("find {0} -type d | sort".format(dir))
         cifdirs= cifdirs.split('\n')
@@ -28,12 +28,12 @@ def fcluster_list(dir):
         picinfo+=picinfo_
         os.chdir(cwd)
 
-    totalinfo=pd.DataFrame(picinfo,columns=['cifid','adress','isite'])
+    totalinfo=pd.DataFrame(picinfo,columns=['cifid','address','isite'])
     totalinfo.to_csv('{}/target_cluster_files.csv'.format(dir))
     return totalinfo
 
 """def isite_list(dir):
-    #for i,adress in enumerate(csvlist):
+    #for i,address in enumerate(csvlist):
     cifid=re.split('/',dir)[-1]
     ciflist=glob.glob('{}/{}_[0-9]*.csv'.format(dir,cifid))
     isitelist=[re.split('_',csvname)[-2] for csvname in ciflist]
@@ -41,7 +41,7 @@ def fcluster_list(dir):
     isitelist=[int(isitelist_) for isitelist_ in isitelist]
     isitelist.sort()
     picinfo=[(('{}').format(cifid),dir,isite) for isite in isitelist]
-    resultdf=pd.DataFrame(picinfo,columns=['cifid','adress','isite'])
+    resultdf=pd.DataFrame(picinfo,columns=['cifid','address','isite'])
     resultdf.to_csv('{}/isite_list'.format(dir))
     return resultdf"""
 
@@ -55,7 +55,7 @@ def cluster_list(dir, dirs=False):
         cifid, isite, _ = tuple(re.split('_', filename))
         result_data.append((cifid, dirname, int(isite)))
 
-    resultdf = pd.DataFrame(result_data, columns=['cifid', 'adress', 'isite']).drop_duplicates().sort_values(by='cifid').reset_index(drop=True)
+    resultdf = pd.DataFrame(result_data, columns=['cifid', 'address', 'isite']).drop_duplicates().sort_values(by='cifid').reset_index(drop=True)
     return resultdf
 
 

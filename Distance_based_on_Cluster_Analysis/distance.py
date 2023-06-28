@@ -1,4 +1,4 @@
-from .cluster_adress_func import ClusterManager
+from .cluster_address_func import ClusterManager
 import torch,time
 import pandas as pd
 def cal_distances(cluster_manager: ClusterManager,reference=1e-8):

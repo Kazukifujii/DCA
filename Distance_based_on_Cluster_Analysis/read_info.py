@@ -152,25 +152,25 @@ def make_sort_ciffile(dir, estimecont=2000):
     isiteinfo.sort(key=lambda x: x[-1])
     
     if estimecont == 'all':
-        info = pd.DataFrame(isiteinfo, columns=['cifid', 'cifadress', 'Si_len'])
+        info = pd.DataFrame(isiteinfo, columns=['cifid', 'cifaddress', 'Si_len'])
         info.to_csv('{}/target_dirs.csv'.format(dir))
         print(info['Si_len'].sum())
         return info
     
     cont = 0
-    picupadress = []
+    picupaddress = []
     for i in isiteinfo:
         cont += i[-1]
-        picupadress.append(i)
+        picupaddress.append(i)
         if cont >= estimecont:
             break
     
     print(cont)
-    info = pd.DataFrame(picupadress, columns=['cifid', 'cifadress', 'Si_len'])
+    info = pd.DataFrame(picupaddress, columns=['cifid', 'cifaddress', 'Si_len'])
     info.to_csv('{}/target_dirs.csv'.format(dir))
     return info
 
-
+#↓は破棄予定
 def remake_csv(csvn,outname=False,atom='Si1'):
     df=pd.read_csv(csvn,index_col=0)
     df2=df[df.atom=='Si1'].copy()

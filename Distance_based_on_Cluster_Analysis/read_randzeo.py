@@ -21,9 +21,9 @@ def make_nn_data_from_randzeo(filename):
     bn=os.path.basename(filename)
     di=os.path.dirname(filename)
     if len(di)!=0:
-        resultadress='{}/{}.pickle'.format(di,bn)
+        resultaddress='{}/{}.pickle'.format(di,bn)
     else:
-        resultadress='{}.pickle'.format(bn)
+        resultaddress='{}.pickle'.format(bn)
     f=open(filename,'r').readlines()
     nn_data=defaultdict(list)
     site_coords=dict()
@@ -52,6 +52,6 @@ def make_nn_data_from_randzeo(filename):
                             mdi=deepcopy(di)
                             recoord=deepcopy(recoord_+site_coord_i)
             nn_data[isite_i].append([isite_j,'Si1',*recoord])
-    with open(resultadress,'wb') as bd:
+    with open(resultaddress,'wb') as bd:
         pickle.dump(nn_data,bd)
     return nn_data

@@ -2,14 +2,14 @@ import os,re,pickle
 from collections import defaultdict
 from numpy import nan
 
-def make_nn_data_from_nnlist(fileadress,siteinfo):
+def make_nn_data_from_nnlist(fileaddress,siteinfo):
     #make nn_data.pickle from file of nnlis
     #set init info
-    f=open(fileadress,'r').readlines()
-    filename=re.split('/',fileadress)[-1]
+    f=open(fileaddress,'r').readlines()
+    filename=re.split('/',fileaddress)[-1]
     resultfile='{}.pickle'.format(filename.replace('.nnlist',''))
-    resultadress=fileadress.replace(filename,'')
-    resultadress='{}{}'.format(resultadress,resultfile)
+    resultaddress=fileaddress.replace(filename,'')
+    resultaddress='{}{}'.format(resultaddress,resultfile)
     nnlist=defaultdict(list)
     #read nnlist
     for i in f:
@@ -30,9 +30,9 @@ def make_nn_data_from_nnlist(fileadress,siteinfo):
         for isite,distace,coord,cell in nnlist[i]:
             nn_data_=[isite,siteinfo[isite-1],*coord]
             nn_data[i].append(nn_data_)
-    if os.path.isfile(resultadress):
-        os.remove(resultadress)
-    with open(resultadress,'wb') as f:
+    if os.path.isfile(resultaddress):
+        os.remove(resultaddress)
+    with open(resultaddress,'wb') as f:
         pickle.dump(nn_data,f)
     return
 
@@ -45,10 +45,10 @@ def read_sitinfo_poscar(filename):
         siteinfo.append(splitinfo[-1])
     return siteinfo
 
-def isolation_poscars(fileadress='init_POSCARS'):
-    filename=os.path.basename(fileadress)
-    dirname=os.path.dirname(fileadress)
-    d=open(fileadress,'r').readlines()
+def isolation_poscars(fileaddress='init_POSCARS'):
+    filename=os.path.basename(fileaddress)
+    dirname=os.path.dirname(fileaddress)
+    d=open(fileaddress,'r').readlines()
     idlist=list()
     for I,i in enumerate(d):
         if re.match('ID',i):
@@ -70,14 +70,14 @@ def isolation_poscars(fileadress='init_POSCARS'):
     os.chdir(cwd)
 
 import subprocess 
-def make_nnlist(fileadress='POSCAR',rmax=1.0):
+def make_nnlist(fileaddress='POSCAR',rmax=1.0):
     
     """cwd=os.getcwd()
-    dirname=os.path.dirname(fileadress)
-    filename=os.path.basename(fileadress)
+    dirname=os.path.dirname(fileaddress)
+    filename=os.path.basename(fileaddress)
     os.chdir(dirname)
     print(dirname)"""
-    subprocess.run('a.out {} {}'.format(fileadress,rmax),shell=True)
+    subprocess.run('a.out {} {}'.format(fileaddress,rmax),shell=True)
     #s.chdir(cwd)
     return
 
