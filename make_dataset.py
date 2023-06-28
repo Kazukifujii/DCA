@@ -1,10 +1,10 @@
 from subprocess import run
 import os,subprocess
 from Distance_based_on_Cluster_Analysis.distance import cal_distances
-from Distance_based_on_Cluster_Analysis.clustering_func import make_clustering
+from Distance_based_on_Cluster_Analysis.clustering import make_clustering,fcluster_list
 from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
 from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
-from Distance_based_on_Cluster_Analysis.cluster_address_func import ClusterManager,fcluster_list
+from Distance_based_on_Cluster_Analysis.clustermanager import ClusterManager
 import argparse
 
 def pares_args():
@@ -59,24 +59,24 @@ def main():
         data=cm.cluster_list_df.iloc[i,:]
         clusteraddress=f'{data.address}/{data.cifid}_{data.isite}_0.csv'
         make_cluster_dataset(cluster_address=clusteraddress,outdir=data.address)
-    print('')
-    return
-    #各結晶に属するクラスターの距離を計算(等価なクラスターを取り出すため)
 
+    #各結晶に属するクラスターの距離を計算(等価なクラスターを取り出すため)
     for i in range(len(picdata)):
-        data=picdata.iloc[i]
+        data=picdata.iloc[i,:]
         cifid=data.cifid
         print(cifid)
-        targetcluster=ClusterManager(data.cifaddress)
+        cm=ClusterManager.from_dirpath(data.cifaddress)
         #距離の計算
-        cluster_distance_df=cal_distances(targetcluster)
+        cluster_distance_df=cal_distances(cm)
+        cluster_distance_df.to_csv(f"{data.cifaddress}/{cifid}_cluster_distance.csv")
         #クラスタリングによる分類
         flusterdf=make_clustering(cluster_distance_df)
-        flusterdf.to_csv(f"{data.cifaddress}/{cifid}_fcluster")
-    #等価なクラスターをリストアップし、一つのディレクトリにまとめる(データベースの作成)
-    fcluster_df=fcluster_list(f'result/{cifdir}')
-    import shutil
+        #結果の保存
+        flusterdf.to_csv(f"{data.cifaddress}/{cifid}_fcluster.csv")
 
+    fcluster_df=fcluster_list(picdata)
+    fcluster_df.to_csv(f'result/{cifdir}/unique_cluster.csv')
+    import shutil
     if os.path.isdir(database):
         shutil.rmtree(database)
     os.mkdir(database)
