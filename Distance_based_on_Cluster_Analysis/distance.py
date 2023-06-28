@@ -20,10 +20,10 @@ def cal_distances(cluster_manager: ClusterManager,reference=1e-8):
         A = torch.tensor(pickup_coordinates.iloc[:, 0].values.tolist(), device=device)
         B = torch.tensor(pickup_coordinates.iloc[:, 1].values.tolist(), device=device)
         C = torch.cdist(A, B, p=2)
-        time.sleep(2)
         dummy_distance=torch.rand(C.size()[0],device=device)
         dummy_distance=torch.where(dummy_distance > reference, torch.tensor(0.0), dummy_distance)
         dummy_distance=dummy_distance.to('cpu')
         results[pickup_atom]= dummy_distance
     results=pd.DataFrame(results).mean(axis=1)
-    return pd.concat([cluster_manager.cluster_list_df,results],axis=1)
+    results.name='distance'
+    return pd.concat([cluster_manager.target_combination_df,results],axis=1)
