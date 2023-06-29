@@ -25,7 +25,7 @@ class ClusterManager:
             cifid, isite, _ = tuple(re.split('_', filename))
             result_data.append((cifid, dirname, int(isite)))
 
-        result_df = pd.DataFrame(result_data, columns=['cifid', 'address', 'isite']).drop_duplicates().sort_values(by='cifid').reset_index(drop=True)
+        result_df = pd.DataFrame(result_data, columns=['cifid', 'address', 'isite']).drop_duplicates().sort_values(by=['cifid','isite']).reset_index(drop=True)
         return result_df
     
     def calculate_self_distance_file(self):
