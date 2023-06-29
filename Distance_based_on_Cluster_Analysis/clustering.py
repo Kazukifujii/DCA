@@ -37,8 +37,8 @@ def fcluster_list(info):
             os.chdir(cwd)
             continue
         fdf=pd.read_csv(csvn,index_col=0)
-        fdf=fdf.drop_duplicates(subset=['class'])
-        fdf.drop(['class'],axis=1,inplace=True)
+        fdf=fdf.drop_duplicates(subset=['Class'])
+        fdf.drop(['Class'],axis=1,inplace=True)
         fdf['address']=data['cifaddress']
         result.append(fdf)
         os.chdir(cwd)
