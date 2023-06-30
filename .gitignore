@@ -13,3 +13,5 @@ __pycache__
 *database*
 ignore_dir/*
 test*
+*mod
+a.out
