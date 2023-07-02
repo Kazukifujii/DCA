@@ -4,7 +4,7 @@ import glob
 import re
 import pandas as pd
 from itertools import combinations
-
+import polars as pl
 class ClusterManager:
     def __init__(self, cluster_list_df):
         self.cluster_list_df = cluster_list_df
@@ -30,21 +30,26 @@ class ClusterManager:
     
     def calculate_self_distance_file(self):
         combinations_list = list(combinations(range(len(self.cluster_list_df)), 2))
-        df_i = self.cluster_list_df.iloc[[i[0] for i in combinations_list]].reset_index(drop=True)
-        df_j = self.cluster_list_df.iloc[[i[1] for i in combinations_list]].reset_index(drop=True)
+        df_i = pl.from_pandas(self.cluster_list_df.iloc[[i[0] for i in combinations_list]].reset_index(drop=True))
+        df_j = pl.from_pandas(self.cluster_list_df.iloc[[i[1] for i in combinations_list]].reset_index(drop=True))
         df_i.columns = ['cifid_i', 'address_i', 'isite_i']
         df_j.columns = ['cifid_j', 'address_j', 'isite_j']
-        
+        df = pl.concat([df_i, df_j],how='horizontal')
         target_combinations = []
-
+        
         #クラスターのすべての回転パターンを作成する
         dim=len(df_i)
         for i in range(12):
-            target_combinations.append(pd.concat([df_i, df_j,pd.Series([i]*dim,name='pattern_j')], axis=1))
-        target_combination_df = pd.concat(target_combinations, ignore_index=True).sort_index(axis=1)
-        target_combination_df['pattern_i'] = 0
+            target_combinations.append(pl.concat([df,pl.DataFrame([i]*dim,schema = ['pattern_j'])],how='horizontal'))
+        target_combination_df = pl.concat(target_combinations,how="vertical")
+        target_combination_df = pl.concat([target_combination_df,pl.DataFrame([0]*target_combination_df.height,schema = ['pattern_i'])],how='horizontal')
         
-        self.target_combination_df = target_combination_df
-        self.target_combination_files = pd.DataFrame()
-        self.target_combination_files['file_i'] = self.target_combination_df.apply(lambda x: os.path.join(x['address_i'], f"{x['cifid_i']}_{x['isite_i']}_{x['pattern_i']}.csv"), axis=1)
-        self.target_combination_files['file_j'] = self.target_combination_df.apply(lambda x: os.path.join(x['address_j'], f"{x['cifid_j']}_{x['isite_j']}_{x['pattern_j']}.csv"), axis=1)
+        target_combination_files = target_combination_df.select(pl.concat_str([pl.col('address_i'),
+                                pl.concat_str([pl.col('cifid_i'),pl.col('isite_i'),pl.col('pattern_i'),pl.lit('.csv')],separator='_')]
+                            ,separator='/').alias('file_i'),
+                pl.concat_str([pl.col('address_j'),
+                                pl.concat_str([pl.col('cifid_j'),pl.col('isite_j'),pl.col('pattern_j'),pl.lit('.csv')],separator='_')]
+                            ,separator='/').alias('file_j')                     
+                )
+        self.target_combination_files = target_combination_files.to_pandas()
+        self.target_combination_df = target_combination_df.to_pandas()
