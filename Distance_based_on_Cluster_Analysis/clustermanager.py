@@ -44,12 +44,20 @@ class ClusterManager:
         target_combination_df = pl.concat(target_combinations,how="vertical")
         target_combination_df = pl.concat([target_combination_df,pl.DataFrame([0]*target_combination_df.height,schema = ['pattern_i'])],how='horizontal')
         
-        target_combination_files = target_combination_df.select(pl.concat_str([pl.col('address_i'),
-                                pl.concat_str([pl.col('cifid_i'),pl.col('isite_i'),pl.col('pattern_i'),pl.lit('.csv')],separator='_')]
-                            ,separator='/').alias('file_i'),
-                pl.concat_str([pl.col('address_j'),
-                                pl.concat_str([pl.col('cifid_j'),pl.col('isite_j'),pl.col('pattern_j'),pl.lit('.csv')],separator='_')]
-                            ,separator='/').alias('file_j')                     
-                )
+        target_combination_files = target_combination_df.select(
+                                    pl.concat_str([
+                                        pl.col('address_i'),
+                                        pl.concat_str([
+                                            pl.concat_str([pl.col('cifid_i'),pl.col('isite_i'),pl.col('pattern_i')],separator='_'),    
+                                            pl.lit('csv')],separator='.')]
+                                    ,separator='/').alias('file_i'),
+                                    
+                                    pl.concat_str([
+                                        pl.col('address_j'),
+                                        pl.concat_str([
+                                            pl.concat_str([pl.col('cifid_j'),pl.col('isite_j'),pl.col('pattern_j')],separator='_'),    
+                                            pl.lit('csv')],separator='.')]
+                                    ,separator='/').alias('file_j'),                 
+                                    )
         self.target_combination_files = target_combination_files.to_pandas()
         self.target_combination_df = target_combination_df.to_pandas()
