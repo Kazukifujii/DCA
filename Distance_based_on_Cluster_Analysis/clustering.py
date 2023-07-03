@@ -10,6 +10,9 @@ def make_clustering(cluster_distance_df, method='single', fclusternum=0.0):
     sorted_distance_df = make_inputdf_linkage(cluster_distance_df)
     result = linkage(sorted_distance_df['distance'].values, method=method)
     
+    #負の値を0にする
+    result[result < 0] = 0
+
     # ラベル付け
     result_ = [num for num in list(fcluster(result, fclusternum))]
     
