@@ -13,7 +13,7 @@ def cal_distances(cluster_manager: ClusterManager,reference=1e-8,eps=0.1, max_it
         chunksize = chunksize if len(target_files) > chunksize else len(target_files)
         result = list()
         for fram in target_files.iter_slices(n_rows=chunksize):
-            results_dis = torch.empty(len(fram),dtype=torch.float32)
+            results_dis = torch.zeros(len(fram),dtype=torch.float32)
             target_cluster_coordinates = fram.select(
                         pl.all().apply(lambda file_i: pl.scan_csv(file_i))
                     )
