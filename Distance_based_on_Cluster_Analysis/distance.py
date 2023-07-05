@@ -3,6 +3,7 @@ import torch
 from .layers import SinkhornDistance    
 import polars as pl
 import pandas as pd
+import numpy as np
 def cal_distances(cluster_manager: ClusterManager,reference=1e-8,eps=0.1, max_iter=1000,target_atoms=['Si1','O1'],chunksize=10000):
         #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         device = torch.device("cpu")
@@ -19,11 +20,11 @@ def cal_distances(cluster_manager: ClusterManager,reference=1e-8,eps=0.1, max_it
                     )
             for pickup_atom in target_atoms:
                 pickup_coordinates = target_cluster_coordinates.select(
-                                pl.all().apply(lambda x: x.filter(pl.col('atom') == pickup_atom).select(['x', 'y', 'z']).collect().to_numpy().tolist())
+                                pl.all().apply(lambda x: x.filter(pl.col('atom') == pickup_atom).select(['x', 'y', 'z']).collect().to_numpy())
                             )
                 pickup_coordinates = pickup_coordinates.to_numpy()
-                A = torch.tensor(pickup_coordinates[:,0].tolist(),dtype=torch.float32)
-                B = torch.tensor(pickup_coordinates[:,1].tolist(),dtype=torch.float32)
+                A = torch.tensor(np.stack(pickup_coordinates[:,0],0),dtype=torch.float32)
+                B = torch.tensor(np.stack(pickup_coordinates[:,1],0),dtype=torch.float32)
                 #del pickup_coordinates
                 distance, _, _ = sinkhorn(A, B)
                 distance=torch.where(distance < reference, torch.tensor(0.0,device=device), distance)
