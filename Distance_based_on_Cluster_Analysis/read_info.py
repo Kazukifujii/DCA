@@ -170,6 +170,17 @@ def make_sort_ciffile(dir, estimecont=2000):
     info.to_csv('{}/target_dirs.csv'.format(dir))
     return info
 
+
+
+def to_series(filepath):
+    address = os.path.dirname(filepath)
+    cifid, isite, _ = tuple(re.split('_', os.path.basename(filepath)))
+    return pd.Series({'address':address,'cifid':cifid,'isite':isite})
+
+def to_path(series):
+    return '{}/{}_{}_0.csv'.format(series.address,series.cifid,series.isite)
+
+
 #↓は破棄予定
 def remake_csv(csvn,outname=False,atom='Si1'):
     df=pd.read_csv(csvn,index_col=0)
