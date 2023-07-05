@@ -1,11 +1,12 @@
 from subprocess import run
-import os,subprocess
+import os,subprocess,shutil
 from Distance_based_on_Cluster_Analysis.distance import cal_distances
 from Distance_based_on_Cluster_Analysis.clustering import make_clustering,fcluster_list
 from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
 from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
 from Distance_based_on_Cluster_Analysis.clustermanager import ClusterManager
 import argparse
+from tqdm import tqdm
 
 def pares_args():
     pares=argparse.ArgumentParser()
@@ -41,7 +42,7 @@ def main():
     #壊れているクラスターを削除
     print('rm break cluster')
     cm=ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)
-   
+    
     for i in range(len(cm.cluster_list_df)):
         data=cm.cluster_list_df.iloc[i,:]
         clusteraddress=f'{data.address}/{data.cifid}_{data.isite}_0.csv'
@@ -50,44 +51,43 @@ def main():
             continue
         index_num=int(open(clusteraddress,'r').readlines()[-1][0])
         if index_num!=cluster_atom_num:
-            f=open('clean up_cluster.log','w')
+            f=open('clean up_cluster.log','a')
             f.write(f'{clusteraddress}\n')
             os.remove(clusteraddress)
             f.close()
-    
+
     #残っているクラスターの回転パターンを全て取る
     print('make all pattern')
     cm=ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)
-    for i in range(len(cm.cluster_list_df)):
+    for i in  range(len(cm.cluster_list_df)):
         data=cm.cluster_list_df.iloc[i,:]
         clusteraddress=f'{data.address}/{data.cifid}_{data.isite}_0.csv'
         make_cluster_dataset(cluster_address=clusteraddress,outdir=data.address)
+    cm=ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)
 
     #各結晶に属するクラスターの距離を計算(等価なクラスターを取り出すため)
-    
-    for i in range(len(picdata)):
+    for i in tqdm(range(len(picdata))):
         data=picdata.iloc[i,:]
         cifid=data.cifid
-        print(cifid)
         cm=ClusterManager.from_dirpath(data.cifaddress)
         #距離の計算
         try:
             cluster_distance_df=cal_distances(cm)
         except:
-            f=open('error.log','w')
+            f=open('error.log','a')
             f.write(f'error cal_distance {i}\n')
             print(f'error cal_distance {i}')
             f.close()
+            continue
         cluster_distance_df.to_csv(f"{data.cifaddress}/{cifid}_cluster_distance.csv")
         #クラスタリングによる分類
         flusterdf=make_clustering(cluster_distance_df)
         #結果の保存
-        flusterdf.to_csv(f"{data.cifaddress}/{cifid}_fcluster.csv")
-    
+        flusterdf.to_csv(f"{data.cifaddress}/{cifid}_fcluster.csv")        
 
     fcluster_df=fcluster_list(picdata)
     fcluster_df.to_csv(f'result/{cifdir}/unique_cluster.csv')
-    import shutil
+    
     if os.path.isdir(database):
         shutil.rmtree(database)
     os.mkdir(database)

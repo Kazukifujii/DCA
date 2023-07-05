@@ -28,22 +28,18 @@ def make_clustering(cluster_distance_df, method='single', fclusternum=0.0):
 
 import os,glob
 def fcluster_list(info):
-    cwd=os.getcwd()
-    result=list()
+    result = list()
     for i in range(len(info)):
-        data=info.iloc[i,:]
-        os.chdir(data['cifaddress'])
-        try:
-            csvn=glob.glob('*_fcluster.csv')[0]
-        except:
+        data = info.iloc[i,:]
+        csvn = glob.glob(os.path.join(data['cifaddress'],'*_fcluster.csv'))
+        if len(csvn) == 0:
             print('no such file')
-            os.chdir(cwd)
             continue
-        fdf=pd.read_csv(csvn,index_col=0)
-        fdf=fdf.drop_duplicates(subset=['Class'])
-        fdf.drop(['Class'],axis=1,inplace=True)
-        fdf['address']=data['cifaddress']
+        csvn = csvn[0]
+        fdf = pd.read_csv(csvn,index_col = 0)
+        fdf = fdf.drop_duplicates(subset = ['Class'])
+        fdf.drop(['Class'],axis = 1,inplace=True)
+        fdf['address'] = data['cifaddress']
         result.append(fdf)
-        os.chdir(cwd)
-    totalinfo=pd.concat(result)
+    totalinfo = pd.concat(result).reset_index(drop=True)
     return totalinfo
