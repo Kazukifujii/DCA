@@ -33,13 +33,20 @@ def main():
   print()
 
   #計算結果の保存
+  import shutil
   resulttxt='result/{}/cifpoint'.format(cifdir)
   text_file=open(resulttxt,'w')
   text_file.write('cifid,point\n')
   text_file.close()
+  if os.path.isdir(f'result/{cifdir}/log'):
+    shutil.rmtree(f'result/{cifdir}/log')
+  os.mkdir(f'result/{cifdir}/log')
 
   #各cifファイルの特徴量を計算
   characteriz_func=CrystalFeatureCalculator(databaseaddress)
+
+
+
   for i in range(len(picdata)):
     data = picdata.iloc[i,:]
     cifid=os.path.basename(data.cifaddress)
