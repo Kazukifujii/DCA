@@ -15,3 +15,6 @@ ignore_dir/*
 test*
 *mod
 a.out
+base2
+*.out
+*.log
