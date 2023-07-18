@@ -5,22 +5,22 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.art3d as art3d
 
 
-def clusterplot(clusterdf,title='cluster'):
+def clusterplot(cluster_df,title='cluster'):
 	noods=list()
-	for index,i in clusterdf.iterrows():
+	for index,i in cluster_df.iterrows():
 		if index==0:
 			continue
 		front_idx=i.loc['front_index']
-		a=clusterdf.loc[front_idx].loc['x':'z']
+		a=cluster_df.loc[front_idx].loc['x':'z']
 		b=i.loc['x':'z']
 		noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
 	fig = plt.figure(figsize = (12, 12))
 	ax = fig.add_subplot(111, projection='3d')
-	ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
+	ax.scatter(cluster_df.x,cluster_df.y,cluster_df.z)
 	ax.set_xlim(-5,5)
 	ax.set_ylim(-5,5)
 	ax.set_zlim(-5,5)
-	for index,i in clusterdf.iterrows():
+	for index,i in cluster_df.iterrows():
 		text=i.atom+'_'+str(i.isite)
 		ax.text(i.x,i.y,i.z,text)
 	for nood in noods:

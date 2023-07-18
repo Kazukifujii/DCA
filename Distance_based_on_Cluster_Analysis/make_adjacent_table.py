@@ -130,14 +130,18 @@ def main():
 	checker = args.restart
 	print('make adjacent info by pymatgen')
 	for i in tqdm(ciffilelist):
+		
 		#cifnum = re.findall('\/(\w+)\.cif',i)[0]
 		cifnum=os.path.basename(i).replace('.cif','')
+		cifdataout = os.path.join(args.output1,args.output2,cifnum)
+		outfile = os.path.join(cifdataout,f"{cifnum}.txt")
+		if os.path.isfile(outfile):
+			continue
 		if cifnum == args.restart or not checker:
 			checker = True
 		
 		if checker:
 			if adjacent_table1(i,True):
-				cifdataout = args.output1 + "/" + args.output2 + "/" + cifnum
 				if not os.path.isdir(cifdataout):
 					os.mkdir(cifdataout)
 				#subprocess.getoutput("cp {0} {1}".format(i,cifdataout))

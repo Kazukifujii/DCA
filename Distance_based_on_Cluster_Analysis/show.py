@@ -9,8 +9,8 @@ import os
 def change(csv2,csv1,show=True,save=False,hist=False,text=True):
     #print(os.getcwd())
     #sys.exit()
-    csvadress1=csv1
-    csvadress2=csv2
+    csvaddress1=csv1
+    csvaddress2=csv2
     csv1=pd.read_csv(csv1,index_col=0)
     csv2=pd.read_csv(csv2,index_col=0)
     x=csv1['x']
@@ -25,7 +25,7 @@ def change(csv2,csv1,show=True,save=False,hist=False,text=True):
     isite2=csv2['isite']
     atom2=csv2['atom']
     
-    val=cal_distance(csvadress1,csvadress2,values=True)
+    val=cal_distance(csvaddress1,csvaddress2,values=True)
     u2=[]
     v2=[]
     w2=[]
@@ -50,7 +50,7 @@ def change(csv2,csv1,show=True,save=False,hist=False,text=True):
 		#ax.set_xlabel('x')
 		#ax.set_ylabel('y')
 		#ax.set_zlabel('z')
-        ax.set_title(os.path.basename(csvadress1).replace('.csv','')+'(blue) to ' +os.path.basename(csvadress2).replace('.csv','')+'(green)',size=10) # タイトル
+        ax.set_title(os.path.basename(csvaddress1).replace('.csv','')+'(blue) to ' +os.path.basename(csvaddress2).replace('.csv','')+'(green)',size=10) # タイトル
         #ax.set_xlim(-5, 5)
         #ax.set_ylim(-5, 5)
         #ax.set_zlim(-5, 5)
@@ -84,27 +84,27 @@ def change(csv2,csv1,show=True,save=False,hist=False,text=True):
         plt.savefig('change.svg')
     plt.close()
     if hist:
-        df=pd.Series(cal_distance(csvadress1,csvadress2,histgram=True),index=parlist)
+        df=pd.Series(cal_distance(csvaddress1,csvaddress2,histgram=True),index=parlist)
         return df
 
 
-def double_clusterplot(clusterdf1,clusterdf2,title='cluster.png',show=None,save=True):
+def double_clusterplot(cluster_df1,cluster_df2,title='cluster.png',show=None,save=True):
     noods=list()
     fig = plt.figure(figsize = (12, 12))
     ax = fig.add_subplot(111, projection='3d')
     ax.set_xlim(-5,5)
     ax.set_ylim(-5,5)
     ax.set_zlim(-5,5)
-    for clusterdf in [clusterdf1,clusterdf2]:
-        for index,i in clusterdf.iterrows():
+    for cluster_df in [cluster_df1,cluster_df2]:
+        for index,i in cluster_df.iterrows():
             if index==0:
                 continue
             front_idx=i.loc['front_index']
-            a=clusterdf.loc[front_idx].loc['x':'z']
+            a=cluster_df.loc[front_idx].loc['x':'z']
             b=i.loc['x':'z']
             noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
-        ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
-        for index,i in clusterdf.iterrows():
+        ax.scatter(cluster_df.x,cluster_df.y,cluster_df.z)
+        for index,i in cluster_df.iterrows():
             text=i.atom+'_'+str(int(i.isite))
             ax.text(i.x,i.y,i.z,text)
         for nood in noods:
@@ -120,9 +120,9 @@ from PIL import Image
 class DrawGif():
     def __init__(self):
         self.image=list()
-    def set_data(self,clusterdf1,clusterdf2):
+    def set_data(self,cluster_df1,cluster_df2):
         pngname='cluster.png'
-        double_clusterplot(clusterdf1,clusterdf2,title=pngname)
+        double_clusterplot(cluster_df1,cluster_df2,title=pngname)
         self.image.append(Image.open(pngname))
         os.remove(pngname)
         return
@@ -130,14 +130,14 @@ class DrawGif():
         self.image[0].save(filename,save_all=True, append_images=self.image[1:],optimize=False, duration=500, loop=0)
         return
 
-def emd_histgram(cifdir,database_adress='database',show=False,save=True):
+def emd_histgram(cifdir,database_address='database',show=False,save=True):
     distanlist=glob('{}/*distance'.format(cifdir))
     histdf=pd.DataFrame()
-    for dataadress in distanlist:
-        data=pd.read_csv(dataadress,index_col=0).iloc[0]
-        clusteradress_base='{}/{}_{}.csv'.format(database_adress,data.isite_j,data.pattern_j)
-        clusteradress_cif='{}/{}_{}.csv'.format(cifdir,data.isite_i,data.pattern_i)
-        d=cal_distance(csv_adress1=clusteradress_cif,csv_adress2=clusteradress_base,histgram=True)
+    for dataaddress in distanlist:
+        data=pd.read_csv(dataaddress,index_col=0).iloc[0]
+        clusteraddress_base='{}/{}_{}.csv'.format(database_address,data.isite_j,data.pattern_j)
+        clusteraddress_cif='{}/{}_{}.csv'.format(cifdir,data.isite_i,data.pattern_i)
+        d=cal_distance(csv_address1=clusteraddress_cif,csv_address2=clusteraddress_base,histgram=True)
         d.sort(reverse=True)
         histdf.loc[:,'{}_{}'.format(data.isite_i,data.isite_j)]=deepcopy(d)
     histdf=histdf.sort_index(axis=1)
@@ -149,14 +149,14 @@ def emd_histgram(cifdir,database_adress='database',show=False,save=True):
     return histdf
 
 
-def clusterplot(clusterdf,text=True,color=False):
+def clusterplot(cluster_df,text=True,color=False):
     #set nood
     noods=list()
-    for index,i in clusterdf.iterrows():
+    for index,i in cluster_df.iterrows():
         if index==0:
             continue
         front_idx=i.loc['front_index']
-        a=clusterdf.loc[front_idx].loc['x':'z']
+        a=cluster_df.loc[front_idx].loc['x':'z']
         b=i.loc['x':'z']
         noods.append(([a.x,b.x],[a.y,b.y],[a.z,b.z]))
     
@@ -168,16 +168,16 @@ def clusterplot(clusterdf,text=True,color=False):
     ax.set_zlim(-5,5)
     '''
     if text:
-        for index,i in clusterdf.iterrows():
+        for index,i in cluster_df.iterrows():
             text=i.atom+'_'+str(i.isite)
             ax.text(i.x,i.y,i.z,text)
     
     if not color is False:
         for atom,color_ in color.items():
-            specific_atom=clusterdf[clusterdf.atom==atom].copy()
+            specific_atom=cluster_df[cluster_df.atom==atom].copy()
             ax.scatter(specific_atom.x,specific_atom.y,specific_atom.z,color=color_,label=atom)
     else:
-        ax.scatter(clusterdf.x,clusterdf.y,clusterdf.z)
+        ax.scatter(cluster_df.x,cluster_df.y,cluster_df.z)
 
     for nood in noods:
         line = art3d.Line3D(*nood)
