@@ -7,12 +7,12 @@ from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
 from Distance_based_on_Cluster_Analysis.clustermanager import ClusterManager
 import argparse
 from tqdm import tqdm
-
+import json
 def pares_args():
     pares=argparse.ArgumentParser()
     pares.add_argument('--cifdir',default='cifdirs/allzeolite',help='zeolitecif')
     pares.add_argument('--adjacent_num',default=2,help='(int)')
-    pares.add_argument('--cluster_atom_num',default=8,help='(int)')
+    pares.add_argument('--cluster_atom_num',default='{"Si1":5,"O1":4}',help='(json)')
     pares.add_argument('--outdirname',default='cluster_database')
     return pares.parse_args()
 
@@ -20,7 +20,7 @@ def main():
     pares=pares_args()
     cifdir=pares.cifdir
     adjacent_num=int(pares.adjacent_num)
-    cluster_atom_num=int(pares.cluster_atom_num)
+    cluster_atom_num=json.load(pares.cluster_atom_num)
     database=pares.outdirname
 
     #cifから隣接情報の取出し
@@ -31,26 +31,22 @@ def main():
     picdata=make_sort_ciffile(f'result/{cifdir}',estimecont='all')
     cwd = os.getcwd()
     allciflen=picdata.shape[0]
-
     for i,data in picdata.iterrows():
         print(f'\r{data.cifid} {i+1}/{allciflen}',end='')
         nn_data_address= subprocess.getoutput(f"find {data.cifaddress} -name nb_*.pickle")
         make_cluster_dataset(cifid=data.cifid,adjacent_num=adjacent_num,nn_data_address=nn_data_address,outdir=data.cifaddress,rotation=False)
     print('')
 
-
-    #壊れているクラスターを削除
-    print('rm break cluster')
-    cm=ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)
-    
-    for i in range(len(cm.cluster_list_df)):
-        data=cm.cluster_list_df.iloc[i,:]
-        clusteraddress=f'{data.address}/{data.cifid}_{data.isite}_0.csv'
+    #異常なクラスターを削除
+    cm.to_file_path()
+    for i in range(len(cm.cluster_path_list_df)):
+        clusteraddress=cm.cluster_path_list_df.iloc[i,:]
         if not os.path.isfile(clusteraddress):
             print('no file',clusteraddress)
             continue
-        index_num=int(open(clusteraddress,'r').readlines()[-1][0])
-        if index_num!=cluster_atom_num:
+        clustertext = open(clusteraddress,'r').readlines()
+        count = [sum([i.count(j) for i in clustertext]) for j in cluster_atom_num.keys()]
+        if count != list(cluster_atom_num.values()):
             f=open('clean up_cluster.log','a')
             f.write(f'{clusteraddress}\n')
             os.remove(clusteraddress)
@@ -59,9 +55,9 @@ def main():
     #残っているクラスターの回転パターンを全て取る
     print('make all pattern')
     cm=ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)
+    cm.to_file_path()
     for i in  range(len(cm.cluster_list_df)):
-        data=cm.cluster_list_df.iloc[i,:]
-        clusteraddress=f'{data.address}/{data.cifid}_{data.isite}_0.csv'
+        clusteraddress=cm.cluster_path_list_df.iloc[i,:]
         make_cluster_dataset(cluster_address=clusteraddress,outdir=data.address)
     cm=ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)
 
