@@ -73,7 +73,19 @@ class ClusterManager:
         target_combination_files = self.__make_target_files(target_combination_df)
         self.target_combination_files = target_combination_files.to_pandas()
         self.target_combination_df = target_combination_df.to_pandas()
-
+    
+    def to_file_path(self):
+        cluster_list_df = pl.from_pandas(self.cluster_list_df)
+        cluster_path_list_df = cluster_list_df.select(
+                                                        pl.concat_str([
+                                                            pl.col('address'),
+                                                            pl.concat_str([
+                                                                pl.concat_str([pl.col('cifid'),pl.col('isite'),pl.col('pattern')],separator='_'),    
+                                                                pl.lit('csv')],separator='.')]
+                                                        ,separator='/').alias('file_i')
+                                                        )
+        self.cluster_path_list_df = cluster_path_list_df.to_pandas()
+        return
 
 class DCAFormatManager(ClusterManager):
     #DCAの入力フォーマットを管理,現状必要なフォーマットは2つ
