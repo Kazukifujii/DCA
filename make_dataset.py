@@ -60,7 +60,11 @@ def main():
         clusteraddress=cm.cluster_path_list_df.iloc[i,:]
         make_cluster_dataset(cluster_address=clusteraddress,outdir=data.address)
     cm=ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)
+    import logging
+    # ログの出力名を設定
+    logger = logging.getLogger('DistanceLogg')
 
+    fh = logging.FileHandler('cal_distance_error.log')
     #各結晶に属するクラスターの距離を計算(等価なクラスターを取り出すため)
     for i in tqdm(range(len(picdata))):
         data=picdata.iloc[i,:]
@@ -69,11 +73,8 @@ def main():
         #距離の計算
         try:
             cluster_distance_df=cal_distances(cm)
-        except:
-            f=open('error.log','a')
-            f.write(f'error cal_distance {i}\n')
-            print(f'error cal_distance {i}')
-            f.close()
+        except :
+            logger.exception('cal_distance error:cifid {}'.format(cifid))
             continue
         cluster_distance_df.to_csv(f"{data.cifaddress}/{cifid}_cluster_distance.csv")
         #クラスタリングによる分類
