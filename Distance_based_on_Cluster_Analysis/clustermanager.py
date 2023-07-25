@@ -74,16 +74,16 @@ class ClusterManager:
         self.target_combination_files = target_combination_files.to_pandas()
         self.target_combination_df = target_combination_df.to_pandas()
     
-    def to_file_path(self):
+    def to_file_path(self,pattern=0):
         cluster_list_df = pl.from_pandas(self.cluster_list_df)
         cluster_path_list_df = cluster_list_df.select(
-                                                        pl.concat_str([
-                                                            pl.col('address'),
-                                                            pl.concat_str([
-                                                                pl.concat_str([pl.col('cifid'),pl.col('isite'),pl.col('pattern')],separator='_'),    
-                                                                pl.lit('csv')],separator='.')]
-                                                        ,separator='/').alias('file_i')
-                                                        )
+                                                pl.concat_str([
+                                                    pl.col('address'),
+                                                    pl.concat_str([
+                                                        pl.concat_str([pl.col('cifid'),pl.col('isite'),pl.lit(f'{pattern}')],separator='_'),    
+                                                        pl.lit('csv')],separator='.')]
+                                                ,separator='/').alias('file_path')
+                                                )
         self.cluster_path_list_df = cluster_path_list_df.to_pandas()
         return
 
