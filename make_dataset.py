@@ -20,7 +20,7 @@ def main():
     pares=pares_args()
     cifdir=pares.cifdir
     adjacent_num=int(pares.adjacent_num)
-    cluster_atom_num=json.load(pares.cluster_atom_num)
+    cluster_atom_num=json.loads(pares.cluster_atom_num)
     database=pares.outdirname
 
     #cifから隣接情報の取出し
