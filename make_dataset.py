@@ -63,8 +63,8 @@ def main():
     import logging
     # ログの出力名を設定
     logger = logging.getLogger('DistanceLogg')
-
     fh = logging.FileHandler('cal_distance_error.log')
+    logger.addHandler(fh)
     #各結晶に属するクラスターの距離を計算(等価なクラスターを取り出すため)
     for i in tqdm(range(len(picdata))):
         data=picdata.iloc[i,:]
