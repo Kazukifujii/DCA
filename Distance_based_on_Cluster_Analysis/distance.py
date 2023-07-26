@@ -1,20 +1,17 @@
 from .clustermanager import ClusterManager
-import torch
-from .layers import SinkhornDistance    
+from scipy.optimize import linear_sum_assignment
+from scipy.spatial.distance import cdist 
 import polars as pl
 import pandas as pd
 import numpy as np
 def cal_distances(cluster_manager: ClusterManager,reference=1e-8,eps=0.1, max_iter=1000,target_atoms=['Si1','O1'],chunksize=10000):
-        #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        device = torch.device("cpu")
         if cluster_manager.target_combination_df is None:
             cluster_manager.calculate_self_distance_file()
         target_files = pl.from_pandas(cluster_manager.target_combination_files)
-        sinkhorn = SinkhornDistance(eps=eps, max_iter=max_iter)
         chunksize = chunksize if len(target_files) > chunksize else len(target_files)
         result = list()
         for fram in target_files.iter_slices(n_rows=chunksize):
-            results_dis = torch.zeros(len(fram),dtype=torch.float32)
+            results_dis = np.empty(len(fram))
             target_cluster_coordinates = fram.select(
                         pl.all().apply(lambda file_i: pl.scan_csv(file_i))
                     )
@@ -23,15 +20,21 @@ def cal_distances(cluster_manager: ClusterManager,reference=1e-8,eps=0.1, max_it
                                 pl.all().apply(lambda x: x.filter(pl.col('atom') == pickup_atom).select(['x', 'y', 'z']).collect().to_numpy())
                             )
                 pickup_coordinates = pickup_coordinates.to_numpy()
-                A = torch.tensor(np.stack(pickup_coordinates[:,0],0),dtype=torch.float32)
-                B = torch.tensor(np.stack(pickup_coordinates[:,1],0),dtype=torch.float32)
+                A = np.stack(pickup_coordinates[:,0],0)
+                B = np.stack(pickup_coordinates[:,1],0)
                 if A.shape==B.shape:
-                    distance, _, _ = sinkhorn(A, B)
-                    distance=torch.where(distance < reference, torch.tensor(0.0,device=device), distance)
+                    n = A.shape[1]
+                    # ユークリッド距離
+                    d = [cdist(ai, bi) for ai, bi in zip(A, B)]
+                    # 線形割当問題の解
+                    assignment = [linear_sum_assignment(di) for di in d]
+                    # コスト
+                    distance = np.array([di[assignmenti].sum() / n for di,assignmenti in zip(d, assignment)])
+                    distance = np.where(distance < reference, 0, distance)
                 else:
-                    distance = torch.tensor([float('nan')]*A.shape[0],device=device)
-                results_dis = torch.sum(torch.stack([results_dis,distance]),dim=0)
+                    distance = np.array([float('nan')]*A.shape[0])
+                results_dis = np.sum(np.stack([results_dis,distance]),axis=0)
             results_dis = results_dis/len(target_atoms)
-            results_dis = results_dis.cpu().numpy().tolist()
+            results_dis = results_dis.tolist()
             result.extend(results_dis)
         return pd.concat([cluster_manager.target_combination_df, pd.DataFrame(result, columns=['distance'])], axis=1)
