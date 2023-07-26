@@ -4,7 +4,7 @@ from scipy.spatial.distance import cdist
 import polars as pl
 import pandas as pd
 import numpy as np
-def cal_distances(cluster_manager: ClusterManager,reference=1e-8,eps=0.1, max_iter=1000,target_atoms=['Si1','O1'],chunksize=10000):
+def cal_distances(cluster_manager: ClusterManager,reference=1e-8,target_atoms=['Si1','O1'],chunksize=10000):
         if cluster_manager.target_combination_df is None:
             cluster_manager.calculate_self_distance_file()
         target_files = pl.from_pandas(cluster_manager.target_combination_files)
@@ -30,11 +30,12 @@ def cal_distances(cluster_manager: ClusterManager,reference=1e-8,eps=0.1, max_it
                     assignment = [linear_sum_assignment(di) for di in d]
                     # コスト
                     distance = np.array([di[assignmenti].sum() / n for di,assignmenti in zip(d, assignment)])
-                    distance = np.where(distance < reference, 0, distance)
+
                 else:
                     distance = np.array([float('nan')]*A.shape[0])
                 results_dis = np.sum(np.stack([results_dis,distance]),axis=0)
             results_dis = results_dis/len(target_atoms)
+            results_dis = np.where(results_dis < reference , 0.0 , results_dis)
             results_dis = results_dis.tolist()
             result.extend(results_dis)
         return pd.concat([cluster_manager.target_combination_df, pd.DataFrame(result, columns=['distance'])], axis=1)
