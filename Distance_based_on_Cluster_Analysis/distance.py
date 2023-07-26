@@ -25,9 +25,11 @@ def cal_distances(cluster_manager: ClusterManager,reference=1e-8,eps=0.1, max_it
                 pickup_coordinates = pickup_coordinates.to_numpy()
                 A = torch.tensor(np.stack(pickup_coordinates[:,0],0),dtype=torch.float32)
                 B = torch.tensor(np.stack(pickup_coordinates[:,1],0),dtype=torch.float32)
-                #del pickup_coordinates
-                distance, _, _ = sinkhorn(A, B)
-                distance=torch.where(distance < reference, torch.tensor(0.0,device=device), distance)
+                if A.shape==B.shape:
+                    distance, _, _ = sinkhorn(A, B)
+                    distance=torch.where(distance < reference, torch.tensor(0.0,device=device), distance)
+                else:
+                    distance = torch.tensor([float('nan')]*A.shape[0],device=device)
                 results_dis = torch.sum(torch.stack([results_dis,distance]),dim=0)
             results_dis = results_dis/len(target_atoms)
             results_dis = results_dis.cpu().numpy().tolist()
