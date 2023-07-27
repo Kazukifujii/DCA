@@ -3,6 +3,8 @@ from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
 from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
 import argparse,os
 import pickle
+import glob
+from tqdm import tqdm
 from Distance_based_on_Cluster_Analysis.characterization import CrystalFeatureCalculator
 def pares_args():
     pares=argparse.ArgumentParser()
@@ -25,11 +27,13 @@ def main():
   #隣接情報からクラスターを生成
   picdata=make_sort_ciffile('result/{}'.format(cifdir),estimecont='all')
   allciflen=picdata.shape[0]
+  total_cluster_num=0
   for i in range(len(picdata)):
       data=picdata.iloc[i,:]
       print('\r{} {}/{}'.format(data.cifid,i+1,allciflen),end='')
       nn_data_address= os.path.join(data.cifaddress,f"nb_{data.cifid}.pickle")
       make_cluster_dataset(cifid=data.cifid,nn_data_address=nn_data_address,adjacent_num=adjacent_num,rotation=False,outdir=data.cifaddress)
+      total_cluster_num += len(glob.glob(os.path.join(data.cifaddress,'*_0.csv')))
   print()
 
   #計算結果の保存
@@ -45,14 +49,15 @@ def main():
   #各cifファイルの特徴量を計算
   characteriz_func=CrystalFeatureCalculator(databaseaddress)
 
-
-
+  
+  bar = tqdm(total = total_cluster_num)
+  bar.set_description('Progress rate')
   for i in range(len(picdata)):
     data = picdata.iloc[i,:]
     cifid=os.path.basename(data.cifaddress)
-    print('cif {}/{}'.format(i+1,len(picdata)))
-    print(cifid)
     feature = characteriz_func.calculate_features(data.cifaddress)
+    bar.update(len(glob.glob(os.path.join(data.cifaddress,'*_0.csv'))))
+    #特徴量の保存
     text_file=open(resulttxt,'a')
     text_file.write('{},{}\n'.format(cifid,feature))
     text_file.close()
