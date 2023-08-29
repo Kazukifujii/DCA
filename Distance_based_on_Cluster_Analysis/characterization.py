@@ -73,15 +73,14 @@ class CrystalFeatureCalculator(ClusterFeatureCalculator):
     
     def process_target_cluster(self,target_cluster):
         features = self.cluster_calculate_features(target_cluster)
-        self.calculate_log.append(self.distances_df.copy())
-        return features
+        self.distances_df.copy()
+        return features,self.distances_df.copy()
 
     def calculate_features(self, crystalpath):
         target_clusters = glob.glob('{}/*_0.csv'.format(crystalpath))
-        self.calculate_log = list()
         result = Parallel(n_jobs=self.n_jobs)(delayed(self.process_target_cluster)(target_cluster) for target_cluster in target_clusters)
-        self.result = result
-        
+        result,self.calculate_log = zip(*result)
+        self.calculate_log = list(self.calculate_log)
         if self.method == 'mean':
             return np.mean(result, axis=0)
         elif self.method == 'max':
