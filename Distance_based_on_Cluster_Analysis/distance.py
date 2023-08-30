@@ -11,7 +11,7 @@ def cal_distances(cluster_manager: ClusterManager,reference=1e-8,target_atoms=['
         chunksize = chunksize if len(target_files) > chunksize else len(target_files)
         result = list()
         for fram in target_files.iter_slices(n_rows=chunksize):
-            results_dis = np.empty(len(fram))
+            results_dis = np.zeros(len(fram))
             target_cluster_coordinates = fram.select(
                         pl.all().apply(lambda file_i: pl.scan_csv(file_i))
                     )
@@ -30,7 +30,6 @@ def cal_distances(cluster_manager: ClusterManager,reference=1e-8,target_atoms=['
                     assignment = [linear_sum_assignment(di) for di in d]
                     # コスト
                     distance = np.array([di[assignmenti].sum() / n for di,assignmenti in zip(d, assignment)])
-
                 else:
                     distance = np.array([float('nan')]*A.shape[0])
                 results_dis = np.sum(np.stack([results_dis,distance]),axis=0)
