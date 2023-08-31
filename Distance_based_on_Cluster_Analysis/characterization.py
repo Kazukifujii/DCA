@@ -45,7 +45,7 @@ class ClusterFeatureCalculator():
     
 
     def cluster_calculate_features(self,clusterpath):
-        target_cluster = pd.read_csv(clusterpath)
+        target_cluster = pd.read_csv(clusterpath,usecols= ['atom','x','y','z'])
         self.distances_df = self.database_path_df.copy()
         distances = list()
         target_coordinates = {key:target_cluster.query(f"atom == @key")[['x','y','z']].to_numpy() for key in self.targets_atoms}
