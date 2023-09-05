@@ -122,7 +122,7 @@ class ClusterFeatureCalculator():
         #計算対象のメッシュをリストアップ,offsetsは計算対象のメッシュの周囲
         querys = _make_query_keys(target_mesh,offsets=offsets)
         #計算対象のメッシュの周囲のクラスターの特徴量を取得する
-        target_database_indexs = [self.database_mesh_dict[query] for  query in querys if query in self.database_mesh_dict.keys()]
+        target_database_indexs = [i for  query in querys if query in self.database_mesh_dict.keys() for i in self.database_mesh_dict[query]]
         target_database_indexs = np.array(target_database_indexs).flatten()
         target_database_coordinates = {key:val[target_database_indexs] for key,val in self.database_coordinates.items()}
         dis = _cal_distance(target_coordinates,target_database_coordinates)
