@@ -4,7 +4,9 @@ from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
 import argparse,os
 import pickle
 import glob
+import shutil
 from tqdm import tqdm
+from joblib import Parallel, delayed
 from Distance_based_on_Cluster_Analysis.characterization import CrystalFeatureCalculator
 def pares_args():
     pares=argparse.ArgumentParser()
@@ -12,6 +14,16 @@ def pares_args():
     pares.add_argument('--adjacent_num',default=2,help='(int)')
     pares.add_argument('--database_path',default='cluster_database',help='database path')
     return pares.parse_args()
+
+
+
+def parallen_make_cluster_dataset(data,adjacent_num=2):
+      nn_data_address= os.path.join(data.cifaddress,f"nb_{data.cifid}.pickle")
+      make_cluster_dataset(cifid=data.cifid,nn_data_address=nn_data_address,adjacent_num=adjacent_num,rotation=False,outdir=data.cifaddress)
+      return 
+  
+  
+
 
 def main():
   pares=pares_args()
@@ -26,18 +38,12 @@ def main():
 
   #隣接情報からクラスターを生成
   picdata=make_sort_ciffile('result/{}'.format(cifdir),estimecont='all')
-  allciflen=picdata.shape[0]
-  total_cluster_num=0
-  for i in range(len(picdata)):
-      data=picdata.iloc[i,:]
-      print('\r{} {}/{}'.format(data.cifid,i+1,allciflen),end='')
-      nn_data_address= os.path.join(data.cifaddress,f"nb_{data.cifid}.pickle")
-      make_cluster_dataset(cifid=data.cifid,nn_data_address=nn_data_address,adjacent_num=adjacent_num,rotation=False,outdir=data.cifaddress)
-      total_cluster_num += len(glob.glob(os.path.join(data.cifaddress,'*_0.csv')))
-  print()
+  total_cluster_num=picdata.Si_len.sum()
+
+  Parallel(n_jobs=-1)([delayed(parallen_make_cluster_dataset)(data,adjacent_num) for i,data in picdata.iterrows()])
 
   #計算結果の保存
-  import shutil
+  
   resulttxt='result/{}/cifpoint'.format(cifdir)
   text_file=open(resulttxt,'w')
   text_file.write('cifid,point\n')

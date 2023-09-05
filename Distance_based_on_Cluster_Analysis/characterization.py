@@ -29,7 +29,7 @@ def make_inertia_matrix(cluster_coordinate):
 def cal_eigenvalues(cluster_coordinate):
     inertia_matrix = make_inertia_matrix(cluster_coordinate)
     eigenvalues, _ = np.linalg.eig(inertia_matrix)
-    return sorted(eigenvalues)
+    return sorted(eigenvalues.real)
 
 from itertools import product
 def _make_query_keys(mesh,offsets=[-1, 0, 1]):
@@ -48,18 +48,19 @@ def _cal_distance(target_coords,database_coords):
     return distances
 
 class ClusterFeatureCalculator():
-    def __init__(self, databasepath,target_atoms=['Si1','O1'],reference=1e-8,sep_value=0.1):
+    def __init__(self, databasepath,target_atoms=['Si1','O1'],reference=1e-8,sep_value=0.1,offsets=[-1, 0, 1],eig_max_neiber_num=2):
         self.targets_atoms = target_atoms
         self.sep_value = sep_value
+        self.offsets = offsets
 
         database_files = glob.glob(os.path.join(databasepath,'*.csv'))
         
         #固有値を求め、ファイルリストのインデックスにキーを割り当てる
 
         #データベースに保存されているクラスターのデータを特定の隣接数以下でフィルタリングする
-        max_neiber_num = 2
+        self.eig_max_neiber_num = eig_max_neiber_num
         database_dfs = [pl.scan_csv(file_i) for file_i in database_files]
-        database_dfs = [df_i.filter(pl.col('neighbor_num')<=max_neiber_num).select(pl.col(['x','y','z'])) for df_i in database_dfs]
+        database_dfs = [df_i.filter(pl.col('neighbor_num')<=self.eig_max_neiber_num).select(pl.col(['x','y','z'])) for df_i in database_dfs]
         #numpy型で数値データに変換する
         database_dfs = pl.collect_all(database_dfs)
         database_coordinates = [df_i.to_numpy() for df_i in database_dfs]
@@ -83,9 +84,9 @@ class ClusterFeatureCalculator():
         sep_value = str(sep_value)
         #固有値の情報をもとにクラスターを分類する
         database_path_df = database_path_df.with_columns(
-        (pl.col('eig_1')//0.1).cast(int).alias("eig_1_mesh"),
-        (pl.col('eig_2')//0.1).cast(int).alias("eig_2_mesh"),
-        (pl.col('eig_3')//0.1).cast(int).alias("eig_3_mesh")
+        (pl.col('eig_1')//self.sep_value).cast(int).alias("eig_1_mesh"),
+        (pl.col('eig_2')//self.sep_value).cast(int).alias("eig_2_mesh"),
+        (pl.col('eig_3')//self.sep_value).cast(int).alias("eig_3_mesh")
         )
 
         self.database_path_df = database_path_df.collect().to_pandas()
@@ -107,30 +108,37 @@ class ClusterFeatureCalculator():
         #ログフォーマットの作成
         self.log_format = self.database_path_df.drop(['eig_1', 'eig_2','eig_3', 'eig_1_mesh', 'eig_2_mesh', 'eig_3_mesh'], axis=1).copy()
 
+    def change_offset(self,offsets):
+        self.offsets = offsets
 
-    def cluster_calculate_features(self,clusterpath,offsets=[-1, 0, 1]):
+    def cluster_calculate_features(self,clusterpath):
         #clusterpath:クラスターのファイルパス
-        #offsets:計算対象のメッシュの周囲のメッシュのオフセット
 
         target_cluster = pd.read_csv(clusterpath,index_col=0)
         
-        target_coordinates = {key:target_cluster.query(f"atom == @key")[['x','y','z']].to_numpy() for key in self.targets_atoms}
         #target_clusterのモーメントの固有値を求める
-        target_eigs = sorted(cal_eigenvalues(target_cluster.query('neighbor_num<=2')[['x','y','z']].to_numpy()))
+        target_eigs = sorted(cal_eigenvalues(target_cluster.query(f'neighbor_num<={self.eig_max_neiber_num}')[['x','y','z']].to_numpy()))
         target_eigs = np.array(target_eigs)
         target_mesh = (target_eigs//self.sep_value).astype(int)
         #計算対象のメッシュをリストアップ,offsetsは計算対象のメッシュの周囲
-        querys = _make_query_keys(target_mesh,offsets=offsets)
+        querys = _make_query_keys(target_mesh,offsets=self.offsets)
         #計算対象のメッシュの周囲のクラスターの特徴量を取得する
         target_database_indexs = [i for  query in querys if query in self.database_mesh_dict.keys() for i in self.database_mesh_dict[query]]
-        target_database_indexs = np.array(target_database_indexs).flatten()
+
+
+        #計算対象のクラスターの特徴量を取得する
         target_database_coordinates = {key:val[target_database_indexs] for key,val in self.database_coordinates.items()}
+        target_coordinates = {key:target_cluster.query(f"atom == @key")[['x','y','z']].to_numpy() for key in self.targets_atoms}
         dis = _cal_distance(target_coordinates,target_database_coordinates)
+
+
+        if len(dis) == 0:
+            #計算対象のクラスターがデータベースに存在しない場合
+            self.distances_df = 'no match'
+            return np.nan
         self.distances_df = self.log_format.loc[target_database_indexs].copy()
         self.distances_df['distance'] = dis
         return dis.min()
-
-from joblib import Parallel, delayed
 
 class CrystalFeatureCalculator(ClusterFeatureCalculator):
     def __init__(self, databasepath, n_jobs=-1,method='mean'):
@@ -140,11 +148,11 @@ class CrystalFeatureCalculator(ClusterFeatureCalculator):
     
     def process_target_cluster(self,target_cluster):
         features = self.cluster_calculate_features(target_cluster)
-        return features,self.distances_df.copy()
+        return features,self.distances_df
 
     def calculate_features(self, crystalpath):
         target_clusters = glob.glob('{}/*_0.csv'.format(crystalpath))
-        result = Parallel(n_jobs=self.n_jobs)(delayed(self.process_target_cluster)(target_cluster) for target_cluster in target_clusters)
+        result = [self.process_target_cluster(target_cluster) for target_cluster in target_clusters]
         result,self.calculate_log = zip(*result)
         self.calculate_log = list(self.calculate_log)
         if self.method == 'mean':
