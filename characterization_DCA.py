@@ -69,7 +69,7 @@ from tqdm.auto import tqdm
 
 @contextlib.contextmanager
 def tqdm_joblib(total: Optional[int] = None, **kwargs):
-
+    #https://blog.ysk.im/x/joblib-with-progress-bar
     pbar = tqdm(total=total, miniters=1, smoothing=0, **kwargs)
 
     class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
