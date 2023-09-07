@@ -5,6 +5,8 @@ import os
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
 import glob
+from itertools import product
+
 def cal_emd(A,B):
     if A.shape==B.shape:
         n = A.shape[1]
@@ -31,12 +33,6 @@ def cal_eigenvalues(cluster_coordinate):
     eigenvalues, _ = np.linalg.eig(inertia_matrix)
     return sorted(eigenvalues.real)
 
-from itertools import product
-def _make_query_keys(mesh,offsets=[-1, 0, 1]):
-    offsets = product(*[offsets] * 3)
-    target_cells = [tuple(mesh + offset) for offset in offsets]
-    return target_cells
-
 def _cal_distance(target_coords,database_coords):
     distances = list()
     for target_atom,database_coord in database_coords.items():
@@ -48,10 +44,10 @@ def _cal_distance(target_coords,database_coords):
     return distances
 
 class ClusterFeatureCalculator():
-    def __init__(self, databasepath,target_atoms=['Si1','O1'],reference=1e-8,sep_value=0.1,offsets=[-1, 0, 1],eig_max_neiber_num=2):
+    def __init__(self, databasepath,target_atoms=['Si1','O1'],reference=1e-8,sep_value=0.1,offset=5,eig_max_neiber_num=2):
         self.targets_atoms = target_atoms
         self.sep_value = sep_value
-        self.offsets = offsets
+        self.offset = offset
 
         database_files = glob.glob(os.path.join(databasepath,'*.csv'))
         
@@ -108,8 +104,24 @@ class ClusterFeatureCalculator():
         #ログフォーマットの作成
         self.log_format = self.database_path_df.drop(['eig_1', 'eig_2','eig_3', 'eig_1_mesh', 'eig_2_mesh', 'eig_3_mesh'], axis=1).copy()
 
-    def change_offset(self,offsets):
-        self.offsets = offsets
+
+    def change_offset(self,offset):
+        self.offset = offset
+
+    def _cal_mesh(self,target_cluster):
+        #target_clusterのモーメントの固有値を求める
+        target_eigs = sorted(cal_eigenvalues(target_cluster.query(f'neighbor_num<={self.eig_max_neiber_num}')[['x','y','z']].to_numpy()))
+        target_eigs = np.array(target_eigs)
+        return (target_eigs//self.sep_value).astype(int)
+    
+    def _make_query_keys(self,mesh):
+        mesh_lenge = [i for i in range(-self.offset,self.offset+1)]
+        offsets = product(*[mesh_lenge] * 3)
+        target_cells = [tuple(mesh + offset) for offset in offsets]
+        return target_cells
+    
+    def _get_target_databse_indexs(self,querys):
+        return [i for  query in querys if query in self.database_mesh_dict.keys() for i in self.database_mesh_dict[query]]
 
     def cluster_calculate_features(self,clusterpath):
         #clusterpath:クラスターのファイルパス
@@ -117,20 +129,18 @@ class ClusterFeatureCalculator():
         target_cluster = pd.read_csv(clusterpath,index_col=0)
         
         #target_clusterのモーメントの固有値を求める
-        target_eigs = sorted(cal_eigenvalues(target_cluster.query(f'neighbor_num<={self.eig_max_neiber_num}')[['x','y','z']].to_numpy()))
-        target_eigs = np.array(target_eigs)
-        target_mesh = (target_eigs//self.sep_value).astype(int)
-        #計算対象のメッシュをリストアップ,offsetsは計算対象のメッシュの周囲
-        querys = _make_query_keys(target_mesh,offsets=self.offsets)
-        #計算対象のメッシュの周囲のクラスターの特徴量を取得する
-        target_database_indexs = [i for  query in querys if query in self.database_mesh_dict.keys() for i in self.database_mesh_dict[query]]
+        target_mesh = self._cal_mesh(target_cluster)
 
+        #計算対象のメッシュをリストアップ,offsetsは計算対象のメッシュの周囲
+        querys = self._make_query_keys(target_mesh)
+
+        #計算対象のメッシュの周囲のクラスターの特徴量を取得する
+        target_database_indexs = self._get_target_databse_indexs(querys)
 
         #計算対象のクラスターの特徴量を取得する
         target_database_coordinates = {key:val[target_database_indexs] for key,val in self.database_coordinates.items()}
         target_coordinates = {key:target_cluster.query(f"atom == @key")[['x','y','z']].to_numpy() for key in self.targets_atoms}
         dis = _cal_distance(target_coordinates,target_database_coordinates)
-
 
         if len(dis) == 0:
             #計算対象のクラスターがデータベースに存在しない場合
