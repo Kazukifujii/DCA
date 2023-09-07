@@ -4,14 +4,13 @@ from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
 import argparse,os
 import pickle
 import glob
+import json
 import pandas as pd
 from joblib import Parallel, delayed
 from Distance_based_on_Cluster_Analysis.characterization import CrystalFeatureCalculator
 def pares_args():
     pares=argparse.ArgumentParser()
-    pares.add_argument('--cifdir',default='cifdirs/sort_volume_ciffiles_top_100',help='zeolitecif')
-    pares.add_argument('--adjacent_num',default=2,help='(int)')
-    pares.add_argument('--database_path',default='cluster_database',help='database path')
+    pares.add_argument('--config-path',default='config',help='config path')
     return pares.parse_args()
 
 
@@ -40,14 +39,45 @@ def parallel_calculate_feature(data,characteriz_func):
     for j,log in enumerate(characteriz_func.calculate_log):
       pickle.dump(log,open(f'{data.cifaddress}/log/{cifid}_{j}.pickle','wb'))
     return 
+
+def load_params_from_config(config):
+  float_keys = ['reference','sep_value']
+  ing_keys = ['offset','eig_max_neiber_num']
+  bool_keys = ['use_mesh_flag']
+  list_keys = ['target_atoms']
+  params = dict(config['CALCULATION'])
+  n_jobs = int(params.pop('n_jobs'))
+  adjacent_num = int(params.pop('adjacent_num'))
+  for key in float_keys:
+        params[key] = float(params[key])
+
+  for key in ing_keys:
+      params[key] = int(params[key])
+
+  for key in bool_keys:
+      params[key] = bool(params[key])
+
+  for key in list_keys:
+      params[key] = json.loads(params[key].replace("'", "\""))
   
+  return params,n_jobs,adjacent_num
+   
 
-
+import configparser
 def main():
-  pares=pares_args()
-  cifdir=pares.cifdir
-  adjacent_num=int(pares.adjacent_num)
-  databaseaddress=pares.database_path
+  config = configparser.ConfigParser()
+  config.read('config')
+  database_path = config['PATH LIST']['database-path']
+  cifdir = config['PATH LIST']['cifdir']
+
+  params,n_jobs,adjacent_num = load_params_from_config(config)
+  
+  params.update({'databasepath':database_path})
+
+  print(params)
+
+  return
+
   resultdir=os.path.join('result',cifdir)
   #cifから隣接情報の取出し
   run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
@@ -58,13 +88,13 @@ def main():
   #隣接情報からクラスターを生成
   print('make cluster dataset')
   picdata=make_sort_ciffile(resultdir,estimecont='all')
-  Parallel(n_jobs=-1)([delayed(parallen_make_cluster_dataset)(data,adjacent_num) for _,data in picdata.iterrows()])
+  Parallel(n_jobs=n_jobs)([delayed(parallen_make_cluster_dataset)(data,adjacent_num) for _,data in picdata.iterrows()])
   print('ok')
   #各cifファイルの特徴量を計算
-  characteriz_func=CrystalFeatureCalculator(databaseaddress)
+  characteriz_func=CrystalFeatureCalculator(**params)
 
   #特徴量の計算
-  Parallel(n_jobs=-1)([delayed(parallel_calculate_feature)(data,characteriz_func) for _,data in picdata.iterrows()])
+  Parallel(n_jobs=n_jobs)([delayed(parallel_calculate_feature)(data,characteriz_func) for _,data in picdata.iterrows()])
 
   #各cifファイルの特徴量を結合
 
