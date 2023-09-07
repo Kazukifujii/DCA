@@ -62,6 +62,30 @@ def load_params_from_config(config):
   
   return params,n_jobs,adjacent_num
    
+import contextlib
+from typing import Optional
+import joblib
+from tqdm.auto import tqdm
+
+@contextlib.contextmanager
+def tqdm_joblib(total: Optional[int] = None, **kwargs):
+
+    pbar = tqdm(total=total, miniters=1, smoothing=0, **kwargs)
+
+    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
+        def __call__(self, *args, **kwargs):
+            pbar.update(n=self.batch_size)
+            return super().__call__(*args, **kwargs)
+
+    old_batch_callback = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
+
+    try:
+        yield pbar
+    finally:
+        joblib.parallel.BatchCompletionCallBack = old_batch_callback
+        pbar.close()
+
 
 import configparser
 def main():
@@ -74,10 +98,6 @@ def main():
   
   params.update({'databasepath':database_path})
 
-  print(params)
-
-  return
-
   resultdir=os.path.join('result',cifdir)
   #cifから隣接情報の取出し
   run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
@@ -88,13 +108,17 @@ def main():
   #隣接情報からクラスターを生成
   print('make cluster dataset')
   picdata=make_sort_ciffile(resultdir,estimecont='all')
-  Parallel(n_jobs=n_jobs)([delayed(parallen_make_cluster_dataset)(data,adjacent_num) for _,data in picdata.iterrows()])
+  with tqdm_joblib(len(picdata)):
+    Parallel(n_jobs=n_jobs)([delayed(parallen_make_cluster_dataset)(data,adjacent_num) for _,data in picdata.iterrows()])
   print('ok')
   #各cifファイルの特徴量を計算
+  print('load database')
   characteriz_func=CrystalFeatureCalculator(**params)
+  print('ok')
 
   #特徴量の計算
-  Parallel(n_jobs=n_jobs)([delayed(parallel_calculate_feature)(data,characteriz_func) for _,data in picdata.iterrows()])
+  with tqdm_joblib(len(picdata)):
+    Parallel(n_jobs=n_jobs)([delayed(parallel_calculate_feature)(data,characteriz_func) for _,data in picdata.iterrows()])
 
   #各cifファイルの特徴量を結合
 
