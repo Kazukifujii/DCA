@@ -8,7 +8,50 @@ from Distance_based_on_Cluster_Analysis.clustermanager import ClusterManager
 import argparse
 import logging
 from tqdm import tqdm
+from joblib import Parallel, delayed
 import json
+import contextlib
+from typing import Optional
+import joblib
+from tqdm.auto import tqdm
+from functools import partial
+
+
+@contextlib.contextmanager
+def tqdm_joblib(total: Optional[int] = None, **kwargs):
+    #https://blog.ysk.im/x/joblib-with-progress-bar
+    pbar = tqdm(total=total, miniters=1, smoothing=0, **kwargs)
+
+    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
+        def __call__(self, *args, **kwargs):
+            pbar.update(n=self.batch_size)
+            return super().__call__(*args, **kwargs)
+
+    old_batch_callback = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
+
+    try:
+        yield pbar
+    finally:
+        joblib.parallel.BatchCompletionCallBack = old_batch_callback
+        pbar.close()
+
+def parallel_clustering_in_crystal(data,logger=None):
+    cifid=data.cifid
+    cm=ClusterManager.from_dirpath(data.cifaddress)
+    #距離の計算
+    try:
+        cluster_distance_df=cal_distances(cm)
+    except :
+        logger.exception('cal_distance error:cifid {}'.format(cifid))
+        return
+    cluster_distance_df.to_csv(f"{data.cifaddress}/{cifid}_cluster_distance.csv")
+    #クラスタリングによる分類
+    flusterdf=make_clustering(cluster_distance_df)
+    #結果の保存
+    flusterdf.to_csv(f"{data.cifaddress}/{cifid}_fcluster.csv")
+
+
 def pares_args():
     pares=argparse.ArgumentParser()
     pares.add_argument('--cifdir',default='cifdirs/allzeolite',help='zeolitecif')
@@ -75,24 +118,13 @@ def main():
     fh = logging.FileHandler('cal_distance_error.log')
     logger.addHandler(fh)
     #各結晶に属するクラスターの距離を計算(等価なクラスターを取り出すため)
-    for i in tqdm(range(len(picdata))):
-        data=picdata.iloc[i,:]
-        cifid=data.cifid
-        if cifid!='SFV':
-            continue
-        cm=ClusterManager.from_dirpath(data.cifaddress)
-        #距離の計算
-        try:
-            cluster_distance_df=cal_distances(cm)
-        except :
-            logger.exception('cal_distance error:cifid {}'.format(cifid))
-            continue
-        cluster_distance_df.to_csv(f"{data.cifaddress}/{cifid}_cluster_distance.csv")
-        #クラスタリングによる分類
-        flusterdf=make_clustering(cluster_distance_df)
-        #結果の保存
-        flusterdf.to_csv(f"{data.cifaddress}/{cifid}_fcluster.csv")        
+    
+    #set logger
+    parallel_clustering = partial(parallel_clustering_in_crystal,logger=logger)
 
+    with tqdm_joblib(total=len(picdata)):
+        Parallel(n_jobs=-1)(delayed(parallel_clustering)(data) for _,data in picdata.iterrows())
+    
     fcluster_df=fcluster_list(picdata)
     fcluster_df.to_csv(f'result/{cifdir}/unique_cluster.csv')
     
