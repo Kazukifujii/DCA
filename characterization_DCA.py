@@ -40,7 +40,7 @@ def parallel_calculate_feature(data,characteriz_func):
       pickle.dump(log,open(f'{data.cifaddress}/log/{cifid}_{j}.pickle','wb'))
     return 
 
-def load_params_from_config(config):
+def load_params_from_config(config:configparser.ConfigParser):
   float_keys = ['reference','sep_value']
   ing_keys = ['offset','eig_max_neiber_num']
   bool_keys = ['use_mesh_flag']

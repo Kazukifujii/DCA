@@ -7,9 +7,12 @@ from scipy.spatial.distance import cdist
 import glob
 from itertools import product
 
-def cal_emd(A,B):
+def cal_emd(A:np.array,B:np.array) -> np.array:
+    #A,B:原子の座標
+    #A,Bは共にm*n*3の配列である必要がある
     if A.shape==B.shape:
-        n = A.shape[1]
+        #原点を除く原子の個数
+        n = A.shape[1]-1 if (A[0,:]==0).all() else A.shape[1]
         # ユークリッド距離
         d = [cdist(ai, bi) for ai, bi in zip(A, B)]
         # 線形割当問題の解
@@ -23,12 +26,12 @@ def cal_emd(A,B):
 def tilda(u):
     return np.array([[0,-u[2],u[1]],[u[2],0,-u[0]],[-u[1],u[0],0]])
 
-def make_inertia_matrix(cluster_coordinate):
+def make_inertia_matrix(cluster_coordinate:np.ndarray) -> np.ndarray:
     cluster_coordinate_tilda = np.array([tilda(u) for u in cluster_coordinate])
     inertia_matrixs = -np.array([np.dot(tilda_vec, tilda_vec) for tilda_vec in cluster_coordinate_tilda]) 
     return np.sum(inertia_matrixs,axis=0)
 
-def cal_eigenvalues(cluster_coordinate):
+def cal_eigenvalues(cluster_coordinate:np.ndarray) -> list():
     inertia_matrix = make_inertia_matrix(cluster_coordinate)
     eigenvalues, _ = np.linalg.eig(inertia_matrix)
     return sorted(eigenvalues.real)
@@ -115,7 +118,7 @@ class ClusterFeatureCalculator():
     def change_use_mesh_flag(self,use_mesh_flag):
         self.use_mesh_flag = use_mesh_flag
 
-    def _cal_mesh(self,target_cluster):
+    def _cal_mesh(self,target_cluster:pd.DataFrame):
         #target_clusterのモーメントの固有値を求める
         target_eigs = sorted(cal_eigenvalues(target_cluster.query(f'neighbor_num<={self.eig_max_neiber_num}')[['x','y','z']].to_numpy()))
         target_eigs = np.array(target_eigs)

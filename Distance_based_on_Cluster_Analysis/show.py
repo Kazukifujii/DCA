@@ -2,7 +2,7 @@ import re,os
 import pandas as pd
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.art3d as art3d
-from .distance_func import cal_distance
+from .distance import cal_distances
 from copy import deepcopy
 from glob import glob
 import os
