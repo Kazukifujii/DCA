@@ -6,6 +6,7 @@ from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
 import glob
 from itertools import product
+import copy
 
 def cal_emd(A:np.array,B:np.array) -> np.array:
     #A,B:原子の座標
@@ -55,44 +56,16 @@ class ClusterFeatureCalculator():
 
         database_files = glob.glob(os.path.join(databasepath,'*.csv'))
         
-        #固有値を求め、ファイルリストのインデックスにキーを割り当てる
-
-        #データベースに保存されているクラスターのデータを特定の隣接数以下でフィルタリングする
-        self.eig_max_neiber_num = eig_max_neiber_num
-        database_dfs = [pl.scan_csv(file_i) for file_i in database_files]
-        database_dfs = [df_i.filter(pl.col('neighbor_num')<=self.eig_max_neiber_num).select(pl.col(['x','y','z'])) for df_i in database_dfs]
-        #numpy型で数値データに変換する
-        database_dfs = pl.collect_all(database_dfs)
-        database_coordinates = [df_i.to_numpy() for df_i in database_dfs]
-
-        #モーメントの固有値の計算を行う
-        eigs = [cal_eigenvalues(cluster_coordinate) for cluster_coordinate in database_coordinates]
-        
         #データベースのファイルパスとそれに対応する固有値を整理し保存する
-        database_path_df = pl.LazyFrame({'file_path':database_files,'eigs':eigs})
+        database_path_df = pl.LazyFrame({'file_path':database_files})
         database_path_df = database_path_df.with_columns(
             pl.col("file_path").map_elements(os.path.dirname).alias("address_i"),
             pl.col("file_path").map_elements(lambda x: os.path.basename(x).replace('.csv', '').split('_')[0]).alias("cifid_i"),
             pl.col("file_path").map_elements(lambda x: os.path.basename(x).replace('.csv', '').split('_')[1]).alias("isite_i"),
-            pl.col("file_path").map_elements(lambda x: os.path.basename(x).replace('.csv', '').split('_')[2]).alias("pattern_i"),
-            pl.col("eigs").list.get(0).alias("eig_1"),
-            pl.col("eigs").list.get(1).alias("eig_2"),
-            pl.col("eigs").list.get(2).alias("eig_3")
-        ).select(pl.col(['address_i','cifid_i','isite_i','pattern_i','eig_1','eig_2','eig_3']))
-        
-
-        sep_value = str(sep_value)
-        #固有値の情報をもとにクラスターを分類する
-        database_path_df = database_path_df.with_columns(
-        (pl.col('eig_1')//self.sep_value).cast(int).alias("eig_1_mesh"),
-        (pl.col('eig_2')//self.sep_value).cast(int).alias("eig_2_mesh"),
-        (pl.col('eig_3')//self.sep_value).cast(int).alias("eig_3_mesh")
-        )
+            pl.col("file_path").map_elements(lambda x: os.path.basename(x).replace('.csv', '').split('_')[2]).alias("pattern_i")
+        ).select(pl.col(['address_i','cifid_i','isite_i','pattern_i']))
 
         self.database_path_df = database_path_df.collect().to_pandas()
-
-        #メッシュの検索を行うための辞書を作成
-        self.database_mesh_dict = self.database_path_df.groupby(['eig_1_mesh', 'eig_2_mesh', 'eig_3_mesh']).apply(lambda x:x.index.tolist()).to_dict()
 
         #計算用のcluster_coordinateを作成する
         self.reference = reference
@@ -106,8 +79,19 @@ class ClusterFeatureCalculator():
         self.database_coordinates = database_coordinates
 
         #ログフォーマットの作成
-        self.log_format = self.database_path_df.drop(['eig_1', 'eig_2','eig_3', 'eig_1_mesh', 'eig_2_mesh', 'eig_3_mesh'], axis=1).copy()
+        self.log_format = self.database_path_df.copy()
 
+
+    def make_mesh_dict(self):
+        #データベースのメッシュを作成する
+        self.database_mesh_dict ={}
+        for atom in self.targets_atoms:
+            _mesh_dict = [cal_eigenvalues(coordinate) for coordinate in self.database_coordinates[atom]]
+            _mesh_df = pd.DataFrame(_mesh_dict,columns=['eig_1','eig_2','eig_3'])
+            _mesh_df = _mesh_df.filter(like='eig').applymap(lambda x: int(x//self.sep_value))
+            _mesh_df.rename(columns={'eig_1':'eig_1_mesh','eig_2':'eig_2_mesh','eig_3':'eig_3_mesh'},inplace=True)
+            _mesh_dict = _mesh_df.groupby(['eig_1_mesh','eig_2_mesh','eig_3_mesh']).apply(lambda x:x.index.tolist()).to_dict()
+            self.database_mesh_dict[atom] = copy.deepcopy(_mesh_dict)
 
     def change_offset(self,offset):
         self.offset = offset
@@ -118,20 +102,35 @@ class ClusterFeatureCalculator():
     def change_use_mesh_flag(self,use_mesh_flag):
         self.use_mesh_flag = use_mesh_flag
 
-    def _cal_mesh(self,target_cluster:pd.DataFrame):
+    def _cal_mesh(self,target_cluster:pd.DataFrame) -> dict():
         #target_clusterのモーメントの固有値を求める
-        target_eigs = sorted(cal_eigenvalues(target_cluster.query(f'neighbor_num<={self.eig_max_neiber_num}')[['x','y','z']].to_numpy()))
-        target_eigs = np.array(target_eigs)
-        return (target_eigs//self.sep_value).astype(int)
+        target_eigs = {}
+        for atom in self.targets_atoms:
+            target_eig = cal_eigenvalues(target_cluster.query(f'atom=="{atom}"')[['x','y','z']].values)
+            target_eigs[atom] = (np.array(target_eig)//self.sep_value).astype(int)
+        return target_eigs
     
-    def _make_query_keys(self,mesh):
+    def __make_query_keys(self,mesh:dict()) -> list():
         mesh_lenge = [i for i in range(-self.offset,self.offset+1)]
         offsets = product(*[mesh_lenge] * 3)
         target_cells = [tuple(mesh + offset) for offset in offsets]
         return target_cells
     
+    def _make_query_keys(self,mesh:dict()) -> list():
+        return {atom:self.__make_query_keys(target_eig) for atom,target_eig in mesh.items()}
+
     def _get_target_databse_indexs(self,querys):
-        return [i for  query in querys if query in self.database_mesh_dict.keys() for i in self.database_mesh_dict[query]]
+        target_indexs = {}
+        for atom,querys_i in querys.items():
+            target_indexs[atom] = [i for  query in querys_i if query in self.database_mesh_dict[atom].keys() for i in self.database_mesh_dict[atom][query]]
+        
+        target_indexs_set = set()
+        for val in target_indexs.values():
+            if len(target_indexs_set)==0:
+                target_indexs_set = copy.deepcopy(set(val))
+                continue
+            target_indexs_set = target_indexs_set & set(val)
+        return list(target_indexs_set)
 
     def cluster_calculate_features(self,clusterpath):
         #clusterpath:クラスターのファイルパス

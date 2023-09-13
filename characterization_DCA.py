@@ -8,6 +8,8 @@ import json
 import pandas as pd
 from joblib import Parallel, delayed
 from Distance_based_on_Cluster_Analysis.characterization import CrystalFeatureCalculator
+import configparser
+
 def pares_args():
     pares=argparse.ArgumentParser()
     pares.add_argument('--config-path',default='config',help='config path')
@@ -87,7 +89,7 @@ def tqdm_joblib(total: Optional[int] = None, **kwargs):
         pbar.close()
 
 
-import configparser
+
 def main():
   config = configparser.ConfigParser()
   config.read('config')
