@@ -48,7 +48,7 @@ def _cal_distance(target_coords,database_coords):
     return distances
 
 class ClusterFeatureCalculator():
-    def __init__(self, databasepath,target_atoms=['Si1','O1'],reference=1e-8,sep_value=0.1,offset=5,eig_max_neiber_num=2,use_mesh_flag=True):
+    def __init__(self, databasepath,target_atoms=['Si1','O1'],reference=1e-8,sep_value=0.1,offset=5,use_mesh_flag=True):
         self.targets_atoms = target_atoms
         self.sep_value = sep_value
         self.offset = offset
@@ -81,6 +81,8 @@ class ClusterFeatureCalculator():
         #ログフォーマットの作成
         self.log_format = self.database_path_df.copy()
 
+        #データベースのメッシュを作成する
+        self.make_mesh_dict()
 
     def make_mesh_dict(self):
         #データベースのメッシュを作成する
@@ -162,9 +164,9 @@ class ClusterFeatureCalculator():
         return dis.min()
 
 class CrystalFeatureCalculator(ClusterFeatureCalculator):
-    def __init__(self, databasepath,method='mean',target_atoms=['Si1','O1'],reference=1e-8,sep_value=0.1,offset=5,eig_max_neiber_num=2,use_mesh_flag=True):
+    def __init__(self, databasepath,method='mean',target_atoms=['Si1','O1'],reference=1e-8,sep_value=0.1,offset=5,use_mesh_flag=True):
         self.method = method
-        super().__init__(databasepath,target_atoms,reference,sep_value,offset,eig_max_neiber_num,use_mesh_flag)
+        super().__init__(databasepath,target_atoms,reference,sep_value,offset,use_mesh_flag)
     
     def process_target_cluster(self,target_cluster):
         features = self.cluster_calculate_features(target_cluster)

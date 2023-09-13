@@ -44,7 +44,7 @@ def parallel_calculate_feature(data,characteriz_func):
 
 def load_params_from_config(config:configparser.ConfigParser):
   float_keys = ['reference','sep_value']
-  ing_keys = ['offset','eig_max_neiber_num']
+  ing_keys = ['offset']
   bool_keys = ['use_mesh_flag']
   list_keys = ['target_atoms']
   params = dict(config['CALCULATION'])
@@ -91,11 +91,11 @@ def tqdm_joblib(total: Optional[int] = None, **kwargs):
 
 
 def main():
+  args=pares_args()
   config = configparser.ConfigParser()
-  config.read('config')
+  config.read(args.config_path)
   database_path = config['PATH LIST']['database-path']
   cifdir = config['PATH LIST']['cifdir']
-
   params,n_jobs,adjacent_num = load_params_from_config(config)
   
   params.update({'databasepath':database_path})
