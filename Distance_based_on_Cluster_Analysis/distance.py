@@ -70,9 +70,6 @@ def cal_emd(A:np.array,B:np.array) -> np.array:
 def load_files_from_dirpath(dirpath):
     return [file for file in glob.glob(os.path.join(dirpath, '*.csv')) if re.search(r'[0-9]+\.csv$', file)]
 
-def make_combination_indexs(files):
-    return list(itertools.combinations(range(len(files)), 2))
-
 def make_combination_indexs_pattern_only_zero(files):
     pattern_list = [i for i, file in enumerate(files) if re.search(r'_0\.csv$', file)]
     return list(itertools.combinations(pattern_list, 2))
@@ -82,7 +79,7 @@ def create_combination_indices(files):
     
     result = []
     for target_comb in only_zero:
-        match_str = re.sub(r'_0\.csv$', '', files[target_comb[1]])
+        match_str = re.sub(r'0\.csv$', '', files[target_comb[1]])
         pattern = re.compile(match_str)
         pattern_list = [i for i, file in enumerate(files) if pattern.match(file)]
         result.extend([(target_comb[0], i) for i in pattern_list])
