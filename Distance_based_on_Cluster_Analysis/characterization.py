@@ -7,22 +7,8 @@ from scipy.spatial.distance import cdist
 import glob
 from itertools import product
 import copy
+from .distance import cal_emd
 
-def cal_emd(A:np.array,B:np.array) -> np.array:
-    #A,B:原子の座標
-    #A,Bは共にm*n*3の配列である必要がある
-    if A.shape==B.shape:
-        #原点を除く原子の個数
-        n = A.shape[1]-1 if (A[0,:]==0).all() else A.shape[1]
-        # ユークリッド距離
-        d = [cdist(ai, bi) for ai, bi in zip(A, B)]
-        # 線形割当問題の解
-        assignment = [linear_sum_assignment(di) for di in d]
-        # コスト
-        distance = np.array([di[assignmenti].sum() / n for di,assignmenti in zip(d, assignment)])
-    else:
-        distance = np.array([float('nan')]*A.shape[0])
-    return distance
 #データベースとクラスターとの距離を計算するクラスを作成する
 def tilda(u):
     return np.array([[0,-u[2],u[1]],[u[2],0,-u[0]],[-u[1],u[0],0]])

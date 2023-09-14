@@ -1,6 +1,6 @@
 from subprocess import run
 import os,subprocess,shutil
-from Distance_based_on_Cluster_Analysis.distance import cal_distances
+from Distance_based_on_Cluster_Analysis.distance import CalulateSelfDistance
 from Distance_based_on_Cluster_Analysis.clustering import make_clustering,fcluster_list
 from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
 from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
@@ -36,12 +36,12 @@ def tqdm_joblib(total: Optional[int] = None, **kwargs):
         joblib.parallel.BatchCompletionCallBack = old_batch_callback
         pbar.close()
 
-def parallel_clustering_in_crystal(data,logger=None):
+
+def parallel_clustering_in_crystal(data,csd:CalulateSelfDistance,logger=None):
     cifid=data.cifid
-    cm=ClusterManager.from_dirpath(data.cifaddress)
     #距離の計算
     try:
-        cluster_distance_df=cal_distances(cm)
+        cluster_distance_df=csd.calculate_distance(data.cifaddress)
     except :
         logger.exception('cal_distance error:cifid {}'.format(cifid))
         return
@@ -119,8 +119,9 @@ def main():
     logger.addHandler(fh)
     #各結晶に属するクラスターの距離を計算(等価なクラスターを取り出すため)
     
-    #set logger
-    parallel_clustering = partial(parallel_clustering_in_crystal,logger=logger)
+    #set logger and CalulateSelfDistance
+    csd=CalulateSelfDistance(target_atoms=['Si1','O1'],reference=1e-8,chunk=30000)
+    parallel_clustering = partial(parallel_clustering_in_crystal,csd=csd,logger=logger)
 
     with tqdm_joblib(total=len(picdata)):
         Parallel(n_jobs=-1)(delayed(parallel_clustering)(data) for _,data in picdata.iterrows())
