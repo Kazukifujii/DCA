@@ -104,7 +104,7 @@ def cal_distance(coordinates_a:dict [np.array],coordinates_b:dict [np.arange],ta
 def format_file_name(path:str) -> dict:
     #dataから、address,cifid,isite,patternを取得する
     address = os.path.dirname(path)
-    cifid,isite,pattern = re.search(r'([A-W]+)_([0-9]+)_([0-9]+)\.csv$',path).groups()
+    cifid,isite,pattern = re.search(r'([A-Z]+)_([0-9]+)_([0-9]+)\.csv$',path).groups()
     return {'address':address,'cifid':cifid,'isite':int(isite),'pattern':int(pattern)}
 
 def make_log_format(files,combination_indexs):
