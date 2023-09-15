@@ -68,7 +68,10 @@ def cal_emd(A:np.array,B:np.array) -> np.array:
 
 
 def load_files_from_dirpath(dirpath):
-    return [file for file in glob.glob(os.path.join(dirpath, '*.csv')) if re.search(r'[0-9]+\.csv$', file)]
+    pattern = re.compile(r'[0-9]+\.csv$')
+    files = [file for file in glob.glob(os.path.join(dirpath, '*.csv')) if re.search(pattern, file)]
+    pattern = re.compile(r'\_([0-9]+)\_')
+    return sorted(files, key=lambda x: int(pattern.findall(x)[0]))
 
 def make_combination_indexs_pattern_only_zero(files):
     pattern_list = [i for i, file in enumerate(files) if re.search(r'_0\.csv$', file)]
@@ -79,11 +82,10 @@ def create_combination_indices(files):
     
     result = []
     for target_comb in only_zero:
-        match_str = re.sub(r'0\.csv$', '', files[target_comb[1]])
-        pattern = re.compile(match_str)
-        pattern_list = [i for i, file in enumerate(files) if pattern.match(file)]
+        match_str = re.sub(r'0\.csv$', '', files[target_comb[1]])#0.csvを削除
+        pattern = re.compile(match_str)#正規表現のパターンを作成,0.csvを削除した文字列と一致するファイルを探す
+        pattern_list = [i for i, file in enumerate(files) if pattern.match(file)]#一致するファイルのインデックスを取得
         result.extend([(target_comb[0], i) for i in pattern_list])
-    
     return result
 
 def load_files(files):
@@ -104,6 +106,16 @@ def format_file_name(path:str) -> dict:
     address = os.path.dirname(path)
     cifid,isite,pattern = re.search(r'([A-W]+)_([0-9]+)_([0-9]+)\.csv$',path).groups()
     return {'address':address,'cifid':cifid,'isite':int(isite),'pattern':int(pattern)}
+
+def make_log_format(files,combination_indexs):
+    #combination_indexs = [i for j in combination_indexs for i in j]
+    all_alist,all_blist = zip(*combination_indexs)
+    all_alist,all_blist = list(all_alist),list(all_blist)
+    distances_log = pd.DataFrame({'file_i':[files[i] for i in all_alist],'file_j':[files[i] for i in all_blist]})
+    distances_log_i = distances_log['file_i'].apply(format_file_name).apply(pd.Series).rename(columns={'address':'address_i','cifid':'cifid_i','isite':'isite_i','pattern':'pattern_i'})
+    distances_log_j = distances_log['file_j'].apply(format_file_name).apply(pd.Series).rename(columns={'address':'address_j','cifid':'cifid_j','isite':'isite_j','pattern':'pattern_j'})
+    return pd.concat([distances_log_i,distances_log_j],axis=1)
+
 
 class CalulateSelfDistance:
     def __init__(self,target_atoms=['Si1','O1'],reference=1e-8,chunk:bool | int=30000):
@@ -149,12 +161,7 @@ class CalulateSelfDistance:
         #計算ログのフォーマット作成
         #combnate_indexsを一次元化
         combination_indexs = [i for j in combination_indexs for i in j]
-        all_alist,all_blist = zip(*combination_indexs)
-        all_alist,all_blist = list(all_alist),list(all_blist)
-        distances_log = pd.DataFrame({'file_1':[files[i] for i in all_alist],'file_2':[files[i] for i in all_blist]})
-        distances_log_i = distances_log['file_1'].apply(format_file_name).apply(pd.Series).rename(columns={'address':'address_i','cifid':'cifid_i','isite':'isite_i','pattern':'pattern_i'})
-        distances_log_j = distances_log['file_2'].apply(format_file_name).apply(pd.Series).rename(columns={'address':'address_j','cifid':'cifid_j','isite':'isite_j','pattern':'pattern_j'})
-        distances_df = pd.concat([distances_log_i,distances_log_j],axis=1)
+        distances_df = make_log_format(files,combination_indexs)
         distances_df['distance'] = distances
         return distances_df
     
