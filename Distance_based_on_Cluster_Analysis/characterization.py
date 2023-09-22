@@ -29,7 +29,7 @@ def _cal_distance(target_coords,database_coords):
         target_cluster_coordinates = np.array([target_coords[target_atom]]*database_coord.shape[0])
         distance = cal_emd(target_cluster_coordinates,database_coord)
         distances.append(distance)
-    distances = np.sum(distances,axis=0)/len(['Si1','O1'])
+    distances = np.sum(distances,axis=0)/len(target_coords)
     distances = np.where(distances < 1e-8 , 0.0 , distances)
     return distances
 
@@ -73,10 +73,11 @@ class ClusterFeatureCalculator():
     def make_mesh_dict(self):
         #データベースのメッシュを作成する
         self.database_mesh_dict ={}
+        self.eig_df = {}
         for atom in self.targets_atoms:
             _mesh_dict = [cal_eigenvalues(coordinate) for coordinate in self.database_coordinates[atom]]
-            _mesh_df = pd.DataFrame(_mesh_dict,columns=['eig_1','eig_2','eig_3'])
-            _mesh_df = _mesh_df.filter(like='eig').applymap(lambda x: int(x//self.sep_value))
+            self.eig_df[atom] = pd.DataFrame(_mesh_dict,columns=['eig_1','eig_2','eig_3'])
+            _mesh_df = self.eig_df[atom].filter(like='eig').applymap(lambda x: int(x//self.sep_value)).copy()
             _mesh_df.rename(columns={'eig_1':'eig_1_mesh','eig_2':'eig_2_mesh','eig_3':'eig_3_mesh'},inplace=True)
             _mesh_dict = _mesh_df.groupby(['eig_1_mesh','eig_2_mesh','eig_3_mesh']).apply(lambda x:x.index.tolist()).to_dict()
             self.database_mesh_dict[atom] = copy.deepcopy(_mesh_dict)
@@ -159,11 +160,11 @@ class CrystalFeatureCalculator(ClusterFeatureCalculator):
         return features,self.distances_df
 
     def calculate_features(self, crystalpath):
-        target_clusters = glob.glob('{}/*_0.csv'.format(crystalpath))
-        result = [self.process_target_cluster(target_cluster) for target_cluster in target_clusters]
-        result,self.calculate_log = zip(*result)
+        self.target_clusters = glob.glob('{}/*_0.csv'.format(crystalpath))
+        result = [self.process_target_cluster(target_cluster) for target_cluster in self.target_clusters]
+        self.cluster_features,self.calculate_log = zip(*result)
         self.calculate_log = list(self.calculate_log)
         if self.method == 'mean':
-            return np.mean(result, axis=0)
+            return np.mean(self.cluster_features, axis=0)
         elif self.method == 'max':
-            return np.max(result)
+            return np.max(self.cluster_features)
