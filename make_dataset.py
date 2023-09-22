@@ -51,6 +51,10 @@ def parallel_clustering_in_crystal(data,csd:CalulateSelfDistance,logger=None):
     #結果の保存
     flusterdf.to_csv(f"{data.cifaddress}/{cifid}_fcluster.csv")
 
+    #上のプログラムをjoblibを使って並列化してください
+def parallel_make_cluster(data):
+    clusteraddress = os.path.join(data.address,f'{data.cifid}_{data.isite}_0.csv')
+    make_cluster_dataset(cluster_address=clusteraddress,outdir=data.address)
 
 def pares_args():
     pares=argparse.ArgumentParser()
@@ -74,15 +78,24 @@ def main():
     #隣接情報からクラスターを生成
     picdata=make_sort_ciffile(f'result/{cifdir}',estimecont='all')
     cwd = os.getcwd()
-    
+    print('make cluster dataset')
     allciflen=picdata.shape[0]
     for i,data in picdata.iterrows():
         print(f'\r{data.cifid} {i+1}/{allciflen}',end='')
         nn_data_address= subprocess.getoutput(f"find {data.cifaddress} -name nb_*.pickle")
         make_cluster_dataset(cifid=data.cifid,adjacent_num=adjacent_num,nn_data_address=nn_data_address,outdir=data.cifaddress,rotation=False)
     print('')
-
+    print('ok')
     #異常なクラスターを削除
+    #異常なクラスターを別ディレクトリに保存
+    #保存先のディレクトリを作成
+    print('clean up cluster')
+    error_dir_path = f'result/{cifdir}/error_clusters'
+    if not os.path.isdir(error_dir_path):
+        os.mkdir(error_dir_path)
+    else:
+        shutil.rmtree(f'result/{cifdir}')
+        os.mkdir(f'result/{cifdir}')
     cm = ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)
     cm.to_file_path()
     for i in range(len(cm.cluster_path_list_df)):
@@ -95,40 +108,37 @@ def main():
         if count != list(cluster_atom_num.values()):
             f=open('clean up_cluster.log','a')
             f.write(f'{clusteraddress}\n')
-            os.remove(clusteraddress)
             f.close()
+            shutil.move(clusteraddress,error_dir_path)
+    print('ok')
     
     del cm
     
     #残っているクラスターの回転パターンを全て取る
     print('make all pattern')
-    cm = ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)
-    cm.to_file_path()
-    allciflen = cm.cluster_list_df.shape[0]
-    for i in  range(len(cm.cluster_list_df)):
-        data = cm.cluster_list_df.iloc[i,:]
-        print(f'\r{data.cifid} {i+1}/{allciflen}',end='')
-        clusteraddress = cm.cluster_path_list_df.iloc[i,0]
-        make_cluster_dataset(cluster_address=clusteraddress,outdir=data.address)
-    
+    cm = ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)  
+    with tqdm_joblib(total=len(cm.cluster_list_df)):
+        Parallel(n_jobs=-1)(delayed(parallel_make_cluster)(data) for _,data in cm.cluster_list_df.iterrows())
     del cm
-    
+    print('ok')
     # ログの出力名を設定
     logger = logging.getLogger('DistanceLogg')
     fh = logging.FileHandler('cal_distance_error.log')
     logger.addHandler(fh)
-    #各結晶に属するクラスターの距離を計算(等価なクラスターを取り出すため)
+    #各結晶に属するクラスターの距離を計算(等価なクラスター  を取り出すため)
     
     #set logger and CalulateSelfDistance
     csd=CalulateSelfDistance(target_atoms=['Si1','O1'],reference=1e-8,chunk=30000)
     parallel_clustering = partial(parallel_clustering_in_crystal,csd=csd,logger=logger)
-
+    print('cal self distance')
     with tqdm_joblib(total=len(picdata)):
         Parallel(n_jobs=-1)(delayed(parallel_clustering)(data) for _,data in picdata.iterrows())
-    
+    print('ok')
+
     fcluster_df=fcluster_list(picdata)
     fcluster_df.to_csv(f'result/{cifdir}/unique_cluster.csv')
     
+    print('make database')
     if os.path.isdir(database):
         shutil.rmtree(database)
     os.mkdir(database)
@@ -140,6 +150,6 @@ def main():
                 print('not file ',clusteraddress)
             copyaddress=f'{database}/{data.cifid}_{data.isite}_{pattern}.csv'
             shutil.copy(clusteraddress,copyaddress)
-
+    print('ok')
 if __name__=='__main__':
     main()
