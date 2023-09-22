@@ -57,7 +57,7 @@ def load_params_from_config(config:configparser.ConfigParser):
       params[key] = int(params[key])
 
   for key in bool_keys:
-      params[key] = bool(params[key])
+      params[key] = params[key].lower() == "true"
 
   for key in list_keys:
       params[key] = json.loads(params[key].replace("'", "\""))
