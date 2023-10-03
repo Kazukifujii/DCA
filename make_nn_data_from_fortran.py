@@ -246,5 +246,3 @@ def make_nn_data_from_cifdirs(dirpath, outputpath, restart=False):
             os.chdir(cwd)
 
     print('end adjacent info')
-
-make_nn_data_from_cifdirs('datas/cifdirs/testcif', 'test', restart=False)
