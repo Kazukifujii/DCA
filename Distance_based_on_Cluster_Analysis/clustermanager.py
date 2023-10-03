@@ -13,13 +13,17 @@ class ClusterManager:
         self.cluster_list_df = cluster_list_df
         self.target_combination_df = None
     @classmethod
-    def from_dirpath(cls, dirpath, dirs=False):
-        cluster_list_df = cls.read_cluster_list(dirpath, dirs)
+    def from_dirpath(cls, dirpath, dirs=False,ignore_dirs:list=None):
+        cluster_list_df = cls.read_cluster_list(dirpath, dirs,ignore_dirs=ignore_dirs)
         return cls(cluster_list_df)
     
     @staticmethod
-    def read_cluster_list(dirpath, dirs):
-        cluster_list = glob.glob('{}/*/*_[0-9]*.csv'.format(dirpath)) if dirs else glob.glob('{}/*_[0-9]*.csv'.format(dirpath))
+    def read_cluster_list(dirpath, dirs,ignore_dirs:list=None):
+        dirlist = [os.path.join(dirpath,f) for f in os.listdir(dirpath) if os.path.isdir(os.path.join(dirpath, f))] if dirs else [dirpath]
+        #ignore_dirsにあるディレクトリをリストから除外する
+        if ignore_dirs is not None:
+            dirlist = [dirpath for dirpath in dirlist if (dirpath) not in ignore_dirs]
+        cluster_list = [path for dirpath in dirlist for path in glob.glob(os.path.join(dirpath,'*.csv'))]
         result_data = []
 
         for filepath in cluster_list:

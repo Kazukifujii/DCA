@@ -91,11 +91,14 @@ def main():
     #保存先のディレクトリを作成
     print('clean up cluster')
     error_dir_path = f'result/{cifdir}/error_clusters'
+    logfile_path = f'result/{cifdir}/clean up_cluster.log'
     if not os.path.isdir(error_dir_path):
         os.mkdir(error_dir_path)
     else:
         shutil.rmtree(f'result/{cifdir}')
         os.mkdir(f'result/{cifdir}')
+    if os.path.isfile(logfile_path):
+        os.remove(logfile_path)
     cm = ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)
     cm.to_file_path()
     for i in range(len(cm.cluster_path_list_df)):
@@ -106,21 +109,21 @@ def main():
         clustertext = open(clusteraddress,'r').readlines()
         count = [sum([i.count(j) for i in clustertext]) for j in cluster_atom_num.keys()]
         if count != list(cluster_atom_num.values()):
-            f=open('clean up_cluster.log','a')
+            f=open(logfile_path,'a')
             f.write(f'{clusteraddress}\n')
             f.close()
             shutil.move(clusteraddress,error_dir_path)
     print('ok')
-    
     del cm
     
     #残っているクラスターの回転パターンを全て取る
     print('make all pattern')
-    cm = ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True)  
+    cm = ClusterManager.from_dirpath(f'result/{cifdir}',dirs=True,ignore_dirs=[error_dir_path])
     with tqdm_joblib(total=len(cm.cluster_list_df)):
         Parallel(n_jobs=-1)(delayed(parallel_make_cluster)(data) for _,data in cm.cluster_list_df.iterrows())
     del cm
     print('ok')
+    
     # ログの出力名を設定
     logger = logging.getLogger('DistanceLogg')
     fh = logging.FileHandler('cal_distance_error.log')
