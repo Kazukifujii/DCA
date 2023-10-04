@@ -4,7 +4,7 @@ module neib
   integer,protected:: ng
   real(8),allocatable,protected:: dislist(:)
 contains
-  subroutine neibourpair(ix,iy,plat,rbas21,rmax,ipr)
+  subroutine neibourpair(ix,iy,plat,rbas21,rmax,atomid,ipr)
     !! For given plat and rbas21=ratom2-ratom1 (cartesian),
     !! we give distance lists, within rmax.
     !! -----------------------------------------------------------------------------------      
@@ -14,6 +14,7 @@ contains
          ,dum,platx(3,3),pwgmin,gmax0,rvec(3),distance,rbas21(3),rmax2,dis2
     integer,allocatable:: igv2x(:,:),kv_iv(:)
     integer:: ig,napw,nn1,nn2,nn3,mshlst,nmin(3),nmax(3),n1,n2,n3,ndatx,ipr,ix,iy
+    character*24:: atomid(*)
     !c      print *, plat(1:3,1),plat(1:3,2),plat(1:3,3),rbas21(1:3),rmax
     !c      PLAT(1:3,1)=[0.5, 0.5, 1.0]
     !c      PLAT(1:3,2)=[0.5, 1.0, 0.5]
@@ -22,15 +23,15 @@ contains
     !c      rbas2=[.5,.5,0.0]    !cartesian atom2
     !
     rmax2=rmax**2
-    call gvlstnx(plat(1,1),plat(1,2),plat(1,3),rbas21,rmax, nmin(1),nmax(1))
-    call gvlstnx(plat(1,2),plat(1,3),plat(1,1),rbas21,rmax, nmin(2),nmax(2))
-    call gvlstnx(plat(1,3),plat(1,1),plat(1,2),rbas21,rmax, nmin(3),nmax(3))
+    call gvlstnx(plat(:,1),plat(:,2),plat(:,3),rbas21,rmax, nmin(1),nmax(1))
+    call gvlstnx(plat(:,2),plat(:,3),plat(:,1),rbas21,rmax, nmin(2),nmax(2))
+    call gvlstnx(plat(:,3),plat(:,1),plat(:,2),rbas21,rmax, nmin(3),nmax(3))
     !! For given rbas21(1:3) (cartesian),
     !c$$$      print *,'rbas21 =',rbas21
     !c$$$      print *,'plat1 =',plat(:,1)
     !c$$$      print *,'plat2 =',plat(:,2)
     !c$$$      print *,'plat3 =',plat(:,3)
-    !print *,'nmin1 mnax1 =',nmin(1),nmax(1),'nmin2 mnax2 =',nmin(2),nmax(2),'nmin3 mnax3 =',nmin(3),nmax(3)
+!    print *,'nmin1 mnax1 =',nmin(1),nmax(1),'nmin2 mnax2 =',nmin(2),nmax(2),'nmin3 mnax3 =',nmin(3),nmax(3)
     ndatx=(nmax(1)-nmin(1)+1)*(nmax(2)-nmin(2)+1)*(nmax(3)-nmin(3)+1)
     if(allocated(dislist)) deallocate(dislist)
     allocate(dislist(ndatx))
@@ -41,7 +42,8 @@ contains
              rvec = rbas21 + (plat(:,1)*n1 + plat(:,2)*n2 + plat(:,3)*n3)
              dis2=sum(rvec*rvec)
              if( dis2<= rmax2) then
-                write(ipr,ftox) '   ',ix,iy,ftof(sqrt(dis2)),'  ',ftof(rvec),'  ',n1,n2,n3
+                write(ipr,ftox) '   ',ix,iy,ftof(sqrt(dis2)),'  ',ftof(rvec),'  ',n1,n2,n3,&
+                     '  ',trim(atomid(ix)),trim(atomid(iy))
                 ig=ig+1
                 dislist(ig)=sqrt(dis2)
              endif
@@ -53,10 +55,7 @@ contains
   end subroutine neibourpair
 end module neib
 !=============================================================================================
-
-!     !
-subroutine gvlstnx(q0,q1,q2,qp,rmax, nmin,nmax)
-  !! Multiples of primitive vectors.
+subroutine gvlstnx(q0,q1,q2,qp,rmax, nmin,nmax)  !! Multiples of primitive vectors.
   !! we look for allow n; n is nmin<n< nmax, satisfying  |qp+n1*q1+n2*q2+n3|< rmax
   !C     ----------------------------------------------------------------------
   !Ci   q0    : first  primitive vector
@@ -80,15 +79,8 @@ subroutine gvlstnx(q0,q1,q2,qp,rmax, nmin,nmax)
   distance1=   sum(q0*qperp) !signed distance to plane for n1=1 from origin
   !! we search n1 for |distance1*n1 - distanceqp|<rmax
   !! fortran int gives an integer closer to zero for given float number.
-  Qqperp = sum(q0*qperp)  !
-  nmax = int(( rmax+distanceqp)/distance1)
-  nmin = int((-rmax+distanceqp)/distance1)
-  if(nmax<nmin) then
-     nt1=nmin
-     nt2=nmax
-     nmax=nt1
-     nmin=nt2
-  endif
+  nmax= floor  ( max((rmax-distanceqp)/distance1,(-rmax-distanceqp)/distance1) )
+  nmin= ceiling( min((rmax-distanceqp)/distance1,(-rmax-distanceqp)/distance1) )
 end subroutine gvlstnx
 
 !!----------------------------------------------------------      
@@ -189,13 +181,11 @@ program neib1
         write(*,ftox) ix,trim(atomid(ix)),ftof(pos(:,ix))
      enddo
   else    
+!     do ix=1,natom
+!        write(*,ftox) ftof(pos(:,ix)),ix,trim(atomid(ix)),'  !Atom position: fractional(direct)' ! / cartetian'
+!     enddo
      do ix=1,natom
-        write(*,ftox) ftof(pos(:,ix)),ix,trim(atomid(ix)), & !'  ',ftof(matmul(plat,pos(:,ix))),&
-             '  !Atom position: fractional(direct)' ! / cartetian'
-     enddo
-     do ix=1,natom
-        write(*,ftox) ftof(matmul(plat,pos(:,ix))),ix,trim(atomid(ix)), &
-             '  !Atom position: cartetian'
+        write(*,ftox) ftof(matmul(plat,pos(:,ix))),'pos atomid=',ix,trim(atomid(ix)),'  !Atom position: cartetian'
      enddo
   endif
 !  open(newunit=u, file=trim(filename)//'_inp.dat', action='read')
@@ -203,21 +193,23 @@ program neib1
 !  read(u,*) plat(1:3,2)
 !  read(u,*) plat(1:3,3)
 !  read(u,*) rmax  
-  write(*,ftox) natom*natom, ' !natom*natom'
-  do ix=1,natom
-     do iy=1,natom
-        if(trim(postype)/='cartesian') rbas21= matmul(plat,pos(:,iy)- pos(:,ix)) !fractional coodinate
-        if(trim(postype)=='cartesian') rbas21= pos(:,iy)- pos(:,ix) !cartesian coodinate
-        write(*,ftox)ix,iy,ftof(rbas21,6),' ! ix iy r2-r1 (cartesian)'
-     enddo
-  enddo
+
+  !write(*,ftox) natom*natom, ' !natom*natom'
+  !do ix=1,natom
+  !   do iy=1,natom
+  !      if(trim(postype)/='cartesian') rbas21= matmul(plat,pos(:,iy)- pos(:,ix)) !fractional coodinate
+  !      if(trim(postype)=='cartesian') rbas21= pos(:,iy)- pos(:,ix) !cartesian coodinate
+  !      write(*,ftox)ix,iy,ftof(rbas21,6),' ! ix iy r2-r1 (cartesian)'
+  !   enddo
+  !enddo
+  
   open(newunit=v, file=trim(cifid)//'.nnlist')
   do ix=1,natom
      do iy=1,natom
         if(trim(postype)/='cartesian') rbas21= matmul(plat,pos(:,iy)- pos(:,ix)) !fractional coodinate
         if(trim(postype)=='cartesian') rbas21= pos(:,iy)- pos(:,ix) !cartesian coodinate
         !write(v,ftox)ix,iy,ftof(rbas21,6),' ',ftof(rmax),'! ix iy r2-r1 rmax'
-        call neibourpair(ix,iy,plat,rbas21,rmax*alat,v)
+        call neibourpair(ix,iy,plat,rbas21,rmax*alat,atomid,v)
      enddo
   enddo
   close(u)
