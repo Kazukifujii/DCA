@@ -27,10 +27,14 @@ class ClusterManager:
         result_data = []
 
         for filepath in cluster_list:
-            filename = os.path.basename(filepath)
-            dirname = os.path.dirname(filepath)
-            cifid, isite, _ = tuple(re.split('_', filename))
-            result_data.append((cifid, dirname, int(isite)))
+            try:
+                filename = os.path.basename(filepath)
+                dirname = os.path.dirname(filepath)
+                cifid, isite, _ = tuple(re.split('_', filename))
+                result_data.append((cifid, dirname, int(isite)))
+            except:
+                #print(f'error:{filepath}')
+                continue
 
         result_df = pd.DataFrame(result_data, columns=['cifid', 'address', 'isite']).drop_duplicates().sort_values(by=['cifid','isite']).reset_index(drop=True)
         return result_df
@@ -134,7 +138,6 @@ class DCAFormatManager(ClusterManager):
         combinations_list = list(combinations(range(len(self.cluster_list_df)), 2))
         df_i = pl.from_pandas(self.cluster_list_df.iloc[[i[0] for i in combinations_list]].reset_index(drop=True))
         df_j = pl.from_pandas(self.cluster_list_df.iloc[[i[1] for i in combinations_list]].reset_index(drop=True))
-        
         
         target_combination_df = self.__make_target_combination_df(df_i,df_j)
 

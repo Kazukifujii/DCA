@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from scipy.cluster.hierarchy import linkage, fcluster
 
 def make_inputdf_linkage(cluster_distance_df):
@@ -26,20 +27,17 @@ def make_clustering(cluster_distance_df, method='single', fclusternum=0.0):
     
     return pd.concat([tagsdf, result_df], axis=1)
 
-import os,glob
-def fcluster_list(info):
+def fcluster_list(cifid_list:list,result_base_path:str) -> pd.DataFrame:
     result = list()
-    for i in range(len(info)):
-        data = info.iloc[i,:]
-        csvn = glob.glob(os.path.join(data['cifaddress'],'*_fcluster.csv'))
-        if len(csvn) == 0:
-            print('no such file')
+    for cifid in cifid_list:
+        result_path = os.path.join(result_base_path,cifid)
+        fcluster_path = os.path.join(result_path,f'{cifid}_fcluster.csv')
+        if not os.path.isfile(fcluster_path):
             continue
-        csvn = csvn[0]
-        fdf = pd.read_csv(csvn,index_col = 0)
+        fdf = pd.read_csv(fcluster_path,index_col = 0)
         fdf = fdf.drop_duplicates(subset = ['Class'])
         fdf.drop(['Class'],axis = 1,inplace=True)
-        fdf['address'] = data['cifaddress']
+        fdf['address'] = result_path
         result.append(fdf)
     totalinfo = pd.concat(result).reset_index(drop=True)
     return totalinfo
