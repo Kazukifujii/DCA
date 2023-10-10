@@ -80,9 +80,7 @@ def main():
     #cifから隣接情報の取出し
     if adjacency_algorithm=='neib':
         from Distance_based_on_Cluster_Analysis.make_nn_data_from_fortran import make_nn_data_from_cifdirs
-        print('neib')
         make_nn_data_from_cifdirs(cifdir,'result',max_neib=max_neib)
-        print('ok')
     elif adjacency_algorithm=='chemenv':
         run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
         run('python3 Distance_based_on_Cluster_Analysis/make_nn_data.py --output2 {}'.format(cifdir),shell=True)
