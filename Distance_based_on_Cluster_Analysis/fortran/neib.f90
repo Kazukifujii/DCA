@@ -4,7 +4,7 @@ module neib
   integer,protected:: ng
   real(8),allocatable,protected:: dislist(:)
 contains
-  subroutine neibourpair(ix,iy,plat,rbas21,rmax,atomid,ipr)
+  subroutine neibourpair(ix,iy,alat,plat,rbas21,rmax,atomid,ipr)
     !! For given plat and rbas21=ratom2-ratom1 (cartesian),
     !! we give distance lists, within rmax.
     !! -----------------------------------------------------------------------------------      
@@ -42,8 +42,8 @@ contains
              rvec = rbas21 + (plat(:,1)*n1 + plat(:,2)*n2 + plat(:,3)*n3)
              dis2=sum(rvec*rvec)
              if( dis2<= rmax2) then
-                write(ipr,ftox) '   ',ix,iy,ftof(sqrt(dis2)),'  ',ftof(rvec),'  ',n1,n2,n3,&
-                     '  ',trim(atomid(ix)),trim(atomid(iy))
+                write(ipr,"(' ',2i6,f12.6,' ',3f11.6,' ',3i4,'  ',a,' ',a)")&
+                     ix,iy,alat*sqrt(dis2),alat*rvec,n1,n2,n3,trim(atomid(ix)),trim(atomid(iy))
                 ig=ig+1
                 dislist(ig)=sqrt(dis2)
              endif
@@ -89,11 +89,11 @@ program neib1
   use neib,only: ng, dislist, Neibourpair
   use m_ftox
   implicit none
-  integer::u,v,i,npair,ix,id1,id2,irr,iu, natom,system,lkeyw,iarg,iy,ntype
+  integer::u,v,i,npair,ix,id1,id2,irr,iu, natom,system,lkeyw,iarg,iy,ntype,n,nnn
   integer,allocatable::nsite(:)
   real(8):: plat(3,3),rbas21(3),rmax
   character*120:: aaa,bbb,filename,tmpline,fout,strn,cifid,keyw,atypeall,postype
-  character*24:: atomid(10000),filetype
+  character*24:: atomid(10000),filetype,atype(200)
   real(8):: pos(3,10000),alat
 !
   if( iargc()/=2) then
@@ -149,25 +149,43 @@ program neib1
      read(iu,*) plat(1:3,2)
      read(iu,*) plat(1:3,3)
      read(iu,"(a)") atypeall
-     ix=1
-     do i=1,len(trim(atypeall))
-        if( atypeall(i:i)==' ') ix=ix+1
+     atypeall=adjustl(atypeall)
+     !write(*,*)'atypeall=',trim(atypeall)
+     i=0
+     do
+        i=i+1
+        n=scan(atypeall,' ')
+        !write(*,*)'atypeall=',trim(atypeall(1:n)),'###',n
+        read(atypeall(1:n),"(a)") atype(i)
+        atypeall = adjustl(atypeall(n+1:))
+        !write(*,*)'out=',i,trim(atype(i))
+        if(len_trim(atypeall)==0) exit
      enddo
-     ntype=ix
-     write(*,ftox)ntype,' ! ntype'
+     ntype=i
      allocate(nsite(ntype))
      read(iu,*) nsite
      natom = sum(nsite)
      write(*,ftox)nsite,' !nsite'
+     do i=1,ntype
+        write(*,*)'readin type',i,trim(atype(i)),nsite(i)
+     enddo
+     nnn=0
+     do i=1,ntype
+        atomid(nnn+1:nnn+nsite(i))=atype(i)
+        nnn=nnn+nsite(i)
+     enddo
      read(iu,*) postype
      call lower_case(postype,postype)
      write(*,ftox)trim(postype),' !postype'
      do ix=1,natom
-        read(iu,*) pos(:,ix),atomid(ix)
+        read(iu,*) pos(:,ix)
      enddo
      write(*,ftox) alat, ' ! unit (angstrom)'
   endif    
 1001 continue
+  do ix=1,natom
+     write(*,ftox) ix,trim(atomid(ix)),ftof(pos(:,ix))
+  enddo
 !  
   !write(*,ftox)'rmax plat natom:'
   write(*,ftox) ftof(rmax),' !rmax (angstrom)'
@@ -209,7 +227,7 @@ program neib1
         if(trim(postype)/='cartesian') rbas21= matmul(plat,pos(:,iy)- pos(:,ix)) !fractional coodinate
         if(trim(postype)=='cartesian') rbas21= pos(:,iy)- pos(:,ix) !cartesian coodinate
         !write(v,ftox)ix,iy,ftof(rbas21,6),' ',ftof(rmax),'! ix iy r2-r1 rmax'
-        call neibourpair(ix,iy,plat,rbas21,rmax*alat,atomid,v)
+        call neibourpair(ix,iy,alat,plat,rbas21,rmax/alat,atomid,v)
      enddo
   enddo
   close(u)
