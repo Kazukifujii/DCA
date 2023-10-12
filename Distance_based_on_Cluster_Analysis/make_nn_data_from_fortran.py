@@ -9,9 +9,9 @@ import glob
 from pymatgen.core.structure import IStructure
 from pymatgen.io.vasp.inputs import Poscar
 
-def read_nnlist(filepath:str,siteinfo:dict,max_neib:dict) -> dict():
+def read_nnlist(filepath:str) -> dict[list]:
     """
-    Make nnlist.
+    Read nnlist file.
     """
     nnfile = open(filepath).readlines()
     nnlist = defaultdict(list)
@@ -24,12 +24,17 @@ def read_nnlist(filepath:str,siteinfo:dict,max_neib:dict) -> dict():
         neighbor_isite_info = [int(info[6]),int(info[7]),int(info[8])]
         #add nnlist
         nnlist[center_isite].append((neighbor_isite,distance,coord,neighbor_isite_info))
-    nnlist = dict(nnlist)
-    #sort 
-    for isite,atom in siteinfo.items():
-        nnlist[isite].sort(key=lambda x:x[1])
-        nnlist[isite]=nnlist[isite][1:max_neib[atom]+1]
-    return nnlist
+    return dict(nnlist)
+
+def sort_and_trim(nnlist: dict[list], siteinfo: dict, max_neib: dict) -> dict:
+    """
+    Sort and trim neighbor lists.
+    """
+    sorted_nnlist = {}
+    for isite, atom in siteinfo.items():
+        nnlist[isite].sort(key=lambda x: x[1])
+        sorted_nnlist[isite] = nnlist[isite][1:max_neib[atom] + 1]
+    return sorted_nnlist
 
 def nnlist2nn_data(nnlist:dict,siteinfo:dict) -> dict():
     #set nn_data
