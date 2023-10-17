@@ -1,4 +1,3 @@
-
 import pandas as pd
 import subprocess
 import time
@@ -16,12 +15,16 @@ idlist = table.to_numpy().flatten().tolist()
 idlist = [cifid if len(cifid)==3 else cifid[1:] for cifid in idlist]
 
 #出力先のディレクトリを作成
-
-if os.path.exists(outdirpaths):
-    shutil.rmtree(outdirpaths)
-os.chdir(outdirpaths)
-
-#ダウンロード
-for cifid in idlist:
-    time.sleep(0.5)
-    subprocess.run(f'wget {download_base_address(cifid)}',shell=True)
+cwd = os.getcwd()
+try:
+    if os.path.exists(outdirpaths):
+        shutil.rmtree(outdirpaths)
+    os.chdir(outdirpaths)
+    #ダウンロード
+    for cifid in idlist:
+        time.sleep(0.5)
+        subprocess.run(f'wget {download_base_address(cifid)}',shell=True)
+except:
+    print('error')
+finally:
+    os.chdir(cwd)
