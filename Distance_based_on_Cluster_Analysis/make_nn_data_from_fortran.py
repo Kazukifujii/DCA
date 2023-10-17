@@ -55,6 +55,7 @@ def read_siteinfo_from_poscar(filename:str) -> dict:
         if re_direct.search(line):
             Direct_index = i
             break
+    
     siteinfo = file[Direct_index-2:Direct_index]
     siteinfo = [re.split('\s+',i.strip()) for i in siteinfo]
     siteinfo[1] = [int(i) for i in siteinfo[1]]
@@ -89,10 +90,38 @@ def make_poscar(ciffile,algorithm='pymatgen'):
     elif algorithm == 'cif2cell':
         subprocess.run(f'cif2cell {ciffile} -p vasp --vasp-format=5', shell=True)
 
+'''
 class CIFDataProcessor:
     def __init__(self,max_neib: dict = {'Si': 4, 'O': 2}, algorithm: str = 'cif2cell'):
         self.max_neib = max_neib
         self.algorithm = algorithm
+    
+    def make_nnlist(self, ciffile: str):
+        """
+        Generate nnlist.
+        """
+        make_poscar(ciffile,algorithm=self.algorithm)
+        run_make_nnlist_out(fileaddress='POSCAR', rmax=3)
+        siteinfo = read_siteinfo_from_poscar('POSCAR')
+        nnlist = read_nnlist('POSCAR.nnlist', siteinfo, self.max_neib)
+        nnlist = nnlist2nn_data(nnlist, siteinfo)
+        return nnlist
+    
+    def make_nnlist_from_poscar(self, poscar_path: str):
+        """
+        Generate nnlist.
+        """
+        run_make_nnlist_out(fileaddress=poscar_path, rmax=3)
+        siteinfo = read_siteinfo_from_poscar(poscar_path)
+        nnlist = read_nnlist(f'{poscar_path}.nnlist', siteinfo, self.max_neib)
+        nnlist = nnlist2nn_data(nnlist, siteinfo)
+        return nnlist
+'''
+class CIFDataProcessor:
+    def __init__(self,max_neib: dict = {'Si': 4, 'O': 2}, algorithm: str = 'cif2cell'):
+        self.max_neib = max_neib
+        self.algorithm = algorithm
+        self.cwd = os.getcwd()
 
     def make_nn_data_from_cifdirs(self,dirpath,outputpath='result'):
         """
@@ -100,9 +129,8 @@ class CIFDataProcessor:
         """
         self.dirpath = dirpath
         self.outputpath = outputpath
-        self.cwd = os.getcwd()
         result_dir_path = os.path.join(self.outputpath, self.dirpath)
-
+        
         # Make output directory
         if not os.path.isdir(self.outputpath):
             os.makedirs(result_dir_path)
@@ -116,28 +144,34 @@ class CIFDataProcessor:
             self.process_cif_file(cif_path, result_dir_path)
 
     def process_cif_file(self, cif_path, result_dir_path):
-        basename = os.path.basename(cif_path)
-        cifnum = basename.replace('.cif', '')
-        result_path = 'nb_{}.pickle'.format(cifnum)
-
-        cifdataout = os.path.join(result_dir_path, cifnum)
-        if not os.path.isdir(cifdataout):
-            os.mkdir(cifdataout)
-        shutil.copyfile(cif_path, os.path.join(cifdataout, basename))
-
-        os.chdir(cifdataout)
         try:
+            basename = os.path.basename(cif_path)
+            cifnum = basename.replace('.cif', '')
+            result_path = 'nb_{}.pickle'.format(cifnum)
+
+            cifdataout = os.path.join(result_dir_path, cifnum)
+            if not os.path.isdir(cifdataout):
+                os.mkdir(cifdataout)
+            shutil.copyfile(cif_path, os.path.join(cifdataout, basename))
+
+            os.chdir(cifdataout)
+        #try:
             make_poscar(basename, algorithm=self.algorithm)  # Use the instance variable for algorithm
             run_make_nnlist_out('POSCAR', 5)
             siteinfo = read_siteinfo_from_poscar('POSCAR')
-            nnlist = read_nnlist('POSCAR.nnlist', siteinfo, self.max_neib)
+            nnlist = read_nnlist('POSCAR.nnlist')
+            nnlist = sort_and_trim(nnlist, siteinfo, self.max_neib)
             nn_data = nnlist2nn_data(nnlist, siteinfo)
 
             # Save nn_data
             self.save_nn_data(result_path, nn_data)
+            """except Exception as e:
+                print(f"Error processing {cif_path}: {str(e)}")"""
+            os.chdir(self.cwd)
         except Exception as e:
             print(f"Error processing {cif_path}: {str(e)}")
-        os.chdir(self.cwd)
+            os.chdir(self.cwd)
+            raise e
 
     def save_nn_data(self, result_path, nn_data):
         if os.path.isfile(result_path):
