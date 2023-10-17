@@ -88,7 +88,7 @@ def make_poscar(ciffile,algorithm='pymatgen'):
         poscar = Poscar(IStructure.from_file(ciffile))
         poscar.write_file('POSCAR')
     elif algorithm == 'cif2cell':
-        subprocess.run(f'cif2cell {ciffile} -p vasp --vasp-format=5', shell=True)
+        subprocess.run(f'cif2cell {ciffile} --force -p vasp --vasp-format=5', shell=True)
 
 '''
 class CIFDataProcessor:
