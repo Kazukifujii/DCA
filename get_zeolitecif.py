@@ -19,12 +19,14 @@ cwd = os.getcwd()
 try:
     if os.path.exists(outdirpaths):
         shutil.rmtree(outdirpaths)
+    os.mkdir(outdirpaths)
     os.chdir(outdirpaths)
     #ダウンロード
     for cifid in idlist:
         time.sleep(0.5)
         subprocess.run(f'wget {download_base_address(cifid)}',shell=True)
-except:
-    print('error')
+except Exception as e:
+    print(f"Error : {str(e)}")
+    raise e
 finally:
     os.chdir(cwd)
