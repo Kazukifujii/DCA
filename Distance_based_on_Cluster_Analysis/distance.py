@@ -128,6 +128,11 @@ class CalulateSelfDistance:
     def calculate_distance(self,dirpath:str) -> pd.DataFrame:
         #最初に指定したディレクトリに保存されているファイルのパスをリストアップする
         files = load_files_from_dirpath(dirpath)
+
+        #fileが0個の場合はエラーを返す
+        if len(files) == 0:
+            raise ValueError('There are no files in the specified directory.')
+
         #ファイルをロードする
         dfs = load_files(files)
         #必要な座標データを取得する
