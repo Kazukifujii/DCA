@@ -3,12 +3,31 @@ import re
 import pickle
 import shutil
 from collections import defaultdict
-import numpy as np
 import subprocess
 import glob
 from pymatgen.core.structure import IStructure
 from pymatgen.io.vasp.inputs import Poscar
+from joblib import Parallel, delayed
+# 標準エラー出力を一時的に無効化するためのコンテキストマネージャ
+from contextlib import contextmanager
+@contextmanager
+def subprocess_run_context(logname='log.txt'):
+    log = None
 
+    # subprocessを実行して、グローバル変数に実行結果を格納する関数
+    def func(command):
+        nonlocal log
+        log = subprocess.run(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        return log
+
+    try:
+        yield func
+    finally:
+        stderr_output = log.stderr.decode('utf-8') if log.stderr else ''
+        stdout_output = log.stdout.decode('utf-8') if log.stdout else ''
+        with open(logname,'w') as f:
+            f.write(stderr_output)
+            f.write(stdout_output)
 def read_nnlist(filepath:str) -> dict[list]:
     """
     Read nnlist file.
@@ -78,7 +97,8 @@ def run_make_nnlist_out(fileaddress='POSCAR', rmax=1.0):
     """
     Generate nnlist using an external program.
     """
-    subprocess.run(f'make_nnlist.out {fileaddress} {rmax} >> {fileaddress}.log', shell=True)
+    with subprocess_run_context(logname='nnlist_log.txt') as run:
+        run(['make_nnlist.out',fileaddress,str(rmax)])
 
 def make_poscar(ciffile,algorithm='pymatgen'):
     """
@@ -88,42 +108,17 @@ def make_poscar(ciffile,algorithm='pymatgen'):
         poscar = Poscar(IStructure.from_file(ciffile))
         poscar.write_file('POSCAR')
     elif algorithm == 'cif2cell':
-        subprocess.run(f'cif2cell {ciffile} --force -p vasp --vasp-format=5', shell=True)
+        with subprocess_run_context(logname='cif2cell_log.txt') as run:
+            run(['cif2cell',ciffile,'-p','vasp','--vasp-format=5'])
 
-'''
 class CIFDataProcessor:
-    def __init__(self,max_neib: dict = {'Si': 4, 'O': 2}, algorithm: str = 'cif2cell'):
-        self.max_neib = max_neib
-        self.algorithm = algorithm
-    
-    def make_nnlist(self, ciffile: str):
-        """
-        Generate nnlist.
-        """
-        make_poscar(ciffile,algorithm=self.algorithm)
-        run_make_nnlist_out(fileaddress='POSCAR', rmax=3)
-        siteinfo = read_siteinfo_from_poscar('POSCAR')
-        nnlist = read_nnlist('POSCAR.nnlist', siteinfo, self.max_neib)
-        nnlist = nnlist2nn_data(nnlist, siteinfo)
-        return nnlist
-    
-    def make_nnlist_from_poscar(self, poscar_path: str):
-        """
-        Generate nnlist.
-        """
-        run_make_nnlist_out(fileaddress=poscar_path, rmax=3)
-        siteinfo = read_siteinfo_from_poscar(poscar_path)
-        nnlist = read_nnlist(f'{poscar_path}.nnlist', siteinfo, self.max_neib)
-        nnlist = nnlist2nn_data(nnlist, siteinfo)
-        return nnlist
-'''
-class CIFDataProcessor:
-    def __init__(self,max_neib: dict = {'Si': 4, 'O': 2}, algorithm: str = 'cif2cell'):
+    def __init__(self,max_neib: dict = {'Si': 4, 'O': 2}, algorithm: str = 'cif2cell',n_jobs=-1):
         self.max_neib = max_neib
         self.algorithm = algorithm
         self.cwd = os.getcwd()
+        self.n_jobs = n_jobs
 
-    def make_nn_data_from_cifdirs(self,dirpath,outputpath='result'):
+    def make_nn_data_from_cifdirs(self,dirpath,outputpath='result',verbose=True):
         """
         Generate nn_data.pickle from CIF directories.
         """
@@ -139,9 +134,10 @@ class CIFDataProcessor:
                 os.makedirs(result_dir_path)
 
         ciffilelist = glob.glob(os.path.join(self.dirpath, '*.cif'))
+        
 
-        for cif_path in ciffilelist:
-            self.process_cif_file(cif_path, result_dir_path)
+        #cif2cellを実装した際、今後の動作に影響がないエラーメッセージが出るため、warningを無視する設定をする
+        Parallel(n_jobs=self.n_jobs, verbose=verbose)(delayed(self.process_cif_file)(cif_path, result_dir_path) for cif_path in ciffilelist)
 
     def process_cif_file(self, cif_path, result_dir_path):
         try:
