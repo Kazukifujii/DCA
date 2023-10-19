@@ -109,7 +109,7 @@ def main():
   #cifから隣接情報の取出し
   if adjacency_algorithm == 'neib':
     from Distance_based_on_Cluster_Analysis.make_nn_data_from_fortran import CIFDataProcessor
-    maker = CIFDataProcessor(max_neib = max_neib,algorithm='cif2cell')
+    maker = CIFDataProcessor(max_neib = max_neib,algorithm='pymatgen')
     maker.make_nn_data_from_cifdirs(cifdir,'result')
   elif adjacency_algorithm == 'chemenv':
       run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
