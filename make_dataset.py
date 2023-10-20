@@ -152,7 +152,7 @@ def main():
     #各結晶に属するクラスターの距離を計算(等価なクラスター  を取り出すため)
     
     #set logger and CalulateSelfDistance
-    csd=CalulateSelfDistance(target_atoms=['Si1','O1'],reference=1e-8,chunk=30000)
+    csd=CalulateSelfDistance(target_atoms=list(cluster_atom_num.keys()),reference=1e-8,chunk=30000)
     parallel_clustering = partial(parallel_clustering_in_crystal,csd=csd,logger=logger)
     print('cal self distance')
     with tqdm_joblib(total=len(cifid_list)):
