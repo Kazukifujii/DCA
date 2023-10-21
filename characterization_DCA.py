@@ -2,7 +2,6 @@ from subprocess import run
 from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
 from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
 import argparse,os
-import pickle
 import glob
 import json
 import pandas as pd
@@ -15,15 +14,19 @@ def pares_args():
     pares.add_argument('--config-path',default='config',help='config path')
     return pares.parse_args()
 
-
-
 def parallen_make_cluster_dataset(data,adjacent_num=2):
       nn_data_address= os.path.join(data.cifaddress,f"nb_{data.cifid}.pickle")
       make_cluster_dataset(cifid=data.cifid,nn_data_address=nn_data_address,adjacent_num=adjacent_num,rotation=False,outdir=data.cifaddress)
       return 
   
+#指定したディレクトリを圧縮し、ものとのファイルを削除する関数
+import shutil
+def zip_and_remove(dirpath):
+    shutil.make_archive(dirpath, 'zip', root_dir=dirpath)
+    shutil.rmtree(dirpath)
 
-def parallel_calculate_feature(path,characteriz_func):
+
+def parallel_calculate_feature(path,characteriz_func:CrystalFeatureCalculator):
     #特徴量を計算し、各ディレクトリに結果を保存
     feature = characteriz_func.calculate_features(path)
 
@@ -37,10 +40,19 @@ def parallel_calculate_feature(path,characteriz_func):
     #logの保存
     #ディレクトリの作成
     os.makedirs(f'{path}/log',exist_ok=True)
-
+    #計算のログをディレクトリに保存
     for j,log in enumerate(characteriz_func.calculate_log):
-      pickle.dump(log,open(f'{path}/log/{cifid}_{j}.pickle','wb'))
-    return 
+        log.to_csv(f'{path}/log/{cifid}_{j}.csv',index=False)
+    zip_and_remove(f'{path}/log')
+
+    #新たなディレクトリを作成し、クラスターを移動
+    os.makedirs(f'{path}/cluster',exist_ok=True)
+    for cluster_file in characteriz_func.target_clusters:
+        shutil.move(cluster_file,f'{path}/cluster')
+    #クラスターのディレクトリを圧縮
+    zip_and_remove(f'{path}/cluster')
+
+    return
 
 def load_params_from_config(config:configparser.ConfigParser):
   float_keys = ['reference','sep_value']
@@ -96,12 +108,18 @@ def main():
   config.read(args.config_path)
   database_path = config['PATH LIST']['database-path']
   cifdir = config['PATH LIST']['cifdir']
+  
   params,n_jobs,adjacent_num = load_params_from_config(config)
   adjacency_algorithm = params.pop('adjacency_algorithm')
   max_neib = params.pop('max_neib')
   params.update({'databasepath':database_path})
-  result_base_path = f'result/{cifdir}'
-  import shutil
+
+  #logの保存先のディレクトリのパスをconfigから取得、そのようなパラメータがない場合はresult/cifdirに保存
+  if config.has_option('PATH LIST','result-path'):
+    result_base_path = config['PATH LIST']['result-path']
+  else:
+    result_base_path = 'result'
+  result_base_path = os.path.join(result_base_path,cifdir)
   #既存のディレクトリがある場合は削除
   if os.path.isdir(result_base_path):
       shutil.rmtree(result_base_path)
@@ -110,12 +128,13 @@ def main():
   if adjacency_algorithm == 'neib':
     from Distance_based_on_Cluster_Analysis.make_nn_data_from_fortran import CIFDataProcessor
     maker = CIFDataProcessor(max_neib = max_neib,algorithm='pymatgen')
-    maker.make_nn_data_from_cifdirs(cifdir,'result')
+    maker.make_nn_data_from_cifdirs(cifdir,outputpath=result_base_path)
   elif adjacency_algorithm == 'chemenv':
       run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
       run('python3 Distance_based_on_Cluster_Analysis/make_nn_data.py --output2 {}'.format(cifdir),shell=True)
-  
   print('ok')
+
+  
   cifid_list = glob.glob(os.path.join(cifdir,'*.cif'))
   cifid_list = [os.path.basename(i).replace('.cif','') for i in cifid_list]
   #隣接情報からクラスターを生成

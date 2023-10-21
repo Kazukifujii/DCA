@@ -118,26 +118,23 @@ class CIFDataProcessor:
         self.cwd = os.getcwd()
         self.n_jobs = n_jobs
 
-    def make_nn_data_from_cifdirs(self,dirpath,outputpath='result',verbose=True):
+    def make_nn_data_from_cifdirs(self,dirpath,outputpath='result/cifdir',verbose=True):
         """
         Generate nn_data.pickle from CIF directories.
         """
         self.dirpath = dirpath
         self.outputpath = outputpath
-        result_dir_path = os.path.join(self.outputpath, self.dirpath)
         
         # Make output directory
-        if not os.path.isdir(self.outputpath):
-            os.makedirs(result_dir_path)
-        else:
-            if not os.path.isdir(result_dir_path):
-                os.makedirs(result_dir_path)
+        if os.path.isdir(self.outputpath):
+            shutil.rmtree(self.outputpath)
+        os.makedirs(self.outputpath)
 
         ciffilelist = glob.glob(os.path.join(self.dirpath, '*.cif'))
         
 
         #cif2cellを実装した際、今後の動作に影響がないエラーメッセージが出るため、warningを無視する設定をする
-        Parallel(n_jobs=self.n_jobs, verbose=verbose)(delayed(self.process_cif_file)(cif_path, result_dir_path) for cif_path in ciffilelist)
+        Parallel(n_jobs=self.n_jobs, verbose=verbose)(delayed(self.process_cif_file)(cif_path, self.outputpath) for cif_path in ciffilelist)
 
     def process_cif_file(self, cif_path, result_dir_path):
         try:
