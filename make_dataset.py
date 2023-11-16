@@ -56,24 +56,30 @@ def parallel_make_cluster(data):
     clusteraddress = os.path.join(data.address,f'{data.cifid}_{data.isite}_0.csv')
     make_cluster_dataset(cluster_address=clusteraddress,outdir=data.address)
 
-def pares_args():
-    pares=argparse.ArgumentParser()
-    pares.add_argument('--cifdir',default='cifdirs/allzeolite',help='zeolitecif')
-    pares.add_argument('--adjacent_num',default=2,help='(int)')
-    pares.add_argument('--cluster_atom_num',default='{"Si":5,"O":4}',help='(json)')
-    pares.add_argument('--max_neib',default='{"Si":4,"O":2}',help="eg {'Si':4,'O':2}")
-    pares.add_argument('--adjacency_algorithm',default='neib',help='chemenv or neib')
-    pares.add_argument('--outdirname',default='cluster_database')
-    return pares.parse_args()
+import configparser
+def parse_config(path='config.ini'):
+    config = configparser.ConfigParser()
+    config.read(path)
+
+    args = {
+        'cifdir': config.get('DEFAULT', 'cifdir', fallback='cifdirs/allzeolite'),
+        'adjacent_num': config.getint('DEFAULT', 'adjacent_num', fallback=2),
+        'cluster_atom_num': json.loads(config.get('DEFAULT', 'cluster_atom_num', fallback='{"Si":5,"O":4}')),
+        'max_neib': json.loads(config.get('DEFAULT', 'max_neib', fallback='{"Si":4,"O":2}')),
+        'adjacency_algorithm': config.get('DEFAULT', 'adjacency_algorithm', fallback='neib'),
+        'outdirname': config.get('DEFAULT', 'outdirname', fallback='cluster_database')
+    }
+
+    return args
 
 def main():
-    pares=pares_args()
-    cifdir=pares.cifdir
-    adjacent_num=int(pares.adjacent_num)
-    cluster_atom_num=json.loads(pares.cluster_atom_num)
-    max_neib=json.loads(pares.max_neib)
-    adjacency_algorithm = pares.adjacency_algorithm
-    database=pares.outdirname
+    args = parse_config('config/makedataset_config.ini')
+    cifdir=args['cifdir']
+    adjacent_num=args['adjacent_num']
+    cluster_atom_num=args['cluster_atom_num']
+    max_neib = args['max_neib']
+    adjacency_algorithm = args['adjacency_algorithm']
+    database=args['outdirname']
 
     result_base_path = f'result/{cifdir}'
     
@@ -85,7 +91,7 @@ def main():
     if adjacency_algorithm=='neib':
         from Distance_based_on_Cluster_Analysis.make_nn_data_from_fortran import CIFDataProcessor
         maker = CIFDataProcessor(max_neib=max_neib,algorithm='pymatgen')
-        maker.make_nn_data_from_cifdirs(cifdir,'result')
+        maker.make_nn_data_from_cifdirs(cifdir,result_base_path)
     elif adjacency_algorithm=='chemenv':
         
         run('python3 Distance_based_on_Cluster_Analysis/make_adjacent_table.py --codpath {} --output2 {}'.format(cifdir,cifdir),shell=True)
