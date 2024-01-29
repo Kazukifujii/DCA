@@ -12,7 +12,7 @@ table = pd.read_html('https://europe.iza-structure.org/IZA-SC/ftc_table.php')[1]
 idlist = table.to_numpy().flatten().tolist()
 
 #idlistの要素すべてを大文字のアルファベット3文字になるようにする
-idlist = [cifid if len(cifid)==3 else cifid[1:] for cifid in idlist]
+idlist = [cifid if len(cifid)==3 else cifid[1:] for cifid in idlist if isinstance(cifid,str)]
 
 #出力先のディレクトリを作成
 cwd = os.getcwd()
