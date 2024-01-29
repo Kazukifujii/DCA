@@ -1,11 +1,9 @@
 from subprocess import run
-import os,subprocess,shutil
+import os,shutil
 from Distance_based_on_Cluster_Analysis.distance import CalulateSelfDistance
 from Distance_based_on_Cluster_Analysis.clustering import make_clustering,fcluster_list
 from Distance_based_on_Cluster_Analysis.make_cluster import make_cluster_dataset
-from Distance_based_on_Cluster_Analysis.read_info import make_sort_ciffile
 from Distance_based_on_Cluster_Analysis.clustermanager import ClusterManager
-import argparse
 import logging
 from tqdm import tqdm
 from joblib import Parallel, delayed
@@ -102,7 +100,6 @@ def main():
 
     #隣接情報からクラスターを生成
     #picdata=make_sort_ciffile(f'result/{cifdir}',estimecont='all')
-    cwd = os.getcwd()
     print('make cluster dataset')
     allciflen=len(cifid_list)
     for i,cifid in enumerate(cifid_list):
